@@ -1,0 +1,394 @@
+/* =========================================
+   Variables de Paleta de Colores y Fuentes
+   ========================================= */
+:root {
+    --primary-green: #4A8C2A;
+    --primary-dark: #2D521A;
+    --black-text: #1A1A1A;
+    --gray-text: #555555;
+    --bg-light: #F8F9FA;
+    --white: #FFFFFF;
+    
+    --font-heading: 'Montserrat', sans-serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+/* =========================================
+   Reset Básico
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--black-text);
+    background-color: var(--white);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* =========================================
+   Navegación (Header)
+   ========================================= */
+.navbar {
+    background-color: var(--white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 100px;
+    padding: 10px 20px;
+}
+
+.brand-logo {
+    height: 100px; /* Logo principal agrandado */
+    width: auto;
+    object-fit: contain;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--black-text);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--primary-green);
+}
+
+/* Botones */
+.btn-primary {
+    background-color: var(--primary-green);
+    color: var(--white) !important;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--black-text);
+    padding: 10px 24px;
+    border: 2px solid var(--black-text);
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background-color: var(--black-text);
+    color: var(--white) !important;
+}
+
+/* =========================================
+   Hero Section
+   ========================================= */
+.hero {
+    background: linear-gradient(135deg, var(--bg-light) 0%, #E9ECEF 100%);
+    padding: 100px 0;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero h1 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    color: var(--black-text);
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: var(--gray-text);
+    margin-bottom: 40px;
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* =========================================
+   Secciones Generales
+   ========================================= */
+.section-padding {
+    padding: 80px 0;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.section-title h2 {
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    color: var(--black-text);
+    margin-bottom: 10px;
+}
+
+.section-title p {
+    color: var(--gray-text);
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* =========================================
+   Servicios (Grid)
+   ========================================= */
+.grid-services {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background: var(--white);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 4px solid var(--primary-green);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.card .icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+}
+
+.card p {
+    color: var(--gray-text);
+    font-size: 0.95rem;
+}
+
+/* =========================================
+   Por qué nosotros (About)
+   ========================================= */
+.about {
+    background-color: var(--bg-light);
+}
+
+.about-container {
+    display: flex;
+    justify-content: center;
+}
+
+.about-text {
+    max-width: 800px;
+}
+
+.about-text h2 {
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+}
+
+.about-text p {
+    color: var(--gray-text);
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.check-list {
+    list-style: none;
+}
+
+.check-list li {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: var(--black-text);
+}
+
+/* =========================================
+   Alianzas / Proveedores
+   ========================================= */
+.alliances {
+    background-color: var(--white);
+}
+
+.grid-alliances {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.alliance-card {
+    background: var(--bg-light);
+    padding: 25px 20px;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-green);
+    transition: transform 0.3s ease;
+}
+
+.alliance-card:hover {
+    transform: translateX(5px);
+}
+
+.alliance-card h4 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--primary-dark);
+    margin-bottom: 10px;
+}
+
+.alliance-card p {
+    color: var(--gray-text);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* =========================================
+   Footer
+   ========================================= */
+.footer {
+    background-color: var(--black-text);
+    color: var(--white);
+    padding: 60px 0 20px;
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.footer-logo {
+    height: 90px; /* Logo del footer agrandado */
+    filter: brightness(0) invert(1);
+    margin-bottom: 20px;
+}
+
+.footer-info p {
+    color: #CCCCCC;
+}
+
+.footer-contact h3 {
+    font-family: var(--font-heading);
+    margin-bottom: 20px;
+    color: var(--primary-green);
+}
+
+.footer-contact p {
+    margin-bottom: 10px;
+    color: #CCCCCC;
+}
+
+.footer-link {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+    color: var(--white);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* =========================================
+   Botón Flotante WhatsApp
+   ========================================= */
+.whatsapp-float {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    bottom: 30px;
+    right: 30px;
+    background-color: #25d366;
+    border-radius: 50px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.1);
+    box-shadow: 2px 4px 15px rgba(0,0,0,0.3);
+}
+
+.whatsapp-float img {
+    width: 35px;
+    height: 35px;
+}
+
+/* =========================================
+   Responsive Media Queries
+   ========================================= */
+@media (max-width: 900px) {
+    .nav-links {
+        display: none; 
+    }
+    
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+    }
+}
