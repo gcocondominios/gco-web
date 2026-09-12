@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mantenimiento de edificios en Concepción durante el verano | GCO</title>
-    <!-- Los enlaces tienen ../ para salir de la carpeta blog y buscar los estilos en la raíz -->
     <link rel="icon" type="image/png" href="../favicon.png">
     <link rel="stylesheet" href="../style.css">
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K1NB1CMMWD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-K1NB1CMMWD');
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
@@ -25,19 +34,17 @@
 </head>
 <body>
 
-    <!-- Header (Navegación adaptada para estar dentro de la carpeta blog) -->
+    <!-- Header -->
     <header class="navbar">
         <div class="container nav-container">
             <a href="../index.html" class="logo-link">
                 <img src="../Logo con las letras mas pequeñas - copia.png" alt="GCO Logo" class="brand-logo">
             </a>
-            
             <div class="menu-toggle" id="mobile-menu">
                 <span class="bar"></span>
                 <span class="bar"></span>
                 <span class="bar"></span>
             </div>
-
             <nav>
                 <ul class="nav-links">
                     <li><a href="../index.html#inicio">Inicio</a></li>
@@ -54,7 +61,6 @@
     <!-- Contenido del Artículo -->
     <main class="blog-post-section">
         <div class="container blog-post-content">
-            
             <h1>Mantenimiento de edificios en Concepción durante el verano: Planificación estratégica</h1>
             <p class="blog-post-meta">Publicado por GCO Gestión de Condominios | 12 de Diciembre, 2025</p>
             
@@ -81,11 +87,11 @@
                 <p>Si tu edificio necesita ordenar su calendario de mantenimientos, en GCO estamos listos para asesorarte.</p>
             </div>
             
-            <a href="../index.html#actualidad" class="back-to-home">← Volver a Novedades</a>
+            <a href="index.html" class="back-to-home">← Volver a Novedades</a>
         </div>
     </main>
 
-    <!-- Footer Adaptado -->
+    <!-- Footer -->
     <footer class="site-footer">
         <div class="footer-contact-bar">
             <div class="container contact-bar-container">
@@ -100,7 +106,6 @@
         </div>
     </footer>
 
-    <!-- Script para el menú -->
     <script>
         const mobileMenu = document.getElementById('mobile-menu');
         const navLinks = document.querySelector('.nav-links');
