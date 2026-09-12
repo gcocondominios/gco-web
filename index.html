@@ -19,14 +19,21 @@
             <a href="#" class="logo-link">
                 <img src="Logo con las letras mas pequeñas - copia.png" alt="GCO Gestión de Condominios Logo" class="brand-logo">
             </a>
+            
+            <!-- Botón de menú para celulares -->
+            <div class="menu-toggle" id="mobile-menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+
             <nav>
                 <ul class="nav-links">
                     <li><a href="#inicio">Inicio</a></li>
                     <li><a href="#servicios">Servicios</a></li>
                     <li><a href="#nosotros">Por qué GCO</a></li>
-                    <!-- Botón a ComunidadFeliz -->
                     <li><a href="https://comunidadfeliz.cl/" target="_blank" class="btn-secondary">Portal Copropietarios</a></li>
-                    <li><a href="#contacto" class="btn-primary">Cotizar ahora</a></li>
+                    <li><a href="#cotizar" class="btn-primary">Cotizar ahora</a></li>
                 </ul>
             </nav>
         </div>
@@ -38,7 +45,7 @@
             <h1>Gestión integral y transparente para tu comunidad</h1>
             <p>Optimizamos los recursos de tu edificio o condominio con un enfoque ético, profesional y cercano. Nos ocupamos de todo para que vivas tranquilo.</p>
             <div class="hero-buttons">
-                <a href="#contacto" class="btn-primary">Solicitar Asesoría</a>
+                <a href="#cotizar" class="btn-primary">Solicitar Asesoría</a>
                 <a href="#servicios" class="btn-secondary">Conocer Servicios</a>
             </div>
         </div>
@@ -52,25 +59,21 @@
                 <p>Soluciones completas, desde la transparencia contable hasta la modernización tecnológica de tu comunidad.</p>
             </div>
             <div class="grid-services">
-                <!-- Servicio 1: Administración -->
                 <div class="card">
                     <div class="icon">📊</div>
                     <h3>Administración y Transparencia</h3>
                     <p>Gestión contable integral a través de la plataforma <strong>ComunidadFeliz</strong>. Cobranza eficiente, pago de remuneraciones y reportes financieros en tiempo real para los residentes.</p>
                 </div>
-                <!-- Servicio 2: Legal y Emergencia -->
                 <div class="card">
                     <div class="icon">⚖️</div>
                     <h3>Cumplimiento Ley 21.442</h3>
                     <p>Actualización normativa, asesoría en reglamentos y validación del <strong>Plan de Emergencia y Evacuación</strong> junto a especialistas en prevención de riesgos.</p>
                 </div>
-                <!-- Servicio 3: Mantenimiento Técnico -->
                 <div class="card">
                     <div class="icon">⚙️</div>
                     <h3>Mantenimiento Técnico Especializado</h3>
                     <p>Supervisión rigurosa de infraestructura crítica: certificación de ascensores, recertificación de puntos de anclaje en techumbres, y reemplazo de bombas de agua.</p>
                 </div>
-                <!-- Servicio 4: Modernización -->
                 <div class="card">
                     <div class="icon">📱</div>
                     <h3>Modernización y Seguridad</h3>
@@ -123,6 +126,25 @@
         </div>
     </section>
 
+    <!-- Formulario de Contacto Section -->
+    <section id="cotizar" class="contact-section section-padding">
+        <div class="container contact-container">
+            <div class="contact-text">
+                <h2>Solicita tu Presupuesto</h2>
+                <p>Déjanos tus datos y nos comunicaremos a la brevedad para evaluar las necesidades de tu comunidad. Administramos edificios comerciales y residenciales en el Gran Concepción.</p>
+            </div>
+            <div class="contact-form-wrapper">
+                <form action="https://formspree.io/f/moeqbojk" method="POST" class="contact-form">
+                    <input type="text" name="Nombre" placeholder="Tu Nombre o Cargo" required>
+                    <input type="email" name="Correo" placeholder="Tu Correo Electrónico" required>
+                    <input type="text" name="Condominio" placeholder="Nombre del Condominio o Edificio" required>
+                    <textarea name="Mensaje" rows="4" placeholder="Cuéntanos qué necesitas mejorar en tu comunidad..." required></textarea>
+                    <button type="submit" class="btn-primary form-submit">Enviar Solicitud</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer / Contacto -->
     <footer id="contacto" class="footer">
         <div class="container footer-container">
@@ -147,6 +169,17 @@
     <a href="https://wa.me/56989249132?text=Hola,%20me%20gustar%C3%ADa%20cotizar%20la%20administraci%C3%B3n%20para%20mi%20condominio" class="whatsapp-float" target="_blank" rel="noopener noreferrer">
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Contactar por WhatsApp">
     </a>
+
+    <!-- Script para el menú de celulares -->
+    <script>
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
+
+        mobileMenu.addEventListener('click', () => {
+            mobileMenu.classList.toggle('is-active');
+            navLinks.classList.toggle('active');
+        });
+    </script>
 
 </body>
 </html>
