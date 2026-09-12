@@ -59,7 +59,7 @@ body {
 }
 
 .brand-logo {
-    height: 100px; /* Logo principal agrandado */
+    height: 100px;
     width: auto;
     object-fit: contain;
 }
@@ -292,6 +292,66 @@ body {
 }
 
 /* =========================================
+   Formulario de Contacto
+   ========================================= */
+.contact-section {
+    background-color: var(--bg-light);
+}
+
+.contact-container {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contact-text, .contact-form-wrapper {
+    flex: 1;
+    min-width: 300px;
+}
+
+.contact-text h2 {
+    font-family: var(--font-heading);
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+    font-size: 2.2rem;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.contact-form input, .contact-form textarea {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.contact-form input:focus, .contact-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 5px rgba(74, 140, 42, 0.2);
+}
+
+.form-submit {
+    cursor: pointer;
+    border: none;
+    font-size: 1.1rem;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+/* =========================================
    Footer
    ========================================= */
 .footer {
@@ -308,7 +368,7 @@ body {
 }
 
 .footer-logo {
-    height: 90px; /* Logo del footer agrandado */
+    height: 90px;
     filter: brightness(0) invert(1);
     margin-bottom: 20px;
 }
@@ -377,13 +437,58 @@ body {
 }
 
 /* =========================================
+   Botón Menú Celular (Hamburguesa)
+   ========================================= */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 6px;
+    z-index: 101;
+}
+
+.menu-toggle .bar {
+    width: 30px;
+    height: 3px;
+    background-color: var(--primary-dark);
+    transition: all 0.3s ease-in-out;
+    border-radius: 3px;
+}
+
+/* =========================================
    Responsive Media Queries
    ========================================= */
 @media (max-width: 900px) {
-    .nav-links {
-        display: none; 
+    /* Activar el botón hamburguesa */
+    .menu-toggle {
+        display: flex; 
     }
     
+    /* Convertir el menú en desplegable */
+    .nav-links {
+        position: absolute;
+        top: 100px; /* Debajo de la barra de navegación */
+        left: 0;
+        width: 100%;
+        background-color: var(--white);
+        flex-direction: column;
+        padding: 20px 0;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        display: none; /* Oculto por defecto */
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    /* Mostrar menú cuando esté activo */
+    .nav-links.active {
+        display: flex; 
+    }
+    
+    /* Animación del botón hamburguesa a "X" */
+    .menu-toggle.is-active .bar:nth-child(2) { opacity: 0; }
+    .menu-toggle.is-active .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+    .menu-toggle.is-active .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
     .hero h1 {
         font-size: 2.2rem;
     }
