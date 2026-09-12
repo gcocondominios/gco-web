@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualidad y Novedades | GCO Gestión de Condominios</title>
+    <!-- Enlaces con ../ para apuntar a la raíz -->
+    <link rel="icon" type="image/png" href="../favicon.png">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        .blog-index-page { background-color: var(--white); padding: 120px 0; min-height: 70vh; }
+        .blog-page-header { max-width: 800px; margin: 0 auto 60px; text-align: center; }
+        .blog-page-header h1 { font-family: var(--font-heading); color: var(--primary-dark); font-size: 3rem; margin-bottom: 20px; }
+        .blog-page-header p { color: var(--gray-text); font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Header (Adaptado para la carpeta blog) -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="../index.html" class="logo-link">
+                <img src="../Logo con las letras mas pequeñas - copia.png" alt="GCO Logo" class="brand-logo">
+            </a>
+            
+            <div class="menu-toggle" id="mobile-menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="../index.html#inicio">Inicio</a></li>
+                    <li><a href="../index.html#metodologia">Metodología</a></li>
+                    <li><a href="../index.html#servicios">Servicios</a></li>
+                    <li><a href="../index.html#actualidad" style="color: var(--primary-green);">Actualidad</a></li>
+                    <li><a href="https://comunidadfeliz.cl/" target="_blank" class="btn-secondary">Portal</a></li>
+                    <li><a href="../index.html#cotizar" class="btn-primary">Cotizar</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Índice de Noticias -->
+    <main class="blog-index-page">
+        <div class="container">
+            <div class="blog-page-header">
+                <h1>Novedades y Consejos</h1>
+                <p>Toda la información clave sobre copropiedad, normativas y mantenimiento técnico para las comunidades del Gran Concepción.</p>
+            </div>
+            
+            <!-- Usamos la misma cuadrícula de la portada -->
+            <div class="blog-updates-grid grid-three-columns">
+                
+                <!-- Tarjeta 1: Agosto 2026 -->
+                <div class="blog-update-card">
+                    <div class="blog-card-image">
+                        <!-- Busca la imagen en la raíz -->
+                        <img src="../Escalera sala de bombas.png" alt="Inspección de sala de bombas y estanques">
+                    </div>
+                    <div class="blog-card-content">
+                        <p class="blog-card-date">25 DE AGOSTO, 2026</p>
+                        <h3>Mantención de hidropack y limpieza de estanques de agua</h3>
+                        <p>¿Qué agua estás bebiendo? Los graves riesgos a la salud por falta de mantención sanitaria y cómo prevenirlos en tu comunidad...</p>
+                        <!-- Enlace directo al archivo (ya estamos en la carpeta blog) -->
+                        <a href="mantenimiento-hidropack-estanques.html" class="blog-card-link">Leer artículo</a>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Mayo 2026 -->
+                <div class="blog-update-card">
+                    <div class="blog-card-image">
+                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&h=250&q=80" alt="Ley de copropiedad UC">
+                    </div>
+                    <div class="blog-card-content">
+                        <p class="blog-card-date">02 DE MAYO, 2026</p>
+                        <h3>Entendiendo la Ley 21.442 y su impacto local</h3>
+                        <p>Un desglose de los puntos clave sobre transparencia financiera y planes de emergencia que los comités de Concepción deben implementar hoy...</p>
+                        <a href="ley-21442-impacto-local.html" class="blog-card-link">Leer artículo</a>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Enero 2026 -->
+                <div class="blog-update-card">
+                    <div class="blog-card-image">
+                        <!-- Busca la imagen en la raíz -->
+                        <img src="../Mantencion techos.jpeg" alt="Mantención preventiva de techumbres">
+                    </div>
+                    <div class="blog-card-content">
+                        <p class="blog-card-date">17 DE ENERO, 2026</p>
+                        <h3>Mantención de techumbres entre Enero y Abril en Concepción</h3>
+                        <p>Evita los costosos daños del invierno. Por qué estos meses son la "ventana de oro" para impermeabilizar y limpiar canaletas...</p>
+                        <a href="mantenimiento-techumbres-concepcion.html" class="blog-card-link">Leer artículo</a>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 4: Diciembre 2025 (La más antigua) -->
+                <div class="blog-update-card">
+                    <div class="blog-card-image">
+                        <img src="https://images.unsplash.com/photo-1504307651254-35680f356f12?auto=format&fit=crop&w=400&h=250&q=80" alt="Mantenimiento en Concepción">
+                    </div>
+                    <div class="blog-card-content">
+                        <p class="blog-card-date">12 DE DICIEMBRE, 2025</p>
+                        <h3>Mantenimiento de edificios en Concepción durante el verano</h3>
+                        <p>Analizamos las instancias críticas de revisión de calderas y salas de bombas para prevenir fallas en la Región del Biobío...</p>
+                        <a href="mantenimiento-verano-concepcion.html" class="blog-card-link">Leer artículo</a>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Adaptado -->
+    <footer class="site-footer">
+        <div class="footer-contact-bar">
+            <div class="container contact-bar-container">
+                <div class="contact-item"><span class="icon">📍</span> Gran Concepción, Región del Biobío</div>
+                <div class="contact-item"><span class="icon">📧</span> gco.condominios@gmail.com</div>
+                <div class="contact-item"><span class="icon">📞</span> +56 9 8924 9132</div>
+                <div class="contact-item"><span class="icon">📱</span> @gecondominios</div>
+            </div>
+        </div>
+        <div class="footer-copyright" style="background-color: #1A1A1A; color: #888; text-align: center; padding: 20px; font-size: 0.9rem;">
+            <p>&copy; 2026 GCO Gestión de Condominios. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Script para el menú -->
+    <script>
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
+        mobileMenu.addEventListener('click', () => {
+            mobileMenu.classList.toggle('is-active');
+            navLinks.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
