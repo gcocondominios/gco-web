@@ -53,7 +53,7 @@
         </div>
     </section>
 
-    <!-- Servicios Section (ACTUALIZADA CON IMÁGENES) -->
+    <!-- Servicios Section (CON IMÁGENES OFICIALES) -->
     <section id="servicios" class="services section-padding">
         <div class="container">
             <div class="section-title text-center">
@@ -202,7 +202,7 @@
         </div>
     </section>
 
-    <!-- Actualidad y Novedades -->
+    <!-- Actualidad y Novedades (Blog con nuevas fotos) -->
     <section id="actualidad" class="blog-updates section-padding">
         <div class="container">
             <div class="section-title text-center">
@@ -211,9 +211,11 @@
             </div>
             
             <div class="blog-updates-grid grid-three-columns">
+                
+                <!-- Artículo 1: Sala de Bombas -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
-                        <img src="https://via.placeholder.com/400x250.png?text=Mantenimiento+en+Concepcion" alt="Mantenimiento en Concepción">
+                        <img src="Escalera sala de bombas.png" alt="Mantenimiento en salas de bombas Concepción">
                     </div>
                     <div class="blog-card-content">
                         <p class="blog-card-date">10 DE ENERO, 2026</p>
@@ -223,21 +225,23 @@
                     </div>
                 </div>
                 
+                <!-- Artículo 2: Mantención de Techos -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
-                        <img src="https://via.placeholder.com/400x250.png?text=Proveedores+Biobio" alt="Proveedores certificados Biobío">
+                        <img src="Mantencion techos.jpeg" alt="Mantención de techos en el Biobío">
                     </div>
                     <div class="blog-card-content">
                         <p class="blog-card-date">15 DE MARZO, 2026</p>
-                        <h3>Lista de proveedores de ascensores certificados en el Biobío</h3>
-                        <p>Es vital que tu comunidad trabaje solo con empresas especialistas con representación técnica local en Concepción. Aquí te explicamos cómo verificarlos...</p>
-                        <a href="blog/proveedores-ascensores-biobio.html" class="blog-card-link">Leer artículo</a>
+                        <h3>Preparación y mantención de techumbres en el Biobío</h3>
+                        <p>Es vital que tu comunidad revise las techumbres y canaletas de forma preventiva. Aquí te explicamos cómo planificar estos trabajos...</p>
+                        <a href="blog/mantencion-techos-biobio.html" class="blog-card-link">Leer artículo</a>
                     </div>
                 </div>
                 
+                <!-- Artículo 3: Ley 21.442 -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
-                        <img src="https://via.placeholder.com/400x250.png?text=Ley+21.442+UC" alt="Ley de copropiedad UC">
+                        <img src="Cumplimiento normativo.png" alt="Ley de copropiedad 21.442">
                     </div>
                     <div class="blog-card-content">
                         <p class="blog-card-date">12 DE MAYO, 2026</p>
@@ -246,6 +250,7 @@
                         <a href="blog/ley-21442-impacto-local.html" class="blog-card-link">Leer artículo</a>
                     </div>
                 </div>
+                
             </div>
             
             <div class="blog-all-link-wrapper text-center">
@@ -254,19 +259,19 @@
         </div>
     </section>
 
-    <!-- Footer Integrado (Formulario + Datos) -->
+    <!-- Footer Integrado (Formulario TRADICIONAL + Datos) -->
     <footer id="cotizar" class="footer section-padding-top">
         <div class="container footer-layout">
             
-            <!-- Bloque Izquierdo: Formulario -->
+            <!-- Bloque Izquierdo: Formulario Nativo Formspree -->
             <div class="footer-form-wrapper">
                 <div class="section-title text-left">
                     <h2>Solicita tu Presupuesto</h2>
                     <p>Déjanos tus datos y nos comunicaremos para evaluar las necesidades de tu comunidad en el Gran Concepción.</p>
                 </div>
                 
-                <!-- Formulario conectado a Formspree CON ID PARA JS -->
-                <form action="[https://formspree.io/f/moeqbojk](https://formspree.io/f/moeqbojk)" method="POST" class="contact-form">
+                <!-- URL limpia y método POST tradicional -->
+                <form action="https://formspree.io/f/moeqbojk" method="POST" class="contact-form">
                     <div class="form-row">
                         <input type="text" name="Nombre" placeholder="Tu Nombre o Cargo" required>
                         <input type="email" name="Correo" placeholder="Tu Correo Electrónico" required>
@@ -275,8 +280,6 @@
                     <textarea name="Mensaje" rows="5" placeholder="Cuéntanos qué necesitas mejorar en tu comunidad..." required></textarea>
                     
                     <button type="submit" class="btn-primary form-submit">Enviar Solicitud</button>
-                    <!-- Contenedor para el mensaje de éxito/error (sin recargar página) -->
-                    <div id="form-status" class="form-status"></div>
                 </form>
             </div>
             
@@ -305,7 +308,7 @@
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Contactar por WhatsApp">
     </a>
 
-    <!-- Scripts (Menú móvil y Envío de Formulario sin recargar) -->
+    <!-- Scripts (Solo Menú móvil) -->
     <script>
         // Lógica del Menú Móvil
         const mobileMenu = document.getElementById('mobile-menu');
@@ -314,45 +317,6 @@
         mobileMenu.addEventListener('click', () => {
             mobileMenu.classList.toggle('is-active');
             navLinks.classList.toggle('active');
-        });
-
-        // Lógica del Formulario (Formspree AJAX)
-        const form = document.getElementById("gco-contact-form");
-        const statusMessage = document.getElementById("form-status");
-
-        form.addEventListener("submit", async function(event) {
-            event.preventDefault(); // Evita que la página te lleve a formspree.io
-            
-            statusMessage.innerHTML = "Enviando solicitud...";
-            statusMessage.className = "form-status sending";
-            statusMessage.style.display = "block";
-            
-            const data = new FormData(event.target);
-            
-            fetch(event.target.action, {
-                method: form.method,
-                body: data,
-                headers: { 'Accept': 'application/json' }
-            }).then(response => {
-                if (response.ok) {
-                    statusMessage.innerHTML = "¡Gracias por comunicarte con GCO! Hemos recibido tu solicitud y te contactaremos pronto.";
-                    statusMessage.className = "form-status success";
-                    form.reset(); // Limpia los campos
-                } else {
-                    response.json().then(data => {
-                        if (Object.hasOwn(data, 'errors')) {
-                            statusMessage.innerHTML = data["errors"].map(error => error["message"]).join(", ");
-                            statusMessage.className = "form-status error";
-                        } else {
-                            statusMessage.innerHTML = "Oops! Hubo un problema al enviar tu solicitud.";
-                            statusMessage.className = "form-status error";
-                        }
-                    })
-                }
-            }).catch(error => {
-                statusMessage.innerHTML = "Oops! Hubo un problema de conexión al enviar el formulario.";
-                statusMessage.className = "form-status error";
-            });
         });
     </script>
 
