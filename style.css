@@ -76,19 +76,27 @@ body {
 .btn-secondary:hover { background-color: var(--black-text); color: var(--white) !important; transform: translateY(-2px); }
 
 /* =========================================
-   Hero Section
+   Hero Section (Fondo de Concepción)
    ========================================= */
 .hero {
-    background: linear-gradient(135deg, #F9FBFC 0%, #E9ECEF 100%); 
+    background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(26, 26, 26, 0.85)), url('Concepcion desde diagonal.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     padding: 180px 0 140px; 
     text-align: center;
 }
 .hero-content { max-width: 850px; margin: 0 auto; }
 .hero h1 {
     font-family: var(--font-heading); font-size: 3.8rem; 
-    color: var(--primary-dark); margin-bottom: 25px; line-height: 1.2;
+    color: var(--white); 
+    margin-bottom: 25px; line-height: 1.2;
 }
-.hero p { font-size: 1.35rem; color: var(--gray-text); margin-bottom: 50px; }
+.hero p { 
+    font-size: 1.35rem; 
+    color: #E8ECEF; 
+    margin-bottom: 50px; 
+}
 .hero-buttons { display: flex; justify-content: center; gap: 20px; }
 
 /* =========================================
@@ -118,7 +126,7 @@ body {
 .section-title.text-center p { margin: 0 auto; }
 
 /* =========================================
-   Servicios (Grid de 3 columnas - ACTUALIZADO PARA IMÁGENES)
+   Servicios (Grid de 3 columnas - Imágenes)
    ========================================= */
 .grid-three-columns {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;
@@ -130,7 +138,7 @@ body {
     transition: var(--transition-standard);
     border: 1px solid #EEE; border-top: 5px solid var(--primary-green);
     display: flex; flex-direction: column; text-align: left;
-    overflow: hidden; /* Importante para que la imagen no se salga de los bordes redondeados */
+    overflow: hidden; 
 }
 .service-card:hover { transform: translateY(-5px); box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
 
@@ -146,7 +154,7 @@ body {
     transition: var(--transition-standard);
 }
 .service-card:hover .service-img-wrapper img {
-    transform: scale(1.05); /* Efecto zoom al pasar el mouse */
+    transform: scale(1.05); 
 }
 
 .service-card-body {
@@ -264,21 +272,6 @@ body {
 .form-submit {
     cursor: pointer; border: none; font-size: 1.1rem;
     padding: 18px; margin-top: 15px; width: auto;
-}
-
-/* Estilos para el mensaje del formulario (Sin redirección) */
-.form-status {
-    margin-top: 15px; padding: 15px; border-radius: 8px;
-    font-size: 1rem; font-weight: 500; display: none; text-align: center;
-}
-.form-status.sending {
-    background-color: rgba(255,255,255,0.1); color: var(--white); border: 1px solid #555;
-}
-.form-status.success {
-    background-color: rgba(40, 167, 69, 0.15); color: #4ade80; border: 1px solid #28a745;
-}
-.form-status.error {
-    background-color: rgba(220, 53, 69, 0.15); color: #ff7682; border: 1px solid #dc3545;
 }
 
 /* Datos de Contacto y Logo */
