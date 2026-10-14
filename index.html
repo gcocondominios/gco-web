@@ -127,7 +127,7 @@
         </div>
     </section>
 
-    <!-- METODOLOGÍA DE TRABAJO CON TUS IMÁGENES OFICIALES -->
+    <!-- METODOLOGÍA DE TRABAJO -->
     <section id="metodologia" class="methodology section-padding" style="background-color: var(--bg-light);">
         <div class="container">
             <div class="section-title text-center">
@@ -251,17 +251,17 @@
                 </div>
             </div>
 
-            <!-- Botón hacia reseñas de Google RECUPERADO -->
+            <!-- Botón hacia reseñas de Google -->
             <div class="text-center" style="margin-top: 50px;">
                 <a href="https://www.google.com/search?hl=es-419&sca_esv=ec77419bf80259b8&sxsrf=APpeQntgFjkIIK0Tphj5Q5lQ5r4Odf1Ncw%3A1789436522700&q=GCO%20Gesti%C3%B3n%20de%20Condominios&stick=H4sIAAAAAAAAAONgU1I1qDAyTzQxMjczSzZINjSwMEuxAgqZJRmZJJoamZubJFmYmKctYpV2d_ZXcE8tLsk8vDlPISVVwTk_LyU_NzMvM78YALRCAkhHAAAA&mat=CSFsF6PnqQmY&ved=2ahUKEwiLjaLCuu-WAxV4qZUCHR00HbYQrMcEegQIGRAC#mpd=~10955474380894202913/customers/reviews" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="border-color: #4A8C2A; color: #4A8C2A;">
                     ⭐ Ver nuestras calificaciones en Google
                 </a>
             </div>
-            
+
         </div>
     </section>
 
-    <!-- Actualidad y Novedades (Blog - SOLO LAS 3 ÚLTIMAS NOTICIAS) -->
+    <!-- Actualidad y Novedades (Blog) -->
     <section id="actualidad" class="blog-updates section-padding">
         <div class="container">
             <div class="section-title text-center">
@@ -271,7 +271,6 @@
             
             <div class="blog-updates-grid grid-three-columns">
                 
-                <!-- Artículo 1: NUEVO - Comité Agotado -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
                         <img src="Comite agotado.jpg" alt="Comité de Administración agotado en Concepción">
@@ -283,21 +282,7 @@
                         <a href="blog/comite-agotado.html" class="blog-card-link">Leer artículo</a>
                     </div>
                 </div>
-
-                <!-- Artículo 2: Sala de Bombas -->
-                <div class="blog-update-card">
-                    <div class="blog-card-image">
-                        <img src="Escalera sala de bombas.png" alt="Mantenimiento en salas de bombas Concepción">
-                    </div>
-                    <div class="blog-card-content">
-                        <p class="blog-card-date">10 DE ENERO, 2026</p>
-                        <h3>Mantenimiento de edificios en Concepción durante el verano</h3>
-                        <p>Analizamos las instancias críticas de revisión de calderas y salas de bombas para prevenir fallas en la Región del Biobío...</p>
-                        <a href="blog/mantenimiento-verano-concepcion.html" class="blog-card-link">Leer artículo</a>
-                    </div>
-                </div>
                 
-                <!-- Artículo 3: Mantención de Techos -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
                         <img src="Mantencion techos.jpeg" alt="Mantención de techos en el Biobío">
@@ -307,6 +292,18 @@
                         <h3>Preparación y mantención de techumbres en el Biobío</h3>
                         <p>Es vital que tu comunidad revise las techumbres y canaletas de forma preventiva. Aquí te explicamos cómo planificar estos trabajos...</p>
                         <a href="blog/mantencion-techos-biobio.html" class="blog-card-link">Leer artículo</a>
+                    </div>
+                </div>
+                
+                <div class="blog-update-card">
+                    <div class="blog-card-image">
+                        <img src="Cumplimiento normativo.png" alt="Ley de copropiedad 21.442">
+                    </div>
+                    <div class="blog-card-content">
+                        <p class="blog-card-date">12 DE MAYO, 2026</p>
+                        <h3>Entendiendo la Ley 21.442 y su impacto local</h3>
+                        <p>Un desglose de los puntos clave sobre transparencia financiera y planes de emergencia que los comités de Concepción deben implementar hoy...</p>
+                        <a href="blog/ley-21442-impacto-local.html" class="blog-card-link">Leer artículo</a>
                     </div>
                 </div>
                 
@@ -328,6 +325,7 @@
                     <p>Déjanos tus datos y nos comunicaremos para evaluar las necesidades de tu comunidad en el Gran Concepción.</p>
                 </div>
                 
+                <!-- INICIO ACTUALIZACIÓN LEY 21.719 -->
                 <form action="https://formspree.io/f/moeqbojk" method="POST" class="contact-form">
                     <div class="form-row">
                         <input type="text" name="Nombre" placeholder="Tu Nombre o Cargo" required>
@@ -336,8 +334,21 @@
                     <input type="text" name="Condominio" placeholder="Nombre del Condominio o Edificio (Ej: Edificio Montemare)" required>
                     <textarea name="Mensaje" rows="5" placeholder="Cuéntanos qué necesitas mejorar en tu comunidad..." required></textarea>
                     
+                    <!-- 1. Checkbox obligatorio de Privacidad -->
+                    <label class="privacy-label">
+                        <input type="checkbox" name="Acepta_Privacidad" required>
+                        He leído y acepto la <a href="privacidad.html" target="_blank" style="color: var(--primary-green); text-decoration: underline;">Política de Privacidad</a>.
+                    </label>
+
                     <button type="submit" class="btn-primary form-submit">Enviar Solicitud</button>
+
+                    <!-- 2. Coletilla informativa de protección de datos -->
+                    <p class="form-disclaimer" style="font-size: 0.8rem; color: #888; text-align: left; margin-top: 10px; line-height: 1.4;">
+                        <strong>Información básica sobre protección de datos:</strong> Responsable: GCO Gestión de Condominios. Finalidad: Responder a tu solicitud de presupuesto y contacto comercial. Legitimación: Tu consentimiento expreso. Tus datos no se cederán a terceros, salvo obligación legal. Puedes ejercer tus derechos de acceso, rectificación y eliminación escribiendo a gco.condominios@gmail.com.
+                    </p>
                 </form>
+                <!-- FIN ACTUALIZACIÓN LEY 21.719 -->
+
             </div>
             
             <div class="footer-info-wrapper">
@@ -355,7 +366,8 @@
         </div>
         
         <div class="footer-bottom">
-            <p>&copy; 2026 GCO Gestión de Condominios. Todos los derechos reservados.</p>
+            <!-- 3. Enlace a la Política de Privacidad en el footer -->
+            <p>&copy; 2026 GCO Gestión de Condominios. Todos los derechos reservados. | <a href="privacidad.html" style="color: #888; text-decoration: underline;">Política de Privacidad (Ley 21.719)</a></p>
         </div>
     </footer>
 
@@ -364,13 +376,33 @@
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Contactar por WhatsApp">
     </a>
 
+    <!-- 4. Banner de Cookies (Ley 21.719) -->
+    <div id="cookie-banner" class="cookie-banner">
+        <p>GCO utiliza cookies propias y de terceros para asegurar el correcto funcionamiento del sitio web y cumplir con la Ley 21.719. Si continúas navegando, consideramos que aceptas su uso. <a href="privacidad.html">Leer más</a>.</p>
+        <button id="accept-cookies" class="btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Aceptar y continuar</button>
+    </div>
+
     <script>
+        // Menú Móvil
         const mobileMenu = document.getElementById('mobile-menu');
         const navLinks = document.querySelector('.nav-links');
 
         mobileMenu.addEventListener('click', () => {
             mobileMenu.classList.toggle('is-active');
             navLinks.classList.toggle('active');
+        });
+
+        // Script del Banner de Cookies
+        const cookieBanner = document.getElementById('cookie-banner');
+        const acceptCookiesBtn = document.getElementById('accept-cookies');
+        
+        if (!localStorage.getItem('gcoCookiesAccepted')) {
+            cookieBanner.style.display = 'flex';
+        }
+
+        acceptCookiesBtn.addEventListener('click', () => {
+            localStorage.setItem('gcoCookiesAccepted', 'true');
+            cookieBanner.style.display = 'none';
         });
     </script>
 
