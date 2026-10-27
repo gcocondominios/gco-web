@@ -3,37 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="GCO Gestión de Condominios: Administración profesional certificada en el Gran Concepción. Cumplimiento Ley 21.442, mantenimiento técnico y transparencia contable.">
+    <meta name="description" content="GCO Gestión de Condominios: Administración profesional certificada UC y MINVU en el Gran Concepción. Cumplimiento Ley 21.442, mantenimiento técnico y transparencia en ComunidadFeliz.">
     <!-- Código de verificación de Google Search Console -->
     <meta name="google-site-verification" content="xRTa9cN3ikQ7JBvyv3XJayFtkeMJ-jqqSODq6vysdx0" />
     <title>GCO | Gestión de Condominios y Edificios | Gran Concepción</title>
     <link rel="icon" type="image/png" href="favicon.png">
     
-    <!-- MEJORA 2: Etiquetas Open Graph para WhatsApp, LinkedIn y Redes Sociales -->
+    <!-- Etiquetas Open Graph para WhatsApp, LinkedIn y Redes Sociales -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="GCO | Gestión de Condominios y Edificios | Gran Concepción">
-    <meta property="og:description" content="Administración ética y profesional liderada por administradores certificados por la UC. Transparencia total, mantenimiento preventivo y cumplimiento Ley 21.442.">
+    <meta property="og:description" content="Administración ética y profesional liderada por administradores certificados por la UC e inscritos en el Registro Nacional MINVU. Transparencia total y cumplimiento Ley 21.442.">
     <meta property="og:url" content="https://www.gcoadmin.cl/">
     <meta property="og:image" content="https://www.gcoadmin.cl/Concepcion%20desde%20diagonal.jpg">
 
-    <!-- MEJORA 3: Datos Estructurados (Schema.org) para posicionamiento local en Google -->
+    <!-- Datos Estructurados (Schema.org): Negocio Local + Preguntas Frecuentes (FAQ) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "ProfessionalService",
-      "name": "GCO Gestión de Condominios",
-      "image": "https://www.gcoadmin.cl/Logo%20con%20las%20letras%20mas%20peque%C3%B1as%20-%20copia.png",
-      "description": "Administración profesional de edificios y condominios en el Gran Concepción, liderada por administradores certificados por la Pontificia Universidad Católica de Chile (UC).",
-      "url": "https://www.gcoadmin.cl",
-      "telephone": "+56989249132",
-      "email": "gco.condominios@gmail.com",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Concepción",
-        "addressRegion": "Biobío",
-        "addressCountry": "CL"
-      },
-      "areaServed": ["Concepción", "Talcahuano", "San Pedro de la Paz", "Chiguayante", "Hualpén"]
+      "@graph": [
+        {
+          "@type": "ProfessionalService",
+          "name": "GCO Gestión de Condominios",
+          "image": "https://www.gcoadmin.cl/Logo%20con%20las%20letras%20mas%20peque%C3%B1as%20-%20copia.png",
+          "description": "Administración profesional de edificios y condominios en el Gran Concepción, liderada por administradores certificados por la Pontificia Universidad Católica de Chile (UC) e inscritos en el Registro Nacional de Administradores (MINVU).",
+          "url": "https://www.gcoadmin.cl",
+          "telephone": "+56989249132",
+          "email": "gco.condominios@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Concepción",
+            "addressRegion": "Biobío",
+            "addressCountry": "CL"
+          },
+          "areaServed": [
+            "Concepción Centro",
+            "Barrio Universitario",
+            "Parque Ecuador",
+            "Lomas de San Andrés",
+            "Lomas de San Sebastián",
+            "San Pedro de la Paz",
+            "Andalué",
+            "Huertos Familiares",
+            "San Pedro del Valle",
+            "Talcahuano",
+            "Brisas del Sol",
+            "Chiguayante",
+            "Hualpén"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "¿Están inscritos en el Registro Nacional de Administradores de Condominios del MINVU?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sí. Nuestro equipo directivo cuenta con certificación académica de la Pontificia Universidad Católica de Chile (UC) y cumple con los requisitos legales vigentes bajo la Ley N° 21.442 y el Registro Nacional de Administradores del MINVU."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Cómo es el proceso para cambiar de administrador en nuestra comunidad?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Acompañamos al Comité de Administración en cada etapa legal: asesoría en la citación a asamblea o acuerdo de comité según su reglamento, levantamiento de acta de entrega, auditoría del estado financiero e infraestructura inicial, y migración ordenada a ComunidadFeliz."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿En qué comunas y sectores del Gran Concepción prestan servicios?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Operamos de forma presencial en todo el Gran Concepción, incluyendo Centro de Concepción, Barrio Universitario, Parque Ecuador, Lomas de San Andrés y San Sebastián, San Pedro de la Paz (Andalué, Huertos Familiares, San Pedro del Valle), Talcahuano (Brisas del Sol), Chiguayante y Hualpén."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Cómo garantizan la transparencia en el cobro y uso de los gastos comunes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Operamos 100% integrados con la plataforma ComunidadFeliz. Cada copropietario y miembro del comité puede revisar desde su celular el respaldo de facturas, conciliaciones bancarias, estado de morosidad y remuneraciones en tiempo real."
+              }
+            }
+          ]
+        }
+      ]
     }
     </script>
 
@@ -49,7 +104,7 @@
     <header class="navbar">
         <div class="container nav-container">
             <a href="#inicio" class="logo-link">
-                <img src="Logo con las letras mas pequeñas - copia.png" alt="GCO Gestión de Condominios Logo" class="brand-logo">
+                <img src="Logo con las letras mas pequeñas - copia.png" alt="GCO Gestión de Condominios y Edificios en Concepción Logo" class="brand-logo">
             </a>
             
             <div class="menu-toggle" id="mobile-menu">
@@ -75,7 +130,7 @@
     <section id="inicio" class="hero">
         <div class="container hero-content">
             <h1>Gestión integral para tu comunidad en Concepción, con transparencia total</h1>
-            <p>Especialistas en la administración ética y profesional de edificios. Nuestro equipo está liderado por <strong>administradores certificados por la Pontificia Universidad Católica de Chile (UC)</strong>, garantizando una gestión de excelencia y vanguardia tecnológica.</p>
+            <p>Especialistas en la administración ética y profesional de edificios. Nuestro equipo está liderado por <strong>administradores certificados por la Pontificia Universidad Católica de Chile (UC)</strong> y acreditados ante el <strong>Registro Nacional de Administradores (MINVU)</strong>, garantizando excelencia operativa y vanguardia tecnológica.</p>
             <div class="hero-buttons">
                 <a href="#cotizar" class="btn-primary">Solicitar Asesoría</a>
                 <a href="#servicios" class="btn-secondary" style="background-color: white;">Conocer Servicios</a>
@@ -94,7 +149,7 @@
                 
                 <div class="card service-card">
                     <div class="service-img-wrapper">
-                        <img src="Administracion y transparencia.png" alt="Administración y Transparencia Contable">
+                        <img src="Administracion y transparencia.png" alt="Administración de edificios y transparencia contable en Concepción con ComunidadFeliz">
                     </div>
                     <div class="service-card-body">
                         <h3>Administración y Transparencia Contable</h3>
@@ -104,7 +159,7 @@
 
                 <div class="card service-card">
                     <div class="service-img-wrapper">
-                        <img src="Cumplimiento normativo.png" alt="Cumplimiento Normativo Ley 21.442">
+                        <img src="Cumplimiento normativo.png" alt="Cumplimiento Normativo Ley 21.442 para condominios en el Gran Concepción">
                     </div>
                     <div class="service-card-body">
                         <h3>Cumplimiento Normativo Ley 21.442</h3>
@@ -114,7 +169,7 @@
 
                 <div class="card service-card">
                     <div class="service-img-wrapper">
-                        <img src="Mantenimiento preventivo.png" alt="Mantenimiento Técnico Preventivo">
+                        <img src="Mantenimiento preventivo.png" alt="Mantenimiento técnico preventivo de ascensores y salas de bombas en Biobío">
                     </div>
                     <div class="service-card-body">
                         <h3>Mantenimiento Técnico Preventivo</h3>
@@ -124,7 +179,7 @@
 
                 <div class="card service-card">
                     <div class="service-img-wrapper">
-                        <img src="tecnologia y seguridad.png" alt="Tecnología y Seguridad">
+                        <img src="tecnologia y seguridad.png" alt="Control de acceso vehicular LPR y seguridad para condominios en Concepción y San Pedro de la Paz">
                     </div>
                     <div class="service-card-body">
                         <h3>Tecnología y Seguridad</h3>
@@ -134,7 +189,7 @@
 
                 <div class="card service-card">
                     <div class="service-img-wrapper">
-                        <img src="Mantenimiento tecnico.jpg" alt="Atención Personalizada en Terreno">
+                        <img src="Mantenimiento tecnico.jpg" alt="Supervisión en terreno de edificios en Concepción, Talcahuano y San Pedro de la Paz">
                     </div>
                     <div class="service-card-body">
                         <h3>Atención Personalizada y Visitas</h3>
@@ -144,7 +199,7 @@
 
                 <div class="card service-card">
                     <div class="service-img-wrapper">
-                        <img src="Asesoria.png" alt="Asesoría en Seguros">
+                        <img src="Asesoria.png" alt="Asesoría en seguros de espacios comunes para comunidades en el Gran Concepción">
                     </div>
                     <div class="service-card-body">
                         <h3>Asesoría en Seguros</h3>
@@ -169,7 +224,7 @@
                 <!-- Paso 1 -->
                 <div class="card service-card" style="background-color: var(--white);">
                     <div class="service-img-wrapper">
-                        <img src="Diagnóstico Técnico.jpg" alt="Diagnóstico Técnico GCO">
+                        <img src="Diagnóstico Técnico.jpg" alt="Auditoría y diagnóstico técnico de edificios en Concepción">
                     </div>
                     <div class="service-card-body">
                         <span class="step-badge">Paso 01</span>
@@ -181,7 +236,7 @@
                 <!-- Paso 2 -->
                 <div class="card service-card" style="background-color: var(--white);">
                     <div class="service-img-wrapper">
-                        <img src="Planificación Estratégica.jpg" alt="Planificación Estratégica GCO">
+                        <img src="Planificación Estratégica.jpg" alt="Planificación de mantenciones y gastos comunes para comités de administración">
                     </div>
                     <div class="service-card-body">
                         <span class="step-badge">Paso 02 y 03</span>
@@ -193,7 +248,7 @@
                 <!-- Paso 3 -->
                 <div class="card service-card" style="background-color: var(--white);">
                     <div class="service-img-wrapper">
-                        <img src="Ejecución en Terreno.jpg" alt="Ejecución en Terreno GCO">
+                        <img src="Ejecución en Terreno.jpg" alt="Gestión operativa en terreno y reportes en ComunidadFeliz">
                     </div>
                     <div class="service-card-body">
                         <span class="step-badge">Paso 04</span>
@@ -290,7 +345,7 @@
         </div>
     </section>
 
-    <!-- Actualidad y Novedades (Blog) - MEJORA 1: Orden cronológico estricto y enlace unificado -->
+    <!-- Actualidad y Novedades (Blog) -->
     <section id="actualidad" class="blog-updates section-padding">
         <div class="container">
             <div class="section-title text-center">
@@ -303,7 +358,7 @@
                 <!-- 1. Septiembre 2026 -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
-                        <img src="Comite agotado.jpg" alt="Comité de Administración agotado en Concepción">
+                        <img src="Comite agotado.jpg" alt="Comité de Administración de edificios en Concepción y Ley 21.442">
                     </div>
                     <div class="blog-card-content">
                         <p class="blog-card-date">16 DE SEPTIEMBRE, 2026</p>
@@ -316,7 +371,7 @@
                 <!-- 2. Mayo 2026 -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
-                        <img src="Cumplimiento normativo.png" alt="Ley de copropiedad 21.442">
+                        <img src="Cumplimiento normativo.png" alt="Cumplimiento de la Ley de Copropiedad 21.442 en Concepción y Biobío">
                     </div>
                     <div class="blog-card-content">
                         <p class="blog-card-date">12 DE MAYO, 2026</p>
@@ -329,7 +384,7 @@
                 <!-- 3. Marzo 2026 -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
-                        <img src="Mantencion techos.jpeg" alt="Mantención de techos en el Biobío">
+                        <img src="Mantencion techos.jpeg" alt="Mantención preventiva de techumbres y canaletas en edificios del Gran Concepción">
                     </div>
                     <div class="blog-card-content">
                         <p class="blog-card-date">15 DE MARZO, 2026</p>
@@ -347,6 +402,38 @@
         </div>
     </section>
 
+    <!-- Sección de Preguntas Frecuentes (FAQ) para Posicionamiento Local -->
+    <section id="preguntas-frecuentes" class="faq-section section-padding" style="background-color: var(--bg-light);">
+        <div class="container">
+            <div class="section-title text-center">
+                <h2>Preguntas Frecuentes de Comités</h2>
+                <p>Resolvemos las dudas clave sobre nuestra gestión certificada y la normativa vigente en el Gran Concepción.</p>
+            </div>
+            
+            <div class="faq-container">
+                <details class="faq-item">
+                    <summary>¿Están inscritos en el Registro Nacional de Administradores de Condominios (MINVU)?</summary>
+                    <p>Sí. Nuestro equipo directivo cuenta con certificación académica de la <strong>Pontificia Universidad Católica de Chile (UC)</strong> y cumple íntegramente con los requisitos legales vigentes bajo la Ley N° 21.442 y el Registro Nacional de Administradores del Ministerio de Vivienda y Urbanismo (MINVU).</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>¿Cómo es el proceso para cambiar de administrador en nuestra comunidad?</summary>
+                    <p>Acompañamos al Comité de Administración en cada etapa legal: asesoría en la citación a asamblea o acuerdo de comité según su reglamento, levantamiento de acta de entrega, auditoría del estado financiero e infraestructura inicial, y migración ordenada a <strong>ComunidadFeliz</strong> sin interrumpir la operación del edificio.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>¿En qué comunas y barrios del Gran Concepción prestan servicios?</summary>
+                    <p>Operamos con presencia en terreno en todo el Gran Concepción: <strong>Centro de Concepción, Barrio Universitario, Parque Ecuador, Lomas de San Andrés, Lomas de San Sebastián, San Pedro de la Paz (Andalué, Huertos Familiares, San Pedro del Valle), Talcahuano (Brisas del Sol), Chiguayante y Hualpén</strong>.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>¿Cómo garantizan la transparencia en el cobro y uso de los gastos comunes?</summary>
+                    <p>Trabajamos 100% integrados con la plataforma <strong>ComunidadFeliz</strong>. Cada copropietario y miembro del comité puede revisar desde su teléfono el respaldo digital de facturas, conciliaciones bancarias, estado de morosidad, pago de remuneraciones y fondos de reserva en tiempo real.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer Integrado -->
     <footer id="cotizar" class="footer section-padding-top">
         <div class="container footer-layout">
@@ -357,7 +444,7 @@
                     <p>Déjanos tus datos y nos comunicaremos para evaluar las necesidades de tu comunidad en el Gran Concepción.</p>
                 </div>
                 
-                <!-- INICIO FORMULARIO CON TELÉFONO + SELECTOR DE UNIDADES (MEJORA 5) + LEY 21.719 -->
+                <!-- FORMULARIO CON TELÉFONO + SELECTOR DE UNIDADES + LEY 21.719 -->
                 <form action="https://formspree.io/f/moeqbojk" method="POST" class="contact-form">
                     <div class="form-row">
                         <input type="text" name="Nombre" placeholder="Tu Nombre o Cargo" required>
@@ -376,7 +463,7 @@
                     </select>
                     <textarea name="Mensaje" rows="4" placeholder="Cuéntanos qué necesitas mejorar en tu comunidad..." required></textarea>
                     
-                    <!-- 1. Checkbox obligatorio de Privacidad -->
+                    <!-- Checkbox obligatorio de Privacidad -->
                     <label class="privacy-label">
                         <input type="checkbox" name="Acepta_Privacidad" required>
                         He leído y acepto la <a href="privacidad.html" target="_blank" style="color: var(--primary-green); text-decoration: underline;">Política de Privacidad</a>.
@@ -384,22 +471,20 @@
 
                     <button type="submit" class="btn-primary form-submit">Enviar Solicitud</button>
 
-                    <!-- 2. Coletilla informativa de protección de datos -->
+                    <!-- Coletilla informativa de protección de datos -->
                     <p class="form-disclaimer" style="font-size: 0.8rem; color: #888; text-align: left; margin-top: 10px; line-height: 1.4;">
                         <strong>Información básica sobre protección de datos:</strong> Responsable: GCO Gestión de Condominios. Finalidad: Responder a tu solicitud de presupuesto y contacto comercial. Legitimación: Tu consentimiento expreso. Tus datos no se cederán a terceros, salvo obligación legal. Puedes ejercer tus derechos de acceso, rectificación y eliminación escribiendo a gco.condominios@gmail.com.
                     </p>
                 </form>
-                <!-- FIN FORMULARIO -->
 
             </div>
             
             <div class="footer-info-wrapper">
-                <img src="Logo con las letras mas pequeñas - copia.png" alt="GCO Logo" class="footer-logo">
-                <p class="footer-description">Empresa liderada por <strong>administradores certificados por la Pontificia Universidad Católica de Chile (UC)</strong>, brindando eficiencia y transparencia en el Gran Concepción.</p>
+                <img src="Logo con las letras mas pequeñas - copia.png" alt="GCO Gestión de Condominios Logo" class="footer-logo">
+                <p class="footer-description">Empresa liderada por <strong>administradores certificados por la Pontificia Universidad Católica de Chile (UC)</strong> e inscritos en el <strong>Registro Nacional de Administradores (MINVU)</strong>, brindando eficiencia y transparencia en el Gran Concepción.</p>
                 
-                <!-- MEJORA 4: Teléfonos clicables directamente desde celulares -->
                 <div class="footer-contact-data">
-                    <p>📍 Gran Concepción, Región del Biobío, Chile</p>
+                    <p>📍 Cobertura: Concepción, San Pedro de la Paz, Talcahuano, Chiguayante y Hualpén</p>
                     <p>📞 <a href="tel:+56989249132">+56 9 8924 9132</a> | <a href="tel:+56966929064">+56 9 6692 9064</a></p>
                     <p>📧 <a href="mailto:gco.condominios@gmail.com">gco.condominios@gmail.com</a></p>
                     <p>💻 <a href="https://www.gcoadmin.cl" target="_blank">www.gcoadmin.cl</a></p>
@@ -409,17 +494,16 @@
         </div>
         
         <div class="footer-bottom">
-            <!-- 3. Enlace a la Política de Privacidad en el footer -->
             <p>&copy; 2026 GCO Gestión de Condominios. Todos los derechos reservados. | <a href="privacidad.html" style="color: #888; text-decoration: underline;">Política de Privacidad (Ley 21.719)</a></p>
         </div>
     </footer>
 
     <!-- Botón flotante de WhatsApp -->
     <a href="https://wa.me/56989249132?text=Hola,%20me%20gustar%C3%ADa%20cotizar%20la%20administraci%C3%B3n%20para%20mi%20condominio" class="whatsapp-float" target="_blank" rel="noopener noreferrer">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Contactar por WhatsApp">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Contactar por WhatsApp a GCO Condominios">
     </a>
 
-    <!-- 4. Banner de Cookies (Ley 21.719) -->
+    <!-- Banner de Cookies (Ley 21.719) -->
     <div id="cookie-banner" class="cookie-banner">
         <p>GCO utiliza cookies propias y de terceros para asegurar el correcto funcionamiento del sitio web y cumplir con la Ley 21.719. Si continúas navegando, consideramos que aceptas su uso. <a href="privacidad.html">Leer más</a>.</p>
         <button id="accept-cookies" class="btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Aceptar y continuar</button>
