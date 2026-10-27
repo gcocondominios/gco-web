@@ -405,3 +405,25 @@ body {
         padding: 15px;
     }
 }
+/* Estilo para el selector de unidades en el formulario */
+.contact-form select {
+    padding: 18px 25px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    background-color: rgba(255,255,255,0.02);
+    color: var(--white);
+    transition: var(--transition-standard);
+    cursor: pointer;
+}
+.contact-form select:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 10px rgba(74, 140, 42, 0.2);
+    background-color: rgba(255,255,255,0.05);
+}
+.contact-form select option {
+    background-color: #1A1A1A;
+    color: var(--white);
+}
