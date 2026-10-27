@@ -8,6 +8,35 @@
     <meta name="google-site-verification" content="xRTa9cN3ikQ7JBvyv3XJayFtkeMJ-jqqSODq6vysdx0" />
     <title>GCO | Gestión de Condominios y Edificios | Gran Concepción</title>
     <link rel="icon" type="image/png" href="favicon.png">
+    
+    <!-- MEJORA 2: Etiquetas Open Graph para WhatsApp, LinkedIn y Redes Sociales -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="GCO | Gestión de Condominios y Edificios | Gran Concepción">
+    <meta property="og:description" content="Administración ética y profesional liderada por administradores certificados por la UC. Transparencia total, mantenimiento preventivo y cumplimiento Ley 21.442.">
+    <meta property="og:url" content="https://www.gcoadmin.cl/">
+    <meta property="og:image" content="https://www.gcoadmin.cl/Concepcion%20desde%20diagonal.jpg">
+
+    <!-- MEJORA 3: Datos Estructurados (Schema.org) para posicionamiento local en Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "GCO Gestión de Condominios",
+      "image": "https://www.gcoadmin.cl/Logo%20con%20las%20letras%20mas%20peque%C3%B1as%20-%20copia.png",
+      "description": "Administración profesional de edificios y condominios en el Gran Concepción, liderada por administradores certificados por la Pontificia Universidad Católica de Chile (UC).",
+      "url": "https://www.gcoadmin.cl",
+      "telephone": "+56989249132",
+      "email": "gco.condominios@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Concepción",
+        "addressRegion": "Biobío",
+        "addressCountry": "CL"
+      },
+      "areaServed": ["Concepción", "Talcahuano", "San Pedro de la Paz", "Chiguayante", "Hualpén"]
+    }
+    </script>
+
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -261,7 +290,7 @@
         </div>
     </section>
 
-    <!-- Actualidad y Novedades (Blog) -->
+    <!-- Actualidad y Novedades (Blog) - MEJORA 1: Orden cronológico estricto y enlace unificado -->
     <section id="actualidad" class="blog-updates section-padding">
         <div class="container">
             <div class="section-title text-center">
@@ -271,6 +300,7 @@
             
             <div class="blog-updates-grid grid-three-columns">
                 
+                <!-- 1. Septiembre 2026 -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
                         <img src="Comite agotado.jpg" alt="Comité de Administración agotado en Concepción">
@@ -283,18 +313,7 @@
                     </div>
                 </div>
                 
-                <div class="blog-update-card">
-                    <div class="blog-card-image">
-                        <img src="Mantencion techos.jpeg" alt="Mantención de techos en el Biobío">
-                    </div>
-                    <div class="blog-card-content">
-                        <p class="blog-card-date">15 DE MARZO, 2026</p>
-                        <h3>Preparación y mantención de techumbres en el Biobío</h3>
-                        <p>Es vital que tu comunidad revise las techumbres y canaletas de forma preventiva. Aquí te explicamos cómo planificar estos trabajos...</p>
-                        <a href="blog/mantencion-techos-biobio.html" class="blog-card-link">Leer artículo</a>
-                    </div>
-                </div>
-                
+                <!-- 2. Mayo 2026 -->
                 <div class="blog-update-card">
                     <div class="blog-card-image">
                         <img src="Cumplimiento normativo.png" alt="Ley de copropiedad 21.442">
@@ -304,6 +323,19 @@
                         <h3>Entendiendo la Ley 21.442 y su impacto local</h3>
                         <p>Un desglose de los puntos clave sobre transparencia financiera y planes de emergencia que los comités de Concepción deben implementar hoy...</p>
                         <a href="blog/ley-21442-impacto-local.html" class="blog-card-link">Leer artículo</a>
+                    </div>
+                </div>
+
+                <!-- 3. Marzo 2026 -->
+                <div class="blog-update-card">
+                    <div class="blog-card-image">
+                        <img src="Mantencion techos.jpeg" alt="Mantención de techos en el Biobío">
+                    </div>
+                    <div class="blog-card-content">
+                        <p class="blog-card-date">15 DE MARZO, 2026</p>
+                        <h3>Preparación y mantención de techumbres en el Biobío</h3>
+                        <p>Es vital que tu comunidad revise las techumbres y canaletas de forma preventiva. Aquí te explicamos cómo planificar estos trabajos...</p>
+                        <a href="blog/mantenimiento-techumbres-concepcion.html" class="blog-card-link">Leer artículo</a>
                     </div>
                 </div>
                 
@@ -325,14 +357,24 @@
                     <p>Déjanos tus datos y nos comunicaremos para evaluar las necesidades de tu comunidad en el Gran Concepción.</p>
                 </div>
                 
-                <!-- INICIO ACTUALIZACIÓN LEY 21.719 -->
+                <!-- INICIO FORMULARIO CON TELÉFONO + SELECTOR DE UNIDADES (MEJORA 5) + LEY 21.719 -->
                 <form action="https://formspree.io/f/moeqbojk" method="POST" class="contact-form">
                     <div class="form-row">
                         <input type="text" name="Nombre" placeholder="Tu Nombre o Cargo" required>
                         <input type="email" name="Correo" placeholder="Tu Correo Electrónico" required>
                     </div>
-                    <input type="text" name="Condominio" placeholder="Nombre del Condominio o Edificio (Ej: Edificio Montemare)" required>
-                    <textarea name="Mensaje" rows="5" placeholder="Cuéntanos qué necesitas mejorar en tu comunidad..." required></textarea>
+                    <div class="form-row">
+                        <input type="tel" name="Telefono" placeholder="Tu Teléfono (Ej: +56 9 1234 5678)" required>
+                        <input type="text" name="Condominio" placeholder="Nombre del Condominio o Edificio" required>
+                    </div>
+                    <select name="Cantidad_Unidades" required>
+                        <option value="" disabled selected>Cantidad aproximada de unidades (departamentos/casas)</option>
+                        <option value="Menos de 50 unidades">Menos de 50 unidades</option>
+                        <option value="Entre 50 y 100 unidades">Entre 50 y 100 unidades</option>
+                        <option value="Entre 100 y 200 unidades">Entre 100 y 200 unidades</option>
+                        <option value="Más de 200 unidades">Más de 200 unidades</option>
+                    </select>
+                    <textarea name="Mensaje" rows="4" placeholder="Cuéntanos qué necesitas mejorar en tu comunidad..." required></textarea>
                     
                     <!-- 1. Checkbox obligatorio de Privacidad -->
                     <label class="privacy-label">
@@ -347,7 +389,7 @@
                         <strong>Información básica sobre protección de datos:</strong> Responsable: GCO Gestión de Condominios. Finalidad: Responder a tu solicitud de presupuesto y contacto comercial. Legitimación: Tu consentimiento expreso. Tus datos no se cederán a terceros, salvo obligación legal. Puedes ejercer tus derechos de acceso, rectificación y eliminación escribiendo a gco.condominios@gmail.com.
                     </p>
                 </form>
-                <!-- FIN ACTUALIZACIÓN LEY 21.719 -->
+                <!-- FIN FORMULARIO -->
 
             </div>
             
@@ -355,9 +397,10 @@
                 <img src="Logo con las letras mas pequeñas - copia.png" alt="GCO Logo" class="footer-logo">
                 <p class="footer-description">Empresa liderada por <strong>administradores certificados por la Pontificia Universidad Católica de Chile (UC)</strong>, brindando eficiencia y transparencia en el Gran Concepción.</p>
                 
+                <!-- MEJORA 4: Teléfonos clicables directamente desde celulares -->
                 <div class="footer-contact-data">
                     <p>📍 Gran Concepción, Región del Biobío, Chile</p>
-                    <p>📞 +56 9 8924 9132 | +56 9 6692 9064</p>
+                    <p>📞 <a href="tel:+56989249132">+56 9 8924 9132</a> | <a href="tel:+56966929064">+56 9 6692 9064</a></p>
                     <p>📧 <a href="mailto:gco.condominios@gmail.com">gco.condominios@gmail.com</a></p>
                     <p>💻 <a href="https://www.gcoadmin.cl" target="_blank">www.gcoadmin.cl</a></p>
                     <p>📱 Instagram: <a href="https://www.instagram.com/gecondominios/" target="_blank">@gecondominios</a></p>
