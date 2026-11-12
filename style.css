@@ -20,8 +20,9 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { 
     scroll-behavior: smooth; 
-    scroll-padding-top: 100px; /* Evita que el menú fijo tape los títulos al navegar */
+    scroll-padding-top: 100px;
     font-size: 16px; 
+    overflow-x: hidden;
 }
 
 body {
@@ -29,10 +30,13 @@ body {
     color: var(--black-text);
     background-color: var(--white);
     line-height: 1.7; 
+    overflow-x: hidden;
+    width: 100%;
 }
 
 .container {
     max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     padding: 0 30px; 
 }
@@ -44,6 +48,7 @@ body {
     background-color: var(--white);
     box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
     position: sticky; top: 0; z-index: 100;
+    width: 100%;
 }
 
 .nav-container {
@@ -242,30 +247,55 @@ body {
 .blog-all-link-wrapper { margin-top: 30px; }
 
 /* =========================================
-   Footer Integrado y Formulario
+   Footer Integrado y Formulario (CORREGIDO PARA MÓVIL)
    ========================================= */
 .footer {
     background-color: var(--black-text); color: var(--white);
     padding: 120px 0 40px;
+    width: 100%;
+    overflow: hidden;
 }
 .footer-layout {
     display: grid; grid-template-columns: 2fr 1fr;
     gap: 70px; align-items: flex-start; margin-bottom: 80px;
+    width: 100%;
+}
+.footer-form-wrapper, .footer-info-wrapper {
+    width: 100%;
+    min-width: 0; /* Impide que los hijos ensanchen la columna más allá de la pantalla */
 }
 
 .footer .section-title h2 { color: var(--white); }
 .footer .section-title.text-left h2::after { background-color: var(--primary-green); }
 .footer .section-title p { color: #BBB; font-size: 1.1rem; }
 
-.contact-form { display: flex; flex-direction: column; gap: 18px; position: relative; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.contact-form { 
+    display: flex; flex-direction: column; gap: 18px; 
+    position: relative; width: 100%; max-width: 100%;
+}
+.form-row { 
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px; 
+    width: 100%; 
+}
 .contact-form input, .contact-form textarea, .contact-form select {
-    padding: 18px 25px; border: 1px solid #444; border-radius: 8px;
-    font-family: var(--font-body); font-size: 1rem;
-    background-color: rgba(255,255,255,0.02); color: var(--white);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 18px 20px; 
+    border: 1px solid #444; 
+    border-radius: 8px;
+    font-family: var(--font-body); 
+    font-size: 1rem;
+    background-color: rgba(255,255,255,0.02); 
+    color: var(--white);
     transition: var(--transition-standard);
 }
-.contact-form select { cursor: pointer; }
+.contact-form select { 
+    cursor: pointer; 
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
 .contact-form select option { background-color: #1A1A1A; color: var(--white); }
 .contact-form input:focus, .contact-form textarea:focus, .contact-form select:focus {
     outline: none; border-color: var(--primary-green);
@@ -274,17 +304,17 @@ body {
 }
 .form-submit {
     cursor: pointer; border: none; font-size: 1.1rem;
-    padding: 18px; margin-top: 15px; width: auto;
+    padding: 18px; margin-top: 15px; width: 100%;
 }
 
 .footer-info-wrapper { text-align: left; }
 .footer-logo {
     height: 120px; filter: brightness(0) invert(1);
-    margin-bottom: 30px;
+    margin-bottom: 30px; max-width: 100%; object-fit: contain;
 }
 .footer-description { color: #BBB; margin-bottom: 40px; font-size: 1.05rem; }
 .footer-contact-data { font-size: 1.05rem; color: #BBB; }
-.footer-contact-data p { margin-bottom: 12px; }
+.footer-contact-data p { margin-bottom: 12px; word-break: break-word; }
 .footer-contact-data a {
     color: var(--primary-green); text-decoration: none;
     font-weight: 500; transition: var(--transition-standard);
@@ -319,10 +349,13 @@ body {
    Ley 21.719 - Privacidad, Cookies y FAQ
    ========================================= */
 .privacy-label {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: flex-start; gap: 10px;
     font-size: 0.9rem; color: #DDD; margin-top: 5px;
+    line-height: 1.4;
 }
-.privacy-label input[type="checkbox"] { width: auto; cursor: pointer; }
+.privacy-label input[type="checkbox"] { 
+    width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; cursor: pointer; 
+}
 
 .cookie-banner {
     position: fixed; bottom: 0; left: 0; width: 100%;
@@ -348,11 +381,12 @@ body {
     font-family: var(--font-heading); font-size: 1.1rem;
     font-weight: 600; color: var(--primary-dark); cursor: pointer;
     list-style: none; display: flex; justify-content: space-between; align-items: center;
+    gap: 15px;
 }
 .faq-item summary::-webkit-details-marker { display: none; }
 .faq-item summary::after {
     content: "+"; font-size: 1.5rem; color: var(--primary-green);
-    font-weight: 700; transition: transform 0.2s ease;
+    font-weight: 700; transition: transform 0.2s ease; flex-shrink: 0;
 }
 .faq-item[open] summary::after { content: "−"; }
 .faq-item p { margin-top: 15px; color: var(--gray-text); line-height: 1.7; font-size: 1rem; }
@@ -386,7 +420,7 @@ body {
 @media (max-width: 767px) {
     .menu-toggle { display: flex; margin-right: 10px; }
     .nav-links {
-        position: absolute; top: 90px; /* Ajustado a la altura real del header en móvil */
+        position: absolute; top: 90px;
         left: 0; width: 100%;
         background-color: var(--white); flex-direction: column;
         padding: 30px 0; box-shadow: 0 10px 15px rgba(0,0,0,0.05);
@@ -398,12 +432,21 @@ body {
     .menu-toggle.is-active .bar:nth-child(1) { transform: translateY(10px) rotate(45deg); }
     .menu-toggle.is-active .bar:nth-child(3) { transform: translateY(-10px) rotate(-45deg); }
 
+    .hero h1 { font-size: 2.3rem; }
+    .section-title h2 { font-size: 2.2rem; }
+    .section-padding { padding: 80px 0; }
+    .footer { padding: 80px 0 40px; }
+
     .hero-buttons { flex-direction: column; gap: 15px; max-width: 400px; margin: 0 auto; }
     .grid-three-columns { grid-template-columns: 1fr; gap: 25px; }
     .grid-alliances { grid-template-columns: 1fr; gap: 15px; }
     .form-row { grid-template-columns: 1fr; gap: 15px; }
+    .contact-form input, .contact-form textarea, .contact-form select {
+        padding: 15px 16px;
+        font-size: 0.95rem;
+    }
     .alliance-card { text-align: left; }
-    .testimonial-card { padding: 40px; border-radius: 8px; }
+    .testimonial-card { padding: 30px 25px; border-radius: 8px; }
     .blog-updates-grid { grid-template-columns: 1fr; gap: 30px; }
     .blog-card-image { height: 180px; }
     .cookie-banner { flex-direction: column; text-align: center; padding: 15px; }
