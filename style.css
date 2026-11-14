@@ -342,8 +342,30 @@ body {
 /* =========================================
    Botón Menú Celular (Hamburguesa)
    ========================================= */
-.menu-toggle { display: none; flex-direction: column; cursor: pointer; gap: 7px; z-index: 101; }
+.menu-toggle { display: none; flex-direction: column; cursor: pointer; gap: 7px; z-index: 101; background: none; border: none; padding: 0; }
 .menu-toggle .bar { width: 35px; height: 3px; background-color: var(--primary-dark); transition: var(--transition-standard); border-radius: 3px; }
+
+/* =========================================
+   Footer Simple (Subpáginas: Blog / Gracias)
+   ========================================= */
+.site-footer {
+    background-color: var(--bg-light);
+    color: var(--gray-text);
+    border-top: 1px solid #EAEAEA;
+}
+.footer-contact-bar {
+    padding: 20px 0;
+}
+.contact-bar-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.contact-item {
+    font-size: 0.95rem;
+    color: var(--gray-text);
+}
 
 /* =========================================
    Ley 21.719 - Privacidad, Cookies y FAQ
