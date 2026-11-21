@@ -102,11 +102,15 @@
     <link rel="preload" as="image" href="Concepcion desde diagonal.jpg" fetchpriority="high">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-    <!-- Google tag (gtag.js) -->
+    <!-- Google tag (gtag.js) con Consent Mode v2 (Ley 21.719) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-K1NB1CMMWD"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        'analytics_storage': localStorage.getItem('gcoCookiesAccepted') ? 'granted' : 'denied',
+        'ad_storage': 'denied'
+      });
       gtag('js', new Date());
       gtag('config', 'G-K1NB1CMMWD');
     </script>
