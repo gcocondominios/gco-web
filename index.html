@@ -71,7 +71,7 @@
               "name": "¿Cómo es el proceso para cambiar de administrador en nuestra comunidad?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Acompañamos al Comité de Administración en cada etapa legal: asesoría en la citación a asamblea o acuerdo de comité según su reglamento, levantamiento de acta de entrega, auditoría del estado financiero e infraestructura inicial, y migración ordenada a ComunidadFeliz."
+                "text": "Acompañamos al Comité de Administración en cada etapa legal: asesoría en la citación a asamblea o acuerdo de comité según su reglamento, levantamiento de acta de entrega, auditoría del estado financiero e infraestructura inicial, y continuidad ordenada de cobros, fondos y operación."
               }
             },
             {
@@ -87,7 +87,7 @@
               "name": "¿Cómo garantizan la transparencia en el cobro y uso de los gastos comunes?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Operamos 100% integrados con la plataforma ComunidadFeliz. Cada copropietario y miembro del comité puede revisar desde su celular el respaldo de facturas, conciliaciones bancarias, estado de morosidad y remuneraciones en tiempo real."
+                "text": "Entregamos rendiciones claras y verificables con respaldo de facturas, conciliaciones bancarias, estado de morosidad, remuneraciones y fondos de reserva, adaptándonos a los canales de información de cada comunidad."
               }
             }
           ]
@@ -132,6 +132,7 @@
                     <li><a href="#servicios">Servicios</a></li>
                     <li><a href="#equipo">Equipo</a></li>
                     <li><a href="#metodologia">Metodología</a></li>
+                    <li><a href="#simulador-morosidad">Simulador</a></li>
                     <li><a href="#actualidad">Actualidad</a></li>
                     <li><a href="https://comunidadfeliz.cl/" target="_blank" rel="noopener noreferrer" class="btn-secondary">Portal</a></li>
                     <li><a href="#cotizar" class="btn-primary">Diagnóstico Gratis</a></li>
@@ -163,11 +164,11 @@
                 
                 <div class="card service-card">
                     <div class="service-img-wrapper">
-                        <img src="Administracion y transparencia.png" alt="Administración de edificios y transparencia contable en Concepción con ComunidadFeliz" loading="lazy">
+                        <img src="Administracion y transparencia.png" alt="Administración de edificios y transparencia contable en Concepción" loading="lazy">
                     </div>
                     <div class="service-card-body">
                         <h3>Administración y Transparencia Contable</h3>
-                        <p>Gestión integral en ComunidadFeliz. Cobranza, remuneraciones y reportes financieros claros en tiempo real.</p>
+                        <p>Gestión clara y ordenada de gastos comunes, cobranza, remuneraciones y reportes financieros verificables en tiempo real.</p>
                     </div>
                 </div>
 
@@ -272,7 +273,7 @@
                         <h3>Valeria Sáez</h3>
                         <p class="team-subtitle">Gestión GGCC y Atención a la Comunidad</p>
                     </div>
-                    <p class="team-bio">Apoya en la gestión y seguimiento de gastos comunes en ComunidadFeliz y mantiene una comunicación cercana, clara y oportuna con los residentes y el comité.</p>
+                    <p class="team-bio">Apoya en la gestión y seguimiento de gastos comunes y mantiene una comunicación cercana, clara y oportuna con los residentes y el comité.</p>
                 </div>
 
                 <!-- 5. Catalina Bello -->
@@ -336,12 +337,12 @@
                 <!-- Paso 3 -->
                 <div class="card service-card methodology-card" style="background-color: var(--white);">
                     <div class="service-img-wrapper">
-                        <img src="Control y Reporte en Tiempo Real.jpg" alt="Control digital y reportes en tiempo real en ComunidadFeliz" loading="lazy">
+                        <img src="Control y Reporte en Tiempo Real.jpg" alt="Control digital y reportes en tiempo real" loading="lazy">
                     </div>
                     <div class="service-card-body">
                         <span class="step-badge">Paso 04</span>
                         <h3>Control y Reporte en Tiempo Real</h3>
-                        <p>Mantenemos al comité informado mediante reportes contables claros en ComunidadFeliz, checklists digitales y visitas semanales de supervisión.</p>
+                        <p>Mantenemos al comité informado mediante reportes contables claros y verificables, checklists digitales y visitas semanales de supervisión.</p>
                     </div>
                 </div>
 
@@ -370,13 +371,88 @@
                 </div>
                 <div class="transition-step">
                     <span class="transition-number">03</span>
-                    <h4>Migración a ComunidadFeliz</h4>
-                    <p>Cargamos saldos iniciales, fondos de reserva y proveedores certificados sin interrumpir el cobro ni la operación diaria.</p>
+                    <h4>Continuidad y Orden Operativo</h4>
+                    <p>Ordenamos saldos iniciales, fondos de reserva y proveedores certificados sin interrumpir el cobro ni la operación diaria.</p>
                 </div>
                 <div class="transition-step">
                     <span class="transition-number">04</span>
                     <h4>Operación y Plan de Mejoras</h4>
                     <p>Iniciamos visitas semanales de operaciones, atención directa a residentes y ejecución del cronograma preventivo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SIMULADOR DE MOROSIDAD PARA COMITÉS -->
+    <section id="simulador-morosidad" class="delinquency-section section-padding">
+        <div class="container">
+            <div class="section-title text-center">
+                <h2>Simulador de Morosidad de la Comunidad</h2>
+                <p>Calcula cuánto deja de recaudar tu edificio o condominio y qué impacto tiene una cobranza preventiva y ordenada en el flujo mensual de la comunidad.</p>
+            </div>
+
+            <div class="delinquency-card">
+                <div class="delinquency-grid">
+                    
+                    <!-- Columna izquierda: Controles -->
+                    <div class="delinquency-controls">
+                        <div class="control-group">
+                            <div class="control-label-row">
+                                <label for="sim-unidades">Unidades de la comunidad</label>
+                                <span id="val-unidades" class="control-value">60 unidades</span>
+                            </div>
+                            <input type="range" id="sim-unidades" min="10" max="300" step="5" value="60">
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-label-row">
+                                <label for="sim-ggcc">Gasto común promedio ($ CLP)</label>
+                                <span id="val-ggcc" class="control-value">$95.000</span>
+                            </div>
+                            <input type="range" id="sim-ggcc" min="30000" max="350000" step="5000" value="95000">
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-label-row">
+                                <label for="sim-morosidad">Morosidad actual (%)</label>
+                                <span id="val-morosidad" class="control-value">18%</span>
+                            </div>
+                            <input type="range" id="sim-morosidad" min="2" max="50" step="1" value="18">
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-label-row">
+                                <label for="sim-recuperacion">Reducción estimada con gestión ordenada</label>
+                                <span id="val-recuperacion" class="control-value">40%</span>
+                            </div>
+                            <input type="range" id="sim-recuperacion" min="15" max="70" step="5" value="40">
+                        </div>
+
+                        <p class="delinquency-disclaimer">
+                            *Simulación referencial en pesos chilenos para fines orientativos. Cada comunidad presenta distintas realidades legales, acuerdos de pago y plazos de cobranza.
+                        </p>
+                    </div>
+
+                    <!-- Columna derecha: Resultados -->
+                    <div class="delinquency-results">
+                        <div class="result-highlight">
+                            <span class="result-tag">Deuda mensual no recaudada</span>
+                            <div id="res-mensual" class="result-amount">$1.026.000</div>
+                            <p id="res-anual" class="result-sub">Equivale a <strong>$12.312.000</strong> sin ingresar al año</p>
+                        </div>
+
+                        <div class="result-recovery-box">
+                            <span class="recovery-tag">Recuperación anual estimada</span>
+                            <div id="res-recuperable" class="result-recovery-amount">$4.924.800</div>
+                            <p id="res-equivalencia" class="recovery-sub">Equivale a aprox. <strong>0,9 meses</strong> de gasto común total de la comunidad.</p>
+                        </div>
+
+                        <div class="result-actions">
+                            <a href="#cotizar" class="btn-primary">Evaluar mi Comunidad en 25 Min</a>
+                            <a id="sim-whatsapp-link" href="https://wa.me/56989249132" target="_blank" rel="noopener noreferrer" class="btn-secondary-light">Consultar por WhatsApp</a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -600,7 +676,7 @@
 
                 <details class="faq-item">
                     <summary>¿Cómo es el proceso para cambiar de administrador en nuestra comunidad?</summary>
-                    <p>Acompañamos al Comité de Administración en cada etapa legal: asesoría en la citación a asamblea o acuerdo de comité según su reglamento, levantamiento de acta de entrega, auditoría del estado financiero e infraestructura inicial, y migración ordenada a <strong>ComunidadFeliz</strong> sin interrumpir la operación del edificio.</p>
+                    <p>Acompañamos al Comité de Administración en cada etapa legal: asesoría en la citación a asamblea o acuerdo de comité según su reglamento, levantamiento de acta de entrega, auditoría del estado financiero e infraestructura inicial, y continuidad ordenada de cobros, fondos y operación sin interrumpir el servicio.</p>
                 </details>
 
                 <details class="faq-item">
@@ -610,7 +686,7 @@
 
                 <details class="faq-item">
                     <summary>¿Cómo garantizan la transparencia en el cobro y uso de los gastos comunes?</summary>
-                    <p>Trabajamos 100% integrados con la plataforma <strong>ComunidadFeliz</strong>. Cada copropietario y miembro del comité puede revisar desde su teléfono el respaldo digital de facturas, conciliaciones bancarias, estado de morosidad, pago de remuneraciones y fondos de reserva en tiempo real.</p>
+                    <p>Entregamos rendiciones claras y verificables con respaldo digital de facturas, conciliaciones bancarias, estado de morosidad, remuneraciones y fondos de reserva en tiempo real, facilitando el acceso y seguimiento desde cualquier dispositivo.</p>
                 </details>
             </div>
         </div>
@@ -692,39 +768,7 @@
         <button id="accept-cookies" class="btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Aceptar y continuar</button>
     </div>
 
-    <script>
-        // Menú Móvil con cierre automático al seleccionar un enlace
-        const mobileMenu = document.getElementById('mobile-menu');
-        const navLinks = document.querySelector('.nav-links');
-        const navItems = document.querySelectorAll('.nav-links a');
-
-        mobileMenu.addEventListener('click', () => {
-            const isOpen = mobileMenu.classList.toggle('is-active');
-            navLinks.classList.toggle('active');
-            mobileMenu.setAttribute('aria-expanded', String(isOpen));
-        });
-
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                mobileMenu.classList.remove('is-active');
-                navLinks.classList.remove('active');
-                mobileMenu.setAttribute('aria-expanded', 'false');
-            });
-        });
-
-        // Script del Banner de Cookies
-        const cookieBanner = document.getElementById('cookie-banner');
-        const acceptCookiesBtn = document.getElementById('accept-cookies');
-        
-        if (!localStorage.getItem('gcoCookiesAccepted')) {
-            cookieBanner.style.display = 'flex';
-        }
-
-        acceptCookiesBtn.addEventListener('click', () => {
-            localStorage.setItem('gcoCookiesAccepted', 'true');
-            cookieBanner.style.display = 'none';
-        });
-    </script>
+    <script src="script.js"></script>
 
 </body>
 </html>
