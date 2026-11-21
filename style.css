@@ -180,7 +180,7 @@ body {
 .service-card-body p { color: var(--gray-text); font-size: 0.98rem; flex-grow: 1; }
 
 /* =========================================
-   Equipo Multidisciplinario (5 Integrantes)
+   Equipo Multidisciplinario (6 Integrantes)
    ========================================= */
 .team-grid {
     display: grid;
@@ -373,6 +373,16 @@ body {
     border: 1px solid #EEE;
 }
 .alliance-card:hover { transform: translateX(5px); }
+.alliance-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary-green);
+    background-color: rgba(74, 140, 42, 0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+}
 .alliance-card h4 {
     font-family: var(--font-heading); font-size: 1.2rem;
     color: var(--primary-dark); margin-bottom: 12px;
