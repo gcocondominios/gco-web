@@ -26,12 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (cookieBanner && !localStorage.getItem('gcoCookiesAccepted')) {
         cookieBanner.style.display = 'flex';
+        document.body.classList.add('cookie-banner-visible');
     }
 
     if (acceptCookiesBtn && cookieBanner) {
         acceptCookiesBtn.addEventListener('click', () => {
             localStorage.setItem('gcoCookiesAccepted', 'true');
             cookieBanner.style.display = 'none';
+            document.body.classList.remove('cookie-banner-visible');
+            if (typeof gtag === 'function') {
+                gtag('consent', 'update', {
+                    'analytics_storage': 'granted'
+                });
+            }
         });
     }
 
