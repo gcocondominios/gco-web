@@ -692,6 +692,7 @@ body {
 }
 .whatsapp-float:hover { transform: scale(1.1); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 .whatsapp-float img, .whatsapp-float svg { width: 38px; height: 38px; fill: #FFFFFF; }
+body.cookie-banner-visible .whatsapp-float { opacity: 0; pointer-events: none; }
 
 /* =========================================
    Botón Menú Celular (Hamburguesa)
@@ -839,6 +840,7 @@ body {
     .testimonial-card { padding: 30px 25px; border-radius: 8px; }
     .blog-updates-grid { grid-template-columns: 1fr; gap: 30px; }
     .blog-card-image { height: 180px; }
+    .footer-bottom { padding-bottom: 85px; }
     .cookie-banner { flex-direction: column; text-align: center; padding: 15px 15px calc(15px + env(safe-area-inset-bottom, 0px)); }
 }
 
