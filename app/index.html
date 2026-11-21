@@ -240,11 +240,15 @@
           </div>
         </div>
 
-        <!-- Primary Action Button (PDF) -->
-        <footer>
+        <!-- Primary Action Buttons -->
+        <footer class="flex flex-col gap-gutter-sm">
           <button id="btn-view-pdf" type="button" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm transition-colors duration-state-change ease-state-change hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed">
             <span class="material-symbols-outlined text-[20px]" aria-hidden="true">description</span>
             <span id="btn-pdf-label" class="font-label text-label-lg">Ver Último Informe Técnico (PDF)</span>
+          </button>
+          <button id="btn-hero-report" type="button" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-sm rounded-md bg-warning-container text-on-warning-container border border-warning/30 transition-colors duration-state-change hover:bg-outline active:scale-[0.99]">
+            <span class="material-symbols-outlined text-[18px] text-warning" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">report_problem</span>
+            <span class="font-label text-label-md">Reportar un problema en este equipo</span>
           </button>
         </footer>
       </article>
@@ -375,8 +379,8 @@
         </div>
 
         <div class="flex flex-col gap-gutter-xs">
-          <label for="resident-desc" class="font-label text-label-md text-on-surface">Detalle breve</label>
-          <textarea id="resident-desc" rows="3" required placeholder="Ej. Se escucha un roce al subir entre los pisos 4 y 6..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+          <label for="resident-desc" class="font-label text-label-md text-on-surface">Detalle breve (opcional)</label>
+          <textarea id="resident-desc" rows="2" placeholder="Ej. Se escucha un roce al subir entre los pisos 4 y 6..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
         </div>
 
         <div class="grid grid-cols-2 gap-gutter-sm">
@@ -385,7 +389,7 @@
             <input id="resident-unit" type="text" placeholder="Ej. Depto. 804" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
           </div>
           <div class="flex flex-col gap-gutter-xs">
-            <span class="font-label text-label-sm text-on-surface-variant">Evidencia (varias fotos)</span>
+            <span class="font-label text-label-sm text-on-surface-variant">Cámara o Galería</span>
             <input id="report-photo-input" type="file" accept="image/*" multiple class="hidden">
             <button id="btn-add-photo" type="button" class="w-full inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container hover:bg-outline transition-colors duration-state-change">
               <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add_a_photo</span>

@@ -178,20 +178,20 @@
       return;
     }
 
-    container.innerHTML = items.map(function (m) {
+    container.innerHTML = items.map(function (m, idx) {
       const isCorr = m.tipo.toLowerCase() !== 'preventiva';
       const iconBg = isCorr ? 'bg-warning-container text-on-warning-container' : 'bg-primary-container text-on-primary-container';
       const iconName = isCorr ? 'handyman' : 'build_circle';
       const pdfLinks = splitLinks(m.linkPdf);
       const pdfLinkHtml = pdfLinks.length > 0
-        ? '<div class="flex flex-wrap gap-gutter-sm mt-gutter-sm">' + pdfLinks.map(function (u, idx) {
-            const lbl = pdfLinks.length === 1 ? 'Ver informe adjunto' : 'Adjunto ' + (idx + 1);
+        ? '<div class="flex flex-wrap gap-gutter-sm mt-gutter-sm">' + pdfLinks.map(function (u, j) {
+            const lbl = pdfLinks.length === 1 ? 'Ver informe adjunto' : 'Adjunto ' + (j + 1);
             return '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[15px]">picture_as_pdf</span>' + lbl + '</a>';
           }).join('') + '</div>'
         : '';
 
       return (
-        '<details class="group">' +
+        '<details class="group"' + (idx === 0 ? ' open' : '') + '>' +
           '<summary class="flex items-center justify-between gap-gutter-md px-gutter-lg py-gutter-md cursor-pointer select-none transition-colors duration-state-change hover:bg-surface-subtle">' +
             '<div class="flex items-center gap-gutter-md min-w-0">' +
               '<div class="w-8 h-8 rounded-md ' + iconBg + ' flex items-center justify-center shrink-0" aria-hidden="true">' +
@@ -442,6 +442,12 @@
     document.getElementById('btn-open-report').addEventListener('click', function () {
       openModal('modal-report');
     });
+    const btnHeroReport = document.getElementById('btn-hero-report');
+    if (btnHeroReport) {
+      btnHeroReport.addEventListener('click', function () {
+        openModal('modal-report');
+      });
+    }
 
     document.querySelectorAll('.cat-chip').forEach(function (chip) {
       chip.addEventListener('click', function () {
@@ -483,7 +489,7 @@
       setLoadingBtn(btn, true, 'Enviando reporte...');
 
       const descRaw = document.getElementById('resident-desc').value.trim();
-      const descripcion = '[' + state.reportCategory + '] ' + descRaw;
+      const descripcion = '[' + state.reportCategory + ']' + (descRaw ? ' ' + descRaw : ' Reportado por residente');
 
       const res = await postApi({
         action: 'createTicket',
@@ -1202,14 +1208,16 @@
 
   function compressImage(file, maxWidth, quality) {
     return new Promise(function (resolve, reject) {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onload = function (ev) {
-        const img = new Image();
-        img.onerror = reject;
-        img.onload = function () {
-          let w = img.width;
-          let h = img.height;
+      const urlApi = window.URL || window.webkitURL;
+      const useObjUrl = Boolean(urlApi && urlApi.createObjectURL);
+      const img = new Image();
+      let objUrl = '';
+
+      function drawAndResolve() {
+        try {
+          let w = img.naturalWidth || img.width;
+          let h = img.naturalHeight || img.height;
+          if (!w || !h) throw new Error('Dimensiones inválidas');
           if (w > maxWidth) {
             h = Math.round((h * maxWidth) / w);
             w = maxWidth;
@@ -1221,11 +1229,54 @@
           ctx.drawImage(img, 0, 0, w, h);
           const dataUrl = canvas.toDataURL('image/jpeg', quality);
           const approxBytes = Math.round((dataUrl.length * 3) / 4);
+          if (objUrl) urlApi.revokeObjectURL(objUrl);
           resolve({ dataUrl: dataUrl, bytes: approxBytes });
+        } catch (err) {
+          if (objUrl) urlApi.revokeObjectURL(objUrl);
+          reject(err);
+        }
+      }
+
+      img.onload = drawAndResolve;
+      img.onerror = function () {
+        if (objUrl) urlApi.revokeObjectURL(objUrl);
+        // Fallback con FileReader si ObjectURL falla
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = function (ev) {
+          const fallbackImg = new Image();
+          fallbackImg.onerror = reject;
+          fallbackImg.onload = function () {
+            img.src = '';
+            let w = fallbackImg.naturalWidth || fallbackImg.width;
+            let h = fallbackImg.naturalHeight || fallbackImg.height;
+            if (w > maxWidth) {
+              h = Math.round((h * maxWidth) / w);
+              w = maxWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(fallbackImg, 0, 0, w, h);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve({ dataUrl: dataUrl, bytes: Math.round((dataUrl.length * 3) / 4) });
+          };
+          fallbackImg.src = ev.target.result;
         };
-        img.src = ev.target.result;
+        reader.readAsDataURL(file);
       };
-      reader.readAsDataURL(file);
+
+      if (useObjUrl) {
+        objUrl = urlApi.createObjectURL(file);
+        img.src = objUrl;
+      } else {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = function (ev) {
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
     });
   }
 
