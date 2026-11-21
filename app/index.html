@@ -385,11 +385,11 @@
             <input id="resident-unit" type="text" placeholder="Ej. Depto. 804" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
           </div>
           <div class="flex flex-col gap-gutter-xs">
-            <span class="font-label text-label-sm text-on-surface-variant">Evidencia</span>
-            <input id="report-photo-input" type="file" accept="image/*" capture="environment" class="hidden">
+            <span class="font-label text-label-sm text-on-surface-variant">Evidencia (varias fotos)</span>
+            <input id="report-photo-input" type="file" accept="image/*" multiple class="hidden">
             <button id="btn-add-photo" type="button" class="w-full inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container hover:bg-outline transition-colors duration-state-change">
               <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add_a_photo</span>
-              <span id="photo-label" class="font-label text-label-sm truncate">Subir foto</span>
+              <span id="photo-label" class="font-label text-label-sm truncate">Subir fotos</span>
             </button>
           </div>
         </div>
@@ -399,10 +399,7 @@
           <input id="resident-email" type="email" placeholder="tu@correo.cl (sin registro requerido)" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
         </div>
 
-        <div id="report-photo-preview-wrap" class="hidden items-center justify-between bg-surface-subtle border border-outline rounded-md p-gutter-sm">
-          <img id="report-photo-preview" alt="Vista previa" class="w-14 h-14 object-cover rounded-sm">
-          <span id="report-photo-size" class="font-mono text-mono-sm text-on-surface-variant"></span>
-          <button id="btn-remove-report-photo" type="button" class="text-error font-label text-label-sm px-gutter-sm">Quitar</button>
+        <div id="report-photo-preview-wrap" class="hidden flex-wrap gap-gutter-sm bg-surface-subtle border border-outline rounded-md p-gutter-sm">
         </div>
 
         <button type="submit" id="btn-submit-report" class="w-full mt-gutter-xs inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change active:scale-[0.99]">
@@ -539,12 +536,13 @@
           <textarea id="maint-sheet-notes" rows="3" required placeholder="Detalle breve de los trabajos efectuados..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
         </div>
 
-        <div>
-          <input id="maint-file-input" type="file" accept="application/pdf,image/*" class="hidden">
+        <div class="flex flex-col gap-gutter-xs">
+          <input id="maint-file-input" type="file" accept="application/pdf,image/*" multiple class="hidden">
           <button id="btn-maint-file" type="button" class="w-full flex items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container hover:bg-outline transition-colors duration-state-change">
             <span class="material-symbols-outlined text-[20px]" aria-hidden="true">upload_file</span>
-            <span id="maint-file-label" class="font-label text-label-md truncate">Adjuntar Informe Técnico (PDF o Foto)</span>
+            <span id="maint-file-label" class="font-label text-label-md truncate">Adjuntar Informe PDF o Fotos</span>
           </button>
+          <div id="maint-file-preview-wrap" class="hidden flex-wrap gap-gutter-sm bg-surface-subtle border border-outline rounded-md p-gutter-sm mt-gutter-xs"></div>
         </div>
 
         <button type="submit" id="btn-maint-submit" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change active:scale-[0.99]">
@@ -570,13 +568,24 @@
         </button>
       </header>
 
-      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-2 gap-gutter-xs" role="tablist">
-        <button type="button" data-admin-tab="tickets" class="admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-md">Tickets</button>
-        <button type="button" data-admin-tab="usuarios" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-md">Usuarios</button>
+      <div id="admin-building-selector-wrap" class="hidden flex-col gap-gutter-xs">
+        <label for="admin-building-select" class="font-label text-label-sm text-on-surface-variant">Comunidad activa</label>
+        <select id="admin-building-select" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-md px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+        </select>
+      </div>
+
+      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-3 gap-gutter-xs" role="tablist">
+        <button type="button" data-admin-tab="tickets" class="admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm">Tickets</button>
+        <button type="button" data-admin-tab="equipos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-sm">Equipos / QR</button>
+        <button type="button" data-admin-tab="usuarios" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-sm">Usuarios</button>
       </div>
 
       <div id="admin-tab-tickets" class="flex flex-col gap-gutter-md">
         <p class="font-body text-body-sm text-on-surface-variant">Cargando tickets...</p>
+      </div>
+
+      <div id="admin-tab-equipos" class="hidden flex-col gap-gutter-md">
+        <p class="font-body text-body-sm text-on-surface-variant">Cargando equipos...</p>
       </div>
 
       <div id="admin-tab-usuarios" class="hidden flex-col gap-gutter-md">

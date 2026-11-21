@@ -18,13 +18,12 @@
     data: null,
     session: loadSession(),
     reportCategory: 'Ruido inusual',
-    reportPhotoBase64: '',
+    reportPhotos: [],
     quickAuthMode: 'login',
     authMode: 'login',
     maintType: 'Preventiva',
     maintState: 'Operativo',
-    maintFileBase64: '',
-    maintFileMime: '',
+    maintFiles: [],
   };
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -149,11 +148,12 @@
 
     const btnPdf = document.getElementById('btn-view-pdf');
     const btnPdfLabel = document.getElementById('btn-pdf-label');
-    if (data.ultimoPdf) {
+    const firstPdf = splitLinks(data.ultimoPdf)[0] || '';
+    if (firstPdf) {
       btnPdf.disabled = false;
       btnPdfLabel.textContent = 'Ver Último Informe Técnico (PDF)';
       btnPdf.onclick = function () {
-        window.open(data.ultimoPdf, '_blank', 'noopener,noreferrer');
+        window.open(firstPdf, '_blank', 'noopener,noreferrer');
       };
     } else {
       btnPdf.disabled = true;
@@ -182,8 +182,12 @@
       const isCorr = m.tipo.toLowerCase() !== 'preventiva';
       const iconBg = isCorr ? 'bg-warning-container text-on-warning-container' : 'bg-primary-container text-on-primary-container';
       const iconName = isCorr ? 'handyman' : 'build_circle';
-      const pdfLinkHtml = m.linkPdf
-        ? '<a href="' + escapeHtml(m.linkPdf) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-gutter-xs mt-gutter-sm font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[15px]">picture_as_pdf</span>Ver informe adjunto</a>'
+      const pdfLinks = splitLinks(m.linkPdf);
+      const pdfLinkHtml = pdfLinks.length > 0
+        ? '<div class="flex flex-wrap gap-gutter-sm mt-gutter-sm">' + pdfLinks.map(function (u, idx) {
+            const lbl = pdfLinks.length === 1 ? 'Ver informe adjunto' : 'Adjunto ' + (idx + 1);
+            return '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[15px]">picture_as_pdf</span>' + lbl + '</a>';
+          }).join('') + '</div>'
         : '';
 
       return (
@@ -244,9 +248,11 @@
       const borderClass = isProc ? 'border-l-warning' : 'border-l-error';
       const iconBg = isProc ? 'bg-warning-container text-on-warning-container' : 'bg-error-container text-on-error-container';
       const iconName = isProc ? 'engineering' : 'report_problem';
-      const fotoLink = t.fotoAntesUrl
-        ? ' · <a href="' + escapeHtml(t.fotoAntesUrl) + '" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Ver foto</a>'
-        : '';
+      const fotoLinks = splitLinks(t.fotoAntesUrl);
+      const fotoLink = fotoLinks.map(function (u, idx) {
+        const lbl = fotoLinks.length === 1 ? 'Ver foto' : 'Foto ' + (idx + 1);
+        return ' · <a href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">' + lbl + '</a>';
+      }).join('');
 
       return (
         '<article class="w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle border-l-4 ' + borderClass + ' p-gutter-lg shadow-gco flex items-start gap-gutter-md">' +
@@ -450,24 +456,22 @@
     });
 
     document.getElementById('report-photo-input').addEventListener('change', async function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
       try {
-        const compressed = await compressImage(file, 1024, 0.75);
-        state.reportPhotoBase64 = compressed.dataUrl;
-        document.getElementById('photo-label').textContent = 'Foto lista';
-        document.getElementById('report-photo-preview').src = compressed.dataUrl;
-        document.getElementById('report-photo-size').textContent = Math.round(compressed.bytes / 1024) + ' KB';
-        const wrap = document.getElementById('report-photo-preview-wrap');
-        wrap.classList.remove('hidden');
-        wrap.classList.add('flex');
+        for (let i = 0; i < files.length; i++) {
+          if (state.reportPhotos.length >= 5) {
+            showToast('Máximo 5 fotos por reporte', true);
+            break;
+          }
+          const compressed = await compressImage(files[i], 1024, 0.75);
+          state.reportPhotos.push(compressed.dataUrl);
+        }
+        renderReportPhotosPreview();
+        e.target.value = '';
       } catch (err) {
-        showToast('No se pudo procesar la imagen', true);
+        showToast('No se pudo procesar una de las imágenes', true);
       }
-    });
-
-    document.getElementById('btn-remove-report-photo').addEventListener('click', function () {
-      clearReportPhoto();
     });
 
     document.getElementById('sheet-report-form').addEventListener('submit', async function (e) {
@@ -487,8 +491,7 @@
         depto: document.getElementById('resident-unit').value.trim(),
         emailVecino: document.getElementById('resident-email').value.trim(),
         descripcion: descripcion,
-        fotoBase64: state.reportPhotoBase64,
-        fotoMimeType: 'image/jpeg',
+        fotos: state.reportPhotos,
       });
 
       setLoadingBtn(btn, false, 'Enviar reporte a administración');
@@ -662,24 +665,28 @@
     });
 
     document.getElementById('maint-file-input').addEventListener('change', async function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const label = document.getElementById('maint-file-label');
-
-      if (file.type.startsWith('image/')) {
-        const compressed = await compressImage(file, 1280, 0.8);
-        state.maintFileBase64 = compressed.dataUrl;
-        state.maintFileMime = 'image/jpeg';
-        label.textContent = file.name + ' (optimizada)';
-      } else {
-        if (file.size > 6 * 1024 * 1024) {
-          showToast('El PDF supera los 6 MB permitidos', true);
-          return;
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+      for (let i = 0; i < files.length; i++) {
+        if (state.maintFiles.length >= 6) {
+          showToast('Máximo 6 archivos por mantención', true);
+          break;
         }
-        state.maintFileBase64 = await readFileAsDataUrl(file);
-        state.maintFileMime = file.type || 'application/pdf';
-        label.textContent = file.name;
+        const file = files[i];
+        if (file.type.startsWith('image/')) {
+          const compressed = await compressImage(file, 1280, 0.8);
+          state.maintFiles.push({ name: file.name, base64: compressed.dataUrl, mimeType: 'image/jpeg', isImage: true });
+        } else {
+          if (file.size > 6 * 1024 * 1024) {
+            showToast(file.name + ' supera los 6 MB permitidos', true);
+            continue;
+          }
+          const dataUrl = await readFileAsDataUrl(file);
+          state.maintFiles.push({ name: file.name, base64: dataUrl, mimeType: file.type || 'application/pdf', isImage: false });
+        }
       }
+      renderMaintFilesPreview();
+      e.target.value = '';
     });
 
     document.getElementById('sheet-maint-form').addEventListener('submit', async function (e) {
@@ -697,8 +704,9 @@
         tipo: state.maintType,
         estadoResultante: state.maintState,
         observaciones: document.getElementById('maint-sheet-notes').value.trim(),
-        archivoBase64: state.maintFileBase64,
-        archivoMimeType: state.maintFileMime,
+        archivos: state.maintFiles.map(function (f) {
+          return { base64: f.base64, mimeType: f.mimeType, name: f.name };
+        }),
       });
 
       setLoadingBtn(btn, false, 'Guardar y publicar registro');
@@ -709,9 +717,8 @@
       }
 
       document.getElementById('sheet-maint-form').reset();
-      state.maintFileBase64 = '';
-      state.maintFileMime = '';
-      document.getElementById('maint-file-label').textContent = 'Adjuntar Informe Técnico (PDF o Foto)';
+      state.maintFiles = [];
+      renderMaintFilesPreview();
       closeModal('modal-maintenance');
       showToast(res.message || 'Mantención publicada');
       loadData();
@@ -722,29 +729,106 @@
       loadAdminPanelData();
     });
 
+    document.getElementById('admin-building-select').addEventListener('change', function (e) {
+      const nuevoEdif = e.target.value;
+      if (!nuevoEdif || nuevoEdif === state.edificioId) return;
+      state.edificioId = nuevoEdif;
+      state.equipoId = '';
+      const url = new URL(window.location.href);
+      url.searchParams.set('edificio', nuevoEdif);
+      url.searchParams.delete('equipo');
+      window.history.pushState({}, '', url.toString());
+      loadData();
+      loadAdminPanelData();
+    });
+
     document.querySelectorAll('.admin-panel-tab').forEach(function (tab) {
       tab.addEventListener('click', function () {
         const target = tab.getAttribute('data-admin-tab');
         document.querySelectorAll('.admin-panel-tab').forEach(function (t) {
           t.className = t === tab
-            ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-md'
-            : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-md';
+            ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm'
+            : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-sm';
         });
-        document.getElementById('admin-tab-tickets').classList.toggle('hidden', target !== 'tickets');
-        document.getElementById('admin-tab-tickets').classList.toggle('flex', target === 'tickets');
-        document.getElementById('admin-tab-usuarios').classList.toggle('hidden', target !== 'usuarios');
-        document.getElementById('admin-tab-usuarios').classList.toggle('flex', target === 'usuarios');
+        ['tickets', 'equipos', 'usuarios'].forEach(function (name) {
+          const panel = document.getElementById('admin-tab-' + name);
+          if (!panel) return;
+          panel.classList.toggle('hidden', target !== name);
+          panel.classList.toggle('flex', target === name);
+        });
       });
     });
   }
 
   function clearReportPhoto() {
-    state.reportPhotoBase64 = '';
+    state.reportPhotos = [];
     document.getElementById('report-photo-input').value = '';
-    document.getElementById('photo-label').textContent = 'Subir foto';
+    renderReportPhotosPreview();
+  }
+
+  function renderReportPhotosPreview() {
     const wrap = document.getElementById('report-photo-preview-wrap');
-    wrap.classList.add('hidden');
-    wrap.classList.remove('flex');
+    const label = document.getElementById('photo-label');
+    if (state.reportPhotos.length === 0) {
+      label.textContent = 'Subir fotos';
+      wrap.classList.add('hidden');
+      wrap.classList.remove('flex');
+      wrap.innerHTML = '';
+      return;
+    }
+    label.textContent = state.reportPhotos.length + (state.reportPhotos.length === 1 ? ' foto lista' : ' fotos listas');
+    wrap.classList.remove('hidden');
+    wrap.classList.add('flex');
+    wrap.innerHTML = state.reportPhotos.map(function (src, idx) {
+      return (
+        '<div class="relative w-16 h-16 shrink-0">' +
+          '<img src="' + src + '" alt="Foto ' + (idx + 1) + '" class="w-16 h-16 object-cover rounded-sm border border-outline">' +
+          '<button type="button" data-rm-rphoto="' + idx + '" aria-label="Quitar foto" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-error text-on-secondary text-[12px] flex items-center justify-center shadow">×</button>' +
+        '</div>'
+      );
+    }).join('');
+
+    wrap.querySelectorAll('[data-rm-rphoto]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const idx = Number(btn.getAttribute('data-rm-rphoto'));
+        state.reportPhotos.splice(idx, 1);
+        renderReportPhotosPreview();
+      });
+    });
+  }
+
+  function renderMaintFilesPreview() {
+    const wrap = document.getElementById('maint-file-preview-wrap');
+    const label = document.getElementById('maint-file-label');
+    if (state.maintFiles.length === 0) {
+      label.textContent = 'Adjuntar Informe PDF o Fotos';
+      wrap.classList.add('hidden');
+      wrap.classList.remove('flex');
+      wrap.innerHTML = '';
+      return;
+    }
+    label.textContent = state.maintFiles.length + (state.maintFiles.length === 1 ? ' archivo adjunto' : ' archivos adjuntos');
+    wrap.classList.remove('hidden');
+    wrap.classList.add('flex');
+    wrap.innerHTML = state.maintFiles.map(function (f, idx) {
+      const thumb = f.isImage
+        ? '<img src="' + f.base64 + '" alt="' + escapeHtml(f.name) + '" class="w-16 h-16 object-cover rounded-sm border border-outline">'
+        : '<div class="w-16 h-16 rounded-sm border border-outline bg-primary-container text-on-primary-container flex flex-col items-center justify-center px-1 text-center"><span class="material-symbols-outlined text-[20px]">picture_as_pdf</span><span class="text-[9px] truncate w-full">' + escapeHtml(f.name) + '</span></div>';
+      return (
+        '<div class="relative w-16 h-16 shrink-0">' +
+          thumb +
+          '<button type="button" data-rm-mfile="' + idx + '" aria-label="Quitar archivo" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-error text-on-secondary text-[12px] flex items-center justify-center shadow">×</button>' +
+        '</div>'
+      );
+    }).join('');
+
+    wrap.querySelectorAll('[data-rm-mfile]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const idx = Number(btn.getAttribute('data-rm-mfile'));
+        state.maintFiles.splice(idx, 1);
+        renderMaintFilesPreview();
+      });
+    });
   }
 
   async function loadAdminPanelData() {
@@ -761,7 +845,23 @@
         showToast(json.error || 'Error al cargar panel', true);
         return;
       }
+
+      const selWrap = document.getElementById('admin-building-selector-wrap');
+      const sel = document.getElementById('admin-building-select');
+      if (json.isGlobalAdmin && json.edificios && json.edificios.length > 0) {
+        selWrap.classList.remove('hidden');
+        selWrap.classList.add('flex');
+        sel.innerHTML = json.edificios.map(function (ed) {
+          const selected = ed.id === state.edificioId ? ' selected' : '';
+          return '<option value="' + escapeHtml(ed.id) + '"' + selected + '>' + escapeHtml(ed.nombre) + ' (' + escapeHtml(ed.id) + ')</option>';
+        }).join('');
+      } else {
+        selWrap.classList.add('hidden');
+        selWrap.classList.remove('flex');
+      }
+
       renderAdminTickets(json.tickets || []);
+      renderAdminEquipos(json.equipos || []);
       renderAdminUsers(json.usuarios || []);
     } catch (err) {
       showToast('Error de red al cargar panel', true);
@@ -780,6 +880,13 @@
     }
 
     container.innerHTML = pendientes.map(function (t) {
+      const fotosAntes = splitLinks(t.fotoAntesUrl);
+      const fotosHtml = fotosAntes.length > 0
+        ? '<div class="flex flex-wrap gap-gutter-sm">' + fotosAntes.map(function (u, idx) {
+            return '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-sm bg-surface-card border border-outline font-label text-label-sm text-primary"><span class="material-symbols-outlined text-[14px]">photo</span>Evidencia ' + (idx + 1) + '</a>';
+          }).join('') + '</div>'
+        : '';
+
       return (
         '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm" data-ticket-id="' + escapeHtml(t.id) + '">' +
           '<div class="flex items-start justify-between gap-gutter-sm">' +
@@ -787,36 +894,58 @@
             '<span class="px-gutter-sm py-gutter-xs rounded-full bg-warning-container text-on-warning-container font-label text-label-sm">' + escapeHtml(t.estado) + '</span>' +
           '</div>' +
           '<p class="font-title text-title-sm text-on-surface">' + escapeHtml(t.descripcion) + '</p>' +
-          '<input type="text" placeholder="Comentario de gestión o cierre..." class="admin-ticket-note w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-xs">' +
-          '<div class="flex items-center gap-gutter-sm">' +
-            '<input type="file" accept="image/*" class="admin-ticket-file hidden">' +
-            '<button type="button" class="btn-admin-ticket-photo flex-1 inline-flex items-center justify-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container font-label text-label-sm">' +
+          fotosHtml +
+          '<input type="text" placeholder="Comentario de gestión o cierre..." class="admin-ticket-note w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+          '<div class="admin-ticket-thumbs hidden flex-wrap gap-gutter-xs"></div>' +
+          '<div class="grid grid-cols-3 gap-gutter-sm">' +
+            '<input type="file" accept="image/*" multiple class="admin-ticket-file hidden">' +
+            '<button type="button" class="btn-admin-ticket-photo min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container font-label text-label-sm">' +
               '<span class="material-symbols-outlined text-[16px]">add_a_photo</span>' +
-              '<span class="admin-photo-text">Foto respaldo</span>' +
+              '<span class="admin-photo-text">Fotos</span>' +
             '</button>' +
-            '<button type="button" data-next-state="En Proceso" class="btn-admin-ticket-save px-gutter-md py-gutter-xs rounded-md bg-warning-container text-on-warning-container font-label text-label-sm">En Proceso</button>' +
-            '<button type="button" data-next-state="Resuelto" class="btn-admin-ticket-save px-gutter-md py-gutter-xs rounded-md bg-success-container text-on-success-container font-label text-label-sm">Resolver</button>' +
+            '<button type="button" data-next-state="En Proceso" class="btn-admin-ticket-save min-h-[42px] px-gutter-sm py-gutter-xs rounded-md bg-warning-container text-on-warning-container font-label text-label-sm">En Proceso</button>' +
+            '<button type="button" data-next-state="Resuelto" class="btn-admin-ticket-save min-h-[42px] px-gutter-sm py-gutter-xs rounded-md bg-success-container text-on-success-container font-label text-label-sm">Resolver</button>' +
           '</div>' +
         '</article>'
       );
     }).join('');
 
     container.querySelectorAll('article[data-ticket-id]').forEach(function (card) {
-      let fotoDespuesBase64 = '';
+      const fotosDespues = [];
       const fileInput = card.querySelector('.admin-ticket-file');
       const photoBtn = card.querySelector('.btn-admin-ticket-photo');
       const photoText = card.querySelector('.admin-photo-text');
+      const thumbs = card.querySelector('.admin-ticket-thumbs');
+
+      function renderTicketThumbs() {
+        if (fotosDespues.length === 0) {
+          photoText.textContent = 'Fotos';
+          thumbs.classList.add('hidden');
+          thumbs.classList.remove('flex');
+          thumbs.innerHTML = '';
+          return;
+        }
+        photoText.textContent = fotosDespues.length + ' foto' + (fotosDespues.length > 1 ? 's' : '');
+        thumbs.classList.remove('hidden');
+        thumbs.classList.add('flex');
+        thumbs.innerHTML = fotosDespues.map(function (src, idx) {
+          return '<img src="' + src + '" alt="Respaldo ' + (idx + 1) + '" class="w-12 h-12 object-cover rounded-sm border border-outline">';
+        }).join('');
+      }
 
       photoBtn.addEventListener('click', function () {
         fileInput.click();
       });
 
       fileInput.addEventListener('change', async function (e) {
-        const f = e.target.files[0];
-        if (!f) return;
-        const compressed = await compressImage(f, 1024, 0.75);
-        fotoDespuesBase64 = compressed.dataUrl;
-        photoText.textContent = 'Foto lista';
+        const files = Array.from(e.target.files || []);
+        for (let i = 0; i < files.length; i++) {
+          if (fotosDespues.length >= 5) break;
+          const compressed = await compressImage(files[i], 1024, 0.75);
+          fotosDespues.push(compressed.dataUrl);
+        }
+        renderTicketThumbs();
+        e.target.value = '';
       });
 
       card.querySelectorAll('.btn-admin-ticket-save').forEach(function (btn) {
@@ -831,8 +960,7 @@
             ticketId: ticketId,
             estado: estado,
             solucion: solucion,
-            fotoDespuesBase64: fotoDespuesBase64,
-            fotoDespuesMimeType: 'image/jpeg',
+            fotosDespues: fotosDespues,
           });
 
           if (!res.ok) {
@@ -844,6 +972,56 @@
           loadAdminPanelData();
           loadData();
         });
+      });
+    });
+  }
+
+  function renderAdminEquipos(equipos) {
+    const container = document.getElementById('admin-tab-equipos');
+    if (!container) return;
+    if (equipos.length === 0) {
+      container.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">No hay equipos registrados en esta comunidad.</p>';
+      return;
+    }
+
+    container.innerHTML = equipos.map(function (eq) {
+      const base = window.location.origin + window.location.pathname;
+      const qrUrl = base + '?edificio=' + encodeURIComponent(eq.edificioId) + '&equipo=' + encodeURIComponent(eq.equipoId);
+      const waUrl = 'https://wa.me/?text=' + encodeURIComponent('Ficha QR ' + eq.nombre + ' (' + eq.edificioId + '): ' + qrUrl);
+      return (
+        '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
+          '<div class="flex items-center justify-between gap-gutter-sm">' +
+            '<div class="flex flex-col min-w-0">' +
+              '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(eq.nombre) + '</span>' +
+              '<span class="font-mono text-mono-sm text-on-surface-variant">#' + escapeHtml(eq.equipoId) + ' · ' + escapeHtml(eq.empresa) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="grid grid-cols-3 gap-gutter-xs">' +
+            '<button type="button" data-go-eq="' + escapeHtml(eq.equipoId) + '" class="min-h-[38px] rounded-md bg-primary text-on-primary font-label text-label-sm">Abrir</button>' +
+            '<button type="button" data-copy-qr="' + escapeHtml(qrUrl) + '" class="min-h-[38px] rounded-md bg-surface-card border border-outline text-on-surface font-label text-label-sm">Copiar QR</button>' +
+            '<a href="' + escapeHtml(waUrl) + '" target="_blank" rel="noopener noreferrer" class="min-h-[38px] rounded-md bg-success-container text-on-success-container font-label text-label-sm inline-flex items-center justify-center">WhatsApp</a>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+
+    container.querySelectorAll('[data-go-eq]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const eqId = btn.getAttribute('data-go-eq');
+        closeModal('modal-admin');
+        navigateToEquipo(eqId);
+      });
+    });
+
+    container.querySelectorAll('[data-copy-qr]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const url = btn.getAttribute('data-copy-qr');
+        try {
+          await navigator.clipboard.writeText(url);
+          showToast('Link QR copiado');
+        } catch (e) {
+          showToast('Link: ' + url);
+        }
       });
     });
   }
@@ -999,6 +1177,14 @@
     if (t.includes('generador') || t.includes('electr') || t.includes('gen')) return 'bolt';
     if (t.includes('jard') || t.includes('riego')) return 'yard';
     return 'precision_manufacturing';
+  }
+
+  function splitLinks(raw) {
+    if (!raw) return [];
+    return String(raw)
+      .split(' | ')
+      .map(function (s) { return s.trim(); })
+      .filter(Boolean);
   }
 
   function escapeHtml(str) {
