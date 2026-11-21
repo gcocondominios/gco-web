@@ -93,8 +93,10 @@
       btnReport.classList.toggle('inline-flex', name === 'equipment');
     }
     if (btnBack) {
-      btnBack.classList.toggle('hidden', name !== 'equipment');
-      btnBack.classList.toggle('inline-flex', name === 'equipment');
+      const canSeeDir = Boolean(state.session && state.session.user && (state.session.user.rol === 'tecnico' || state.session.user.rol === 'admin'));
+      const showBack = name === 'equipment' && canSeeDir;
+      btnBack.classList.toggle('hidden', !showBack);
+      btnBack.classList.toggle('inline-flex', showBack);
     }
   }
 
