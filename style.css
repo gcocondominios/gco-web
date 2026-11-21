@@ -153,9 +153,15 @@ body {
 
 .service-img-wrapper {
     width: 100%; height: 220px; overflow: hidden;
+    background-color: #EAECEF;
 }
 .service-img-wrapper img {
-    width: 100%; height: 100%; object-fit: cover; transition: var(--transition-standard);
+    width: 100%; height: 100%; object-fit: cover; object-position: center 20%;
+    transition: var(--transition-standard);
+    display: block;
+}
+.methodology-card .service-img-wrapper {
+    height: 240px;
 }
 .service-card:hover .service-img-wrapper img { transform: scale(1.05); }
 
@@ -172,6 +178,100 @@ body {
     margin-bottom: 15px; color: var(--black-text); line-height: 1.3;
 }
 .service-card-body p { color: var(--gray-text); font-size: 0.98rem; flex-grow: 1; }
+
+/* =========================================
+   Equipo Multidisciplinario (5 Integrantes)
+   ========================================= */
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+.team-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 35px 30px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.04);
+    border: 1px solid #EEE;
+    border-top: 5px solid var(--primary-green);
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    transition: var(--transition-standard);
+}
+.team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+}
+.team-role-badge {
+    display: inline-block;
+    background-color: rgba(74, 140, 42, 0.1);
+    color: var(--primary-green);
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    width: fit-content;
+}
+.team-header h3 {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    color: var(--black-text);
+    margin-bottom: 4px;
+}
+.team-subtitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+}
+.team-bio {
+    color: var(--gray-text);
+    font-size: 0.96rem;
+    line-height: 1.65;
+}
+
+/* =========================================
+   Cambio de Administración (4 Pasos)
+   ========================================= */
+.transition-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+.transition-step {
+    background: var(--white);
+    padding: 32px 25px;
+    border-radius: 12px;
+    border: 1px solid #EAEAEA;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.03);
+    text-align: left;
+    transition: var(--transition-standard);
+}
+.transition-step:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-green);
+}
+.transition-number {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--primary-green);
+    margin-bottom: 12px;
+}
+.transition-step h4 {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    color: var(--black-text);
+    margin-bottom: 10px;
+}
+.transition-step p {
+    color: var(--gray-text);
+    font-size: 0.94rem;
+    line-height: 1.6;
+}
 
 /* =========================================
    Sección Diagnóstico Técnico (Caballo de Troya)
@@ -518,7 +618,8 @@ body {
     .hero h1 { font-size: 3rem; }
     .hero p { font-size: 1.2rem; }
     .section-title h2 { font-size: 2.8rem; }
-    .grid-three-columns { grid-template-columns: repeat(2, 1fr); gap: 30px; }
+    .grid-three-columns, .team-grid { grid-template-columns: repeat(2, 1fr); gap: 30px; }
+    .transition-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
     .diagnostic-checklist { grid-template-columns: 1fr; }
     .diagnostic-box { padding: 40px 30px; }
     .diagnostic-box h2 { font-size: 2rem; }
@@ -554,7 +655,8 @@ body {
     .footer { padding: 80px 0 40px; }
 
     .hero-buttons { flex-direction: column; gap: 15px; max-width: 400px; margin: 0 auto; }
-    .grid-three-columns { grid-template-columns: 1fr; gap: 25px; }
+    .grid-three-columns, .team-grid, .transition-grid { grid-template-columns: 1fr; gap: 25px; }
+    .methodology-card .service-img-wrapper { height: 210px; }
     .grid-alliances { grid-template-columns: 1fr; gap: 15px; }
     .form-row { grid-template-columns: 1fr; gap: 15px; }
     .contact-form input, .contact-form textarea, .contact-form select {
