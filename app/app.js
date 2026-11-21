@@ -11,6 +11,7 @@
   const API_URL = 'https://script.google.com/macros/s/AKfycbw_hB2YcR0HZeOVRY_ss7egIQWqATVgZe3RtJXXvsY-ZvsYFVjUgInhJNN1I9EKYT0aTA/exec';
 
   const STORAGE_KEY = 'gco_session_v1';
+  const QUEUE_KEY = 'gco_offline_queue_v1';
 
   const state = {
     edificioId: '',
@@ -27,13 +28,24 @@
   };
 
   document.addEventListener('DOMContentLoaded', function () {
+    registerServiceWorker();
     bindEvents();
     updateSessionUI();
+    updateOfflineBanner();
     readUrlAndLoad();
 
     window.addEventListener('popstate', function () {
       readUrlAndLoad();
     });
+    window.addEventListener('online', function () {
+      updateOfflineBanner();
+      syncOfflineQueue();
+    });
+    window.addEventListener('offline', updateOfflineBanner);
+
+    if (navigator.onLine) {
+      syncOfflineQueue();
+    }
   });
 
   function readUrlAndLoad() {
@@ -163,9 +175,41 @@
 
     renderHistory(data.historial || []);
     renderActiveTickets(data.ticketsActivos || []);
+    renderResolvedTickets(data.ticketsResueltos || []);
 
     updateSessionUI();
     showView('equipment');
+  }
+
+  function renderResolvedTickets(tickets) {
+    const wrap = document.getElementById('tickets-resolved-wrap');
+    const list = document.getElementById('tickets-resolved-list');
+    const title = document.getElementById('tickets-resolved-title');
+    if (!wrap || !list) return;
+
+    if (!tickets || tickets.length === 0) {
+      wrap.classList.add('hidden');
+      return;
+    }
+
+    wrap.classList.remove('hidden');
+    title.textContent = 'Últimas incidencias resueltas (' + tickets.length + ')';
+    list.innerHTML = tickets.map(function (t) {
+      const fotosDesp = splitLinks(t.fotoDespuesUrl);
+      const fotoHtml = fotosDesp.length > 0
+        ? ' · <a href="' + escapeHtml(fotosDesp[0]) + '" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Ver respaldo</a>'
+        : '';
+      return (
+        '<div class="px-gutter-lg py-gutter-md bg-surface-subtle flex flex-col gap-gutter-xs">' +
+          '<div class="flex items-center justify-between gap-gutter-sm">' +
+            '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(t.descripcion) + '</span>' +
+            '<span class="px-gutter-sm py-0.5 rounded-full bg-success-container text-on-success-container font-label text-label-sm shrink-0">Resuelto</span>' +
+          '</div>' +
+          (t.solucion ? '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(t.solucion) + '</p>' : '') +
+          '<span class="font-label text-label-sm text-on-surface-variant">' + escapeHtml(formatShortDate(t.fecha)) + fotoHtml + '</span>' +
+        '</div>'
+      );
+    }).join('');
   }
 
   function renderHistory(items) {
@@ -739,6 +783,7 @@
         tipo: state.maintType,
         estadoResultante: state.maintState,
         observaciones: document.getElementById('maint-sheet-notes').value.trim(),
+        costoClp: Number(document.getElementById('maint-cost').value || 0),
         archivos: state.maintFiles.map(function (f) {
           return { base64: f.base64, mimeType: f.mimeType, name: f.name };
         }),
@@ -1335,6 +1380,15 @@
       );
     }).join('');
 
+    const costSummaryHtml = r.costoTotalGeneral > 0
+      ? '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px; margin-bottom:18px; font-size:12px; background:#F9FAFC;">' +
+          '<strong>Inversión registrada en mantenciones:</strong> ' +
+          'Total $' + Number(r.costoTotalGeneral).toLocaleString('es-CL') + ' CLP ' +
+          '(Preventivas: $' + Number(r.costoTotalPreventivo || 0).toLocaleString('es-CL') +
+          ' · Correctivas/Otros: $' + Number(r.costoTotalCorrectivo || 0).toLocaleString('es-CL') + ')' +
+        '</div>'
+      : '';
+
     sheet.innerHTML =
       '<div style="font-family: \'Plus Jakarta Sans\', \'Rubik\', sans-serif; color: #0F2942; max-width: 900px; margin: 0 auto;">' +
         '<div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 2px solid #1D5B96; padding-bottom: 12px; margin-bottom: 16px;">' +
@@ -1348,12 +1402,13 @@
             '<div>Emitido por: ' + escapeHtml(userName) + '</div>' +
           '</div>' +
         '</div>' +
-        '<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px;">' +
+        '<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">' +
           '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">Operativos</div><div style="font-size:18px; font-weight:700; color:#005236;">' + r.operativos + ' / ' + r.totalEquipos + '</div></div>' +
           '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">En Observación</div><div style="font-size:18px; font-weight:700; color:#653E00;">' + r.observacion + '</div></div>' +
           '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">Fuera de Servicio</div><div style="font-size:18px; font-weight:700; color:#930013;">' + r.fueraServicio + '</div></div>' +
           '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">Tickets Activos / Resueltos</div><div style="font-size:18px; font-weight:700;">' + (r.ticketsAbiertos + r.ticketsEnProceso) + ' / ' + r.ticketsResueltos + '</div></div>' +
         '</div>' +
+        costSummaryHtml +
         '<h2 style="font-size: 15px; font-weight: 700; margin: 16px 0 8px 0;">1. Estado de Equipos e Instalaciones</h2>' +
         '<table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px;">' +
           '<thead><tr style="background:#F4F6F9; text-align:left;"><th style="border:1px solid #DEE3ED; padding:8px;">Equipo</th><th style="border:1px solid #DEE3ED; padding:8px;">Empresa</th><th style="border:1px solid #DEE3ED; padding:8px;">Última Visita</th><th style="border:1px solid #DEE3ED; padding:8px;">Próx. Visita</th><th style="border:1px solid #DEE3ED; padding:8px;">Estado</th><th style="border:1px solid #DEE3ED; padding:8px;">Última Observación</th></tr></thead>' +
@@ -1417,7 +1472,88 @@
     });
   }
 
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    }
+  }
+
+  function loadOfflineQueue() {
+    try {
+      const raw = localStorage.getItem(QUEUE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveOfflineQueue(q) {
+    try {
+      localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
+    } catch (e) {}
+    updateOfflineBanner();
+  }
+
+  function updateOfflineBanner() {
+    const banner = document.getElementById('offline-banner');
+    const text = document.getElementById('offline-banner-text');
+    if (!banner || !text) return;
+    const q = loadOfflineQueue();
+    if (!navigator.onLine) {
+      text.textContent = q.length > 0
+        ? 'Sin señal · ' + q.length + ' envío(s) pendiente(s) al reconectar'
+        : 'Sin señal · Mostrando última información guardada';
+      banner.classList.remove('hidden');
+      banner.classList.add('flex');
+    } else if (q.length > 0) {
+      text.textContent = 'Sincronizando ' + q.length + ' envío(s) pendiente(s)...';
+      banner.classList.remove('hidden');
+      banner.classList.add('flex');
+    } else {
+      banner.classList.add('hidden');
+      banner.classList.remove('flex');
+    }
+  }
+
+  async function syncOfflineQueue() {
+    const queue = loadOfflineQueue();
+    if (queue.length === 0 || !navigator.onLine) return;
+
+    const remaining = [];
+    let syncedCount = 0;
+
+    for (let i = 0; i < queue.length; i++) {
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(queue[i]),
+        });
+        const json = await res.json();
+        if (json && json.ok) syncedCount++;
+        else remaining.push(queue[i]);
+      } catch (err) {
+        remaining.push(queue[i]);
+      }
+    }
+
+    saveOfflineQueue(remaining);
+    if (syncedCount > 0) {
+      showToast('Se sincronizaron ' + syncedCount + ' registro(s) pendientes');
+      loadData();
+    }
+  }
+
   async function postApi(payload) {
+    const queueable = ['createTicket', 'addMaintenance', 'updateTicket'].indexOf(payload.action) !== -1;
+
+    if (!navigator.onLine && queueable) {
+      const q = loadOfflineQueue();
+      q.push(payload);
+      saveOfflineQueue(q);
+      return { ok: true, queued: true, message: 'Sin señal: guardado en el celular. Se enviará al reconectar.' };
+    }
+
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -1426,6 +1562,12 @@
       });
       return await res.json();
     } catch (err) {
+      if (queueable) {
+        const q = loadOfflineQueue();
+        q.push(payload);
+        saveOfflineQueue(q);
+        return { ok: true, queued: true, message: 'Sin señal: guardado en el celular. Se enviará al reconectar.' };
+      }
       return { ok: false, error: 'Error de conexión al enviar datos.' };
     }
   }

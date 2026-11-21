@@ -138,6 +138,14 @@
       </span>
     </header>
 
+    <!-- Banner de estado Offline / Cola de sincronización -->
+    <div id="offline-banner" class="hidden items-center justify-between gap-gutter-sm px-gutter-md py-gutter-sm rounded-md bg-warning-container text-on-warning-container border border-warning/30">
+      <div class="flex items-center gap-gutter-xs min-w-0">
+        <span class="material-symbols-outlined text-[18px] text-warning shrink-0" aria-hidden="true">cloud_off</span>
+        <span id="offline-banner-text" class="font-label text-label-sm">Sin señal · Los cambios se enviarán al reconectar</span>
+      </div>
+    </div>
+
     <!-- Barra de herramientas según rol (Técnico / Admin) -->
     <section id="role-actions-bar" class="hidden flex-col gap-gutter-sm">
       <div class="flex items-center justify-between px-gutter-xs">
@@ -279,6 +287,14 @@
 
         <div id="tickets-list" class="flex flex-col gap-gutter-sm">
         </div>
+
+        <details id="tickets-resolved-wrap" class="hidden bg-surface-card rounded-lg border border-outline-subtle shadow-gco overflow-hidden">
+          <summary class="flex items-center justify-between gap-gutter-md px-gutter-lg py-gutter-md cursor-pointer select-none hover:bg-surface-subtle transition-colors duration-state-change">
+            <span id="tickets-resolved-title" class="font-label text-label-md text-on-surface-variant">Últimas incidencias resueltas</span>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">expand_more</span>
+          </summary>
+          <div id="tickets-resolved-list" class="divide-y divide-outline-subtle border-t border-outline-subtle"></div>
+        </details>
       </section>
 
     </main>
@@ -555,6 +571,11 @@
         <div class="flex flex-col gap-gutter-xs">
           <label for="maint-sheet-notes" class="font-label text-label-md text-on-surface">Observaciones técnicas</label>
           <textarea id="maint-sheet-notes" rows="3" required placeholder="Detalle breve de los trabajos efectuados..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="maint-cost" class="font-label text-label-sm text-on-surface-variant">Costo CLP (opcional, para control de comité)</label>
+          <input id="maint-cost" type="number" min="0" step="1000" placeholder="Ej. 180000" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-mono text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
         </div>
 
         <div class="flex flex-col gap-gutter-xs">
