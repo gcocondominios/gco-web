@@ -430,60 +430,7 @@
     });
 
     document.getElementById('btn-open-report').addEventListener('click', function () {
-      syncReportModalStep();
       openModal('modal-report');
-    });
-
-    document.querySelectorAll('.qauth-tab').forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        state.quickAuthMode = tab.getAttribute('data-qauth-tab');
-        document.querySelectorAll('.qauth-tab').forEach(function (t) {
-          const active = t === tab;
-          t.className = active
-            ? 'qauth-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-md'
-            : 'qauth-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-md';
-        });
-        const regFields = document.getElementById('qauth-register-fields');
-        regFields.classList.toggle('hidden', state.quickAuthMode !== 'register');
-        regFields.classList.toggle('flex', state.quickAuthMode === 'register');
-      });
-    });
-
-    document.getElementById('quick-auth-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const btn = document.getElementById('btn-qauth-submit');
-      setLoadingBtn(btn, true, 'Verificando...');
-
-      const payload = {
-        action: state.quickAuthMode,
-        email: document.getElementById('qauth-email').value.trim(),
-        password: document.getElementById('qauth-pass').value,
-      };
-
-      if (state.quickAuthMode === 'register') {
-        payload.nombre = document.getElementById('qauth-name').value.trim();
-        payload.deptoOEmpresa = document.getElementById('qauth-depto').value.trim();
-        payload.edificioId = state.edificioId;
-        payload.rol = 'vecino';
-      }
-
-      const res = await postApi(payload);
-      setLoadingBtn(btn, false, 'Continuar al reporte');
-
-      if (!res.ok) {
-        showToast(res.error || 'No se pudo autenticar', true);
-        return;
-      }
-
-      if (res.pending) {
-        showToast(res.message);
-        closeModal('modal-report');
-        return;
-      }
-
-      saveSession({ token: res.token, user: res.user });
-      syncReportModalStep();
-      showToast('Sesión iniciada');
     });
 
     document.querySelectorAll('.cat-chip').forEach(function (chip) {
@@ -523,7 +470,6 @@
 
     document.getElementById('sheet-report-form').addEventListener('submit', async function (e) {
       e.preventDefault();
-      if (!state.session) return;
 
       const btn = document.getElementById('btn-submit-report');
       setLoadingBtn(btn, true, 'Enviando reporte...');
@@ -533,10 +479,11 @@
 
       const res = await postApi({
         action: 'createTicket',
-        token: state.session.token,
+        token: state.session ? state.session.token : '',
         edificioId: state.edificioId,
         equipoId: state.equipoId,
         depto: document.getElementById('resident-unit').value.trim(),
+        emailVecino: document.getElementById('resident-email').value.trim(),
         descripcion: descripcion,
         fotoBase64: state.reportPhotoBase64,
         fotoMimeType: 'image/jpeg',
@@ -617,6 +564,64 @@
       closeModal('modal-auth');
       document.getElementById('auth-form').reset();
       showToast('Bienvenido/a, ' + res.user.nombre);
+    });
+
+    // Recuperación de contraseña
+    document.getElementById('btn-show-reset').addEventListener('click', function () {
+      document.getElementById('auth-form').classList.add('hidden');
+      document.getElementById('auth-reset-panel').classList.remove('hidden');
+      document.getElementById('auth-reset-panel').classList.add('flex');
+      document.getElementById('reset-request-form').classList.remove('hidden');
+      document.getElementById('reset-confirm-form').classList.add('hidden');
+    });
+
+    document.getElementById('btn-back-login').addEventListener('click', function () {
+      document.getElementById('auth-reset-panel').classList.add('hidden');
+      document.getElementById('auth-reset-panel').classList.remove('flex');
+      document.getElementById('auth-form').classList.remove('hidden');
+    });
+
+    document.getElementById('reset-request-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-reset-send');
+      setLoadingBtn(btn, true, 'Enviando...');
+      const email = document.getElementById('reset-email').value.trim();
+      const res = await postApi({ action: 'requestPasswordReset', email: email });
+      setLoadingBtn(btn, false, 'Enviar código a mi correo');
+
+      if (!res.ok) {
+        showToast(res.error || 'No se pudo enviar el código', true);
+        return;
+      }
+      showToast(res.message);
+      document.getElementById('reset-request-form').classList.add('hidden');
+      document.getElementById('reset-confirm-form').classList.remove('hidden');
+      document.getElementById('reset-confirm-form').classList.add('flex');
+    });
+
+    document.getElementById('reset-confirm-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-reset-confirm');
+      setLoadingBtn(btn, true, 'Actualizando...');
+      const email = document.getElementById('reset-email').value.trim();
+      const code = document.getElementById('reset-code').value.trim();
+      const newPassword = document.getElementById('reset-new-pass').value;
+      const res = await postApi({
+        action: 'confirmPasswordReset',
+        email: email,
+        code: code,
+        newPassword: newPassword,
+      });
+      setLoadingBtn(btn, false, 'Restablecer contraseña');
+
+      if (!res.ok) {
+        showToast(res.error || 'Error al restablecer clave', true);
+        return;
+      }
+      showToast(res.message);
+      document.getElementById('reset-request-form').reset();
+      document.getElementById('reset-confirm-form').reset();
+      document.getElementById('btn-back-login').click();
     });
 
     document.getElementById('btn-open-maintenance').addEventListener('click', function () {
@@ -729,17 +734,6 @@
         document.getElementById('admin-tab-usuarios').classList.toggle('flex', target === 'usuarios');
       });
     });
-  }
-
-  function syncReportModalStep() {
-    const authGate = document.getElementById('report-auth-gate');
-    const reportForm = document.getElementById('sheet-report-form');
-    const loggedIn = Boolean(state.session && state.session.token);
-
-    authGate.classList.toggle('hidden', loggedIn);
-    authGate.classList.toggle('flex', !loggedIn);
-    reportForm.classList.toggle('hidden', !loggedIn);
-    reportForm.classList.toggle('flex', loggedIn);
   }
 
   function clearReportPhoto() {

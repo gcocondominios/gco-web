@@ -357,46 +357,7 @@
         </button>
       </header>
 
-      <div id="report-auth-gate" class="hidden flex-col gap-gutter-md">
-        <div class="bg-primary-container text-on-primary-container rounded-md px-gutter-md py-gutter-sm flex items-center gap-gutter-sm">
-          <span class="material-symbols-outlined text-[18px] shrink-0" aria-hidden="true">person</span>
-          <span class="font-label text-label-sm">Identifícate brevemente para asociar el ticket a tu departamento.</span>
-        </div>
-
-        <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-2 gap-gutter-xs">
-          <button type="button" data-qauth-tab="login" class="qauth-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-md">Ya tengo cuenta</button>
-          <button type="button" data-qauth-tab="register" class="qauth-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-md">Registrarme</button>
-        </div>
-
-        <form id="quick-auth-form" class="flex flex-col gap-gutter-md">
-          <div id="qauth-register-fields" class="hidden flex-col gap-gutter-md">
-            <div class="flex flex-col gap-gutter-xs">
-              <label for="qauth-name" class="font-label text-label-sm text-on-surface-variant">Nombre completo</label>
-              <input id="qauth-name" type="text" placeholder="Ej. Camila Rojas" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
-            </div>
-            <div class="flex flex-col gap-gutter-xs">
-              <label for="qauth-depto" class="font-label text-label-sm text-on-surface-variant">Departamento / Casa</label>
-              <input id="qauth-depto" type="text" placeholder="Ej. Depto. 804" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-gutter-xs">
-            <label for="qauth-email" class="font-label text-label-sm text-on-surface-variant">Correo electrónico</label>
-            <input id="qauth-email" type="email" required placeholder="tu@correo.cl" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
-          </div>
-
-          <div class="flex flex-col gap-gutter-xs">
-            <label for="qauth-pass" class="font-label text-label-sm text-on-surface-variant">Contraseña</label>
-            <input id="qauth-pass" type="password" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
-          </div>
-
-          <button type="submit" id="btn-qauth-submit" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
-            <span class="font-label text-label-lg">Continuar al reporte</span>
-          </button>
-        </form>
-      </div>
-
-      <form id="sheet-report-form" class="hidden flex-col gap-gutter-md">
+      <form id="sheet-report-form" class="flex flex-col gap-gutter-md">
         <div id="report-duplicate-hint" class="hidden bg-warning-container text-on-warning-container rounded-md px-gutter-md py-gutter-sm items-center gap-gutter-sm">
           <span class="material-symbols-outlined text-[18px] text-warning shrink-0" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">info</span>
           <span id="report-duplicate-text" class="font-label text-label-sm">Existe un reporte activo reciente.</span>
@@ -420,7 +381,7 @@
 
         <div class="grid grid-cols-2 gap-gutter-sm">
           <div class="flex flex-col gap-gutter-xs">
-            <label for="resident-unit" class="font-label text-label-sm text-on-surface-variant">Tu Depto.</label>
+            <label for="resident-unit" class="font-label text-label-sm text-on-surface-variant">Tu Depto. (opcional)</label>
             <input id="resident-unit" type="text" placeholder="Ej. Depto. 804" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
           </div>
           <div class="flex flex-col gap-gutter-xs">
@@ -431,6 +392,11 @@
               <span id="photo-label" class="font-label text-label-sm truncate">Subir foto</span>
             </button>
           </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="resident-email" class="font-label text-label-sm text-on-surface-variant">Correo para avisos (opcional)</label>
+          <input id="resident-email" type="email" placeholder="tu@correo.cl (sin registro requerido)" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
         </div>
 
         <div id="report-photo-preview-wrap" class="hidden items-center justify-between bg-surface-subtle border border-outline rounded-md p-gutter-sm">
@@ -493,7 +459,44 @@
           <span class="material-symbols-outlined text-[20px]" aria-hidden="true">login</span>
           <span id="btn-auth-label" class="font-label text-label-lg">Ingresar</span>
         </button>
+
+        <button type="button" id="btn-show-reset" class="font-label text-label-sm text-primary hover:underline self-center py-gutter-xs">
+          ¿Olvidaste tu contraseña?
+        </button>
       </form>
+
+      <!-- Recuperación de contraseña -->
+      <div id="auth-reset-panel" class="hidden flex-col gap-gutter-md">
+        <p class="font-body text-body-sm text-on-surface-variant">Ingresa tu correo y te enviaremos un código de 6 dígitos para crear una nueva clave.</p>
+
+        <form id="reset-request-form" class="flex flex-col gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="reset-email" class="font-label text-label-sm text-on-surface-variant">Correo electrónico</label>
+            <input id="reset-email" type="email" required placeholder="nombre@empresa.cl" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <button type="submit" id="btn-reset-send" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
+            <span class="font-label text-label-lg">Enviar código a mi correo</span>
+          </button>
+        </form>
+
+        <form id="reset-confirm-form" class="hidden flex-col gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="reset-code" class="font-label text-label-sm text-on-surface-variant">Código de 6 dígitos</label>
+            <input id="reset-code" type="text" inputmode="numeric" maxlength="6" required placeholder="123456" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-mono text-body-md px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="reset-new-pass" class="font-label text-label-sm text-on-surface-variant">Nueva contraseña</label>
+            <input id="reset-new-pass" type="password" minlength="6" required placeholder="Mínimo 6 caracteres" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <button type="submit" id="btn-reset-confirm" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
+            <span class="font-label text-label-lg">Restablecer contraseña</span>
+          </button>
+        </form>
+
+        <button type="button" id="btn-back-login" class="font-label text-label-sm text-on-surface-variant hover:text-primary self-center py-gutter-xs">
+          Volver a iniciar sesión
+        </button>
+      </div>
     </div>
   </div>
 
