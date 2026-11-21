@@ -1,0 +1,65 @@
+/* ==========================================================================
+   GCO Gestión de Condominios — Estilos Complementarios (Stitch Design System)
+   ========================================================================== */
+
+.material-symbols-outlined {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  line-height: 1 !important;
+  box-sizing: content-box;
+  overflow: hidden;
+  white-space: nowrap;
+  direction: ltr;
+  vertical-align: middle;
+}
+
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.shadow-gco {
+  box-shadow: 0 4px 20px -2px rgba(15, 41, 66, 0.06);
+}
+
+@keyframes sheetSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sheet-panel {
+  animation: sheetSlideUp 240ms cubic-bezier(0.2, 0, 0, 1) forwards;
+  max-height: 90dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@keyframes gcoPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.skeleton-box {
+  animation: gcoPulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel,
+  .skeleton-box {
+    animation: none;
+  }
+}

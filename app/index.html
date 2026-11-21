@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1D5B96">
+  <meta name="description" content="Seguimiento de mantenciones y reporte de incidencias — GCO Gestión de Condominios">
+  <title>GCO Gestión de Condominios</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="../img/icon-192.png">
+  <link rel="apple-touch-icon" href="../img/icon-192.png">
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    globalThis.tailwind = globalThis.tailwind || {};
+    globalThis.tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'primary': '#1D5B96',
+            'on-primary': '#FFFFFF',
+            'primary-container': '#EAF1FF',
+            'on-primary-container': '#00325A',
+            'secondary': '#0F2942',
+            'on-secondary': '#FFFFFF',
+            'surface': '#F4F6F9',
+            'on-surface': '#0F2942',
+            'surface-card': '#FFFFFF',
+            'on-surface-card': '#0F2942',
+            'surface-variant': '#EFF1F4',
+            'on-surface-variant': '#49607C',
+            'surface-subtle': '#F9FAFC',
+            'outline': '#DEE3ED',
+            'outline-subtle': '#E8ECF2',
+            'success': '#10B981',
+            'on-success': '#393939',
+            'success-container': '#D1FAE5',
+            'on-success-container': '#005236',
+            'warning': '#F59E0B',
+            'on-warning': '#2A1700',
+            'warning-container': '#FEF3C7',
+            'on-warning-container': '#653E00',
+            'error': '#EF4444',
+            'on-error': '#1C1C1C',
+            'error-container': '#FFEDEB',
+            'on-error-container': '#930013',
+          },
+          borderRadius: {
+            'sm': '6px',
+            'DEFAULT': '10px',
+            'md': '12px',
+            'lg': '16px',
+            'xl': '24px',
+            'full': '9999px',
+          },
+          spacing: {
+            'gutter-xs': '4px',
+            'gutter-sm': '8px',
+            'gutter-md': '12px',
+            'gutter-lg': '16px',
+            'gutter-xl': '20px',
+            'section': '24px',
+            'page-margin': '16px',
+          },
+          fontFamily: {
+            'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+            'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+            'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+            'body': ['"Rubik"', 'sans-serif'],
+            'label': ['"Rubik"', 'sans-serif'],
+            'mono': ['"Red Hat Mono"', 'monospace'],
+          },
+          fontSize: {
+            'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+            'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+            'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
+            'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
+            'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+            'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+            'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
+            'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
+            'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+            'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+            'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+            'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
+          },
+          transitionDuration: {
+            'state-change': '120ms',
+            'accordion-toggle': '200ms',
+            'sheet-enter': '240ms',
+          },
+          transitionTimingFunction: {
+            'state-change': 'ease-out',
+            'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
+            'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Red+Hat+Mono:wght@500&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+
+  <div class="min-h-screen w-full max-w-md mx-auto px-page-margin py-gutter-xl flex flex-col gap-section">
+
+    <!-- Compact Top Header -->
+    <header class="flex items-center justify-between gap-gutter-md">
+      <div class="flex items-center gap-gutter-sm min-w-0">
+        <button id="btn-back-directory" type="button" aria-label="Ver todos los equipos del edificio" class="hidden w-9 h-9 rounded-full bg-surface-card border border-outline text-on-surface items-center justify-center shrink-0 shadow-sm hover:bg-surface-subtle transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+        </button>
+        <div id="brand-logo-box" class="w-9 h-9 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
+          <img src="../img/logo.png" alt="GCO" class="w-full h-full object-contain p-1 bg-surface-card" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <svg style="display:none" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V7l8-4v18"></path>
+            <path d="M19 21V11l-6-4"></path>
+            <path d="M9 9v.01"></path>
+            <path d="M9 12v.01"></path>
+            <path d="M9 15v.01"></path>
+          </svg>
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span class="font-headline text-title-sm text-on-surface leading-tight">GCO</span>
+          <span class="font-body text-label-sm text-on-surface-variant leading-tight">Gestión de Condominios</span>
+        </div>
+      </div>
+
+      <span id="header-building-pill" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant shrink-0 shadow-sm max-w-[190px]">
+        <span class="material-symbols-outlined text-[14px] text-primary shrink-0" aria-hidden="true">apartment</span>
+        <span id="header-building-name" class="font-label text-label-sm truncate">Cargando...</span>
+      </span>
+    </header>
+
+    <!-- ESTADO DE CARGA (SKELETON) -->
+    <main id="view-loading" class="flex flex-col gap-section flex-1" aria-busy="true" aria-label="Cargando información del equipo">
+      <div class="w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-gco flex flex-col gap-gutter-lg">
+        <div class="flex items-start justify-between gap-gutter-md">
+          <div class="flex flex-col gap-gutter-sm flex-1">
+            <div class="h-7 w-48 rounded-sm bg-surface-variant skeleton-box"></div>
+            <div class="h-4 w-28 rounded-sm bg-surface-variant skeleton-box"></div>
+          </div>
+          <div class="w-10 h-10 rounded-md bg-surface-variant skeleton-box"></div>
+        </div>
+        <div class="h-7 w-52 rounded-full bg-surface-variant skeleton-box"></div>
+        <div class="h-16 w-full rounded-md bg-surface-subtle skeleton-box"></div>
+        <div class="h-11 w-full rounded-md bg-surface-variant skeleton-box"></div>
+      </div>
+
+      <div class="flex flex-col gap-gutter-md">
+        <div class="h-5 w-36 rounded-sm bg-outline skeleton-box"></div>
+        <div class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-lg flex flex-col gap-gutter-md">
+          <div class="h-10 w-full rounded-md bg-surface-subtle skeleton-box"></div>
+          <div class="h-10 w-full rounded-md bg-surface-subtle skeleton-box"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ESTADO DE ERROR / SIN PARÁMETROS -->
+    <main id="view-error" class="hidden flex-col gap-section flex-1">
+      <article class="w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-gco flex flex-col items-center text-center gap-gutter-md">
+        <div class="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center">
+          <span class="material-symbols-outlined text-[24px]" aria-hidden="true">qr_code_scanner</span>
+        </div>
+        <h1 class="font-headline text-headline-md text-on-surface">No pudimos cargar la ficha</h1>
+        <p id="error-message" class="font-body text-body-md text-on-surface-variant">
+          Escanea el código QR ubicado en el equipo del edificio para consultar su estado en tiempo real.
+        </p>
+        <button id="btn-retry-load" type="button" class="inline-flex items-center justify-center gap-gutter-xs px-gutter-xl py-gutter-sm rounded-md bg-primary text-on-primary font-label text-label-lg hover:bg-secondary transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">refresh</span>
+          <span>Reintentar</span>
+        </button>
+      </article>
+    </main>
+
+    <!-- VISTA 1: FICHA DE EQUIPO INDIVIDUAL -->
+    <main id="view-equipment" class="hidden flex-col gap-section flex-1">
+
+      <!-- Barra de herramientas según rol (Técnico / Admin) -->
+      <section id="role-actions-bar" class="hidden flex-col gap-gutter-sm">
+        <div class="flex items-center justify-between px-gutter-xs">
+          <span id="role-session-badge" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-primary">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">verified_user</span>
+            <span id="role-session-text">Sesión activa</span>
+          </span>
+        </div>
+        <div class="grid grid-cols-1 gap-gutter-sm" id="role-buttons-grid">
+          <button id="btn-open-maintenance" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-secondary text-on-secondary shadow-sm hover:bg-primary transition-colors duration-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">build</span>
+            <span class="font-label text-label-lg">Registrar Nueva Mantención</span>
+          </button>
+          <button id="btn-open-admin" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-primary-container text-on-primary-container border border-primary/20 hover:bg-outline transition-colors duration-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">admin_panel_settings</span>
+            <span class="font-label text-label-lg">Panel de Administración (Tickets y Usuarios)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Main Asset Status Card (Hero Card) -->
+      <article class="w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-gco flex flex-col gap-gutter-lg">
+        <header class="flex flex-col gap-gutter-sm">
+          <div class="flex items-start justify-between gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs min-w-0">
+              <h1 id="eq-name" class="font-headline text-headline-lg text-on-surface text-balance">Equipo</h1>
+              <p id="eq-code" class="font-mono text-mono-sm text-on-surface-variant">Equipo #---</p>
+            </div>
+            <div id="eq-icon-box" class="w-10 h-10 rounded-md bg-primary-container text-on-primary-container flex items-center justify-center shrink-0" aria-hidden="true">
+              <span id="eq-icon" class="material-symbols-outlined text-[22px]">precision_manufacturing</span>
+            </div>
+          </div>
+
+          <!-- Prominent Traffic Light Status Pill -->
+          <div class="pt-gutter-xs">
+            <span id="eq-status-pill" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-success-container text-on-success-container">
+              <span id="eq-status-icon" class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">check_circle</span>
+              <span id="eq-status-text" class="font-label text-label-md">OPERATIVO</span>
+            </span>
+          </div>
+        </header>
+
+        <!-- 3-Item Key Metadata Grid -->
+        <div class="bg-surface-subtle rounded-md py-gutter-md px-gutter-xs grid grid-cols-3 divide-x divide-outline-subtle">
+          <div class="px-gutter-sm flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant">Última visita</span>
+            <span id="eq-last-visit" class="font-label text-label-md text-on-surface tabular-nums">--</span>
+          </div>
+          <div class="px-gutter-sm flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant">Responsable</span>
+            <span id="eq-company" class="font-label text-label-md text-on-surface truncate">--</span>
+          </div>
+          <div class="px-gutter-sm flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant">Próxima visita</span>
+            <span id="eq-next-visit" class="font-label text-label-md text-on-surface tabular-nums">--</span>
+          </div>
+        </div>
+
+        <!-- Primary Action Button (PDF) -->
+        <footer>
+          <button id="btn-view-pdf" type="button" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm transition-colors duration-state-change ease-state-change hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">description</span>
+            <span id="btn-pdf-label" class="font-label text-label-lg">Ver Último Informe Técnico (PDF)</span>
+          </button>
+        </footer>
+      </article>
+
+      <!-- Collapsible Accordion Section: Historial Reciente -->
+      <section class="flex flex-col gap-gutter-md" aria-labelledby="heading-history">
+        <div class="flex items-center justify-between px-gutter-xs">
+          <h2 id="heading-history" class="font-headline text-title-md text-on-surface">Historial Reciente</h2>
+          <span id="history-count-label" class="font-label text-label-sm text-on-surface-variant">Últimos 5 registros</span>
+        </div>
+
+        <div id="history-list" class="bg-surface-card rounded-lg border border-outline-subtle shadow-gco divide-y divide-outline-subtle overflow-hidden">
+        </div>
+      </section>
+
+      <!-- Active Tickets Preview Box -->
+      <section class="flex flex-col gap-gutter-md" aria-labelledby="heading-tickets">
+        <div class="flex items-center justify-between px-gutter-xs">
+          <h2 id="heading-tickets" class="font-headline text-title-md text-on-surface">Incidencias Activas en este Equipo</h2>
+          <span id="tickets-count-badge" role="status" class="inline-flex items-center justify-center min-w-6 h-6 px-gutter-sm rounded-full bg-warning-container text-on-warning-container tabular-nums">
+            <span id="tickets-count-num" class="font-label text-label-sm">0</span>
+          </span>
+        </div>
+
+        <div id="tickets-list" class="flex flex-col gap-gutter-sm">
+        </div>
+      </section>
+
+    </main>
+
+    <!-- VISTA 2: DIRECTORIO DE EQUIPOS DEL EDIFICIO -->
+    <main id="view-directory" class="hidden flex-col gap-gutter-lg flex-1">
+      <section class="flex flex-col gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <h1 class="font-headline text-headline-lg text-on-surface">Equipos del Edificio</h1>
+          <p class="font-body text-body-sm text-on-surface-variant">Estado en tiempo real y mantenciones al día</p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-gutter-sm">
+          <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center gap-gutter-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+              <span class="font-label text-label-sm text-on-surface-variant">Operativos</span>
+            </div>
+            <span id="dir-count-ok" class="font-headline text-headline-md text-on-surface tabular-nums">0</span>
+          </div>
+          <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center gap-gutter-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-warning shrink-0" aria-hidden="true"></span>
+              <span class="font-label text-label-sm text-on-surface-variant">Observación</span>
+            </div>
+            <span id="dir-count-warn" class="font-headline text-headline-md text-on-surface tabular-nums">0</span>
+          </div>
+          <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center gap-gutter-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-error shrink-0" aria-hidden="true"></span>
+              <span class="font-label text-label-sm text-on-surface-variant">Alerta</span>
+            </div>
+            <span id="dir-count-err" class="font-headline text-headline-md text-on-surface tabular-nums">0</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm" role="tablist" aria-label="Filtrar equipos por estado">
+          <button type="button" data-filter="all" class="dir-filter-chip px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-md transition-colors duration-state-change">Todos</button>
+          <button type="button" data-filter="ok" class="dir-filter-chip px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-label-md hover:bg-surface-subtle transition-colors duration-state-change">Operativos</button>
+          <button type="button" data-filter="alert" class="dir-filter-chip px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-label-md hover:bg-surface-subtle transition-colors duration-state-change">Con alertas</button>
+        </div>
+      </section>
+
+      <section id="directory-list" class="flex flex-col gap-gutter-md" aria-label="Lista de equipos">
+      </section>
+    </main>
+
+    <!-- Bottom Action Area -->
+    <footer class="flex flex-col items-center gap-gutter-lg pt-gutter-sm pb-gutter-md">
+      <button id="btn-open-report" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-surface-card text-on-surface border border-outline shadow-sm transition-colors duration-state-change ease-state-change hover:bg-warning-container hover:border-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2 active:scale-[0.99]">
+        <span class="material-symbols-outlined text-[20px] text-warning" aria-hidden="true">warning</span>
+        <span class="font-label text-label-lg">Reportar un problema en este equipo</span>
+      </button>
+
+      <div class="flex flex-col items-center gap-gutter-xs text-center">
+        <div class="flex items-center gap-gutter-sm">
+          <button id="btn-open-auth" type="button" class="font-label text-label-md text-on-surface-variant hover:text-primary transition-colors duration-state-change py-gutter-xs px-gutter-sm rounded-sm">
+            Acceso Técnico / Administración
+          </button>
+          <button id="btn-logout" type="button" class="hidden font-label text-label-md text-error hover:underline py-gutter-xs px-gutter-sm rounded-sm">
+            Cerrar sesión
+          </button>
+        </div>
+        <p class="font-label text-label-sm text-on-surface-variant">
+          Powered by gcoadmin.cl
+        </p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- BOTTOM SHEET 1: REPORTAR PROBLEMA -->
+  <div id="modal-report" class="fixed inset-0 z-50 hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-report-title">
+    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <h2 id="sheet-report-title" class="font-headline text-headline-md text-on-surface">Reportar un problema</h2>
+          <p id="report-eq-subtitle" class="font-mono text-mono-sm text-on-surface-variant">Equipo #---</p>
+        </div>
+        <button type="button" data-close-modal="modal-report" aria-label="Cerrar modal" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <div id="report-auth-gate" class="hidden flex-col gap-gutter-md">
+        <div class="bg-primary-container text-on-primary-container rounded-md px-gutter-md py-gutter-sm flex items-center gap-gutter-sm">
+          <span class="material-symbols-outlined text-[18px] shrink-0" aria-hidden="true">person</span>
+          <span class="font-label text-label-sm">Identifícate brevemente para asociar el ticket a tu departamento.</span>
+        </div>
+
+        <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-2 gap-gutter-xs">
+          <button type="button" data-qauth-tab="login" class="qauth-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-md">Ya tengo cuenta</button>
+          <button type="button" data-qauth-tab="register" class="qauth-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-md">Registrarme</button>
+        </div>
+
+        <form id="quick-auth-form" class="flex flex-col gap-gutter-md">
+          <div id="qauth-register-fields" class="hidden flex-col gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs">
+              <label for="qauth-name" class="font-label text-label-sm text-on-surface-variant">Nombre completo</label>
+              <input id="qauth-name" type="text" placeholder="Ej. Camila Rojas" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+            </div>
+            <div class="flex flex-col gap-gutter-xs">
+              <label for="qauth-depto" class="font-label text-label-sm text-on-surface-variant">Departamento / Casa</label>
+              <input id="qauth-depto" type="text" placeholder="Ej. Depto. 804" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="qauth-email" class="font-label text-label-sm text-on-surface-variant">Correo electrónico</label>
+            <input id="qauth-email" type="email" required placeholder="tu@correo.cl" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="qauth-pass" class="font-label text-label-sm text-on-surface-variant">Contraseña</label>
+            <input id="qauth-pass" type="password" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+
+          <button type="submit" id="btn-qauth-submit" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
+            <span class="font-label text-label-lg">Continuar al reporte</span>
+          </button>
+        </form>
+      </div>
+
+      <form id="sheet-report-form" class="hidden flex-col gap-gutter-md">
+        <div id="report-duplicate-hint" class="hidden bg-warning-container text-on-warning-container rounded-md px-gutter-md py-gutter-sm items-center gap-gutter-sm">
+          <span class="material-symbols-outlined text-[18px] text-warning shrink-0" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">info</span>
+          <span id="report-duplicate-text" class="font-label text-label-sm">Existe un reporte activo reciente.</span>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface">¿Qué ocurre con el equipo?</span>
+          <div class="flex flex-wrap gap-gutter-sm">
+            <button type="button" data-cat="Ruido inusual" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-sm transition-colors duration-state-change">Ruido inusual</button>
+            <button type="button" data-cat="Puertas" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Puertas</button>
+            <button type="button" data-cat="Botonera" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Botonera</button>
+            <button type="button" data-cat="Iluminación" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Iluminación</button>
+            <button type="button" data-cat="Detenido" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Detenido</button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="resident-desc" class="font-label text-label-md text-on-surface">Detalle breve</label>
+          <textarea id="resident-desc" rows="3" required placeholder="Ej. Se escucha un roce al subir entre los pisos 4 y 6..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-gutter-sm">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="resident-unit" class="font-label text-label-sm text-on-surface-variant">Tu Depto.</label>
+            <input id="resident-unit" type="text" placeholder="Ej. Depto. 804" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant">Evidencia</span>
+            <input id="report-photo-input" type="file" accept="image/*" capture="environment" class="hidden">
+            <button id="btn-add-photo" type="button" class="w-full inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container hover:bg-outline transition-colors duration-state-change">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add_a_photo</span>
+              <span id="photo-label" class="font-label text-label-sm truncate">Subir foto</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="report-photo-preview-wrap" class="hidden items-center justify-between bg-surface-subtle border border-outline rounded-md p-gutter-sm">
+          <img id="report-photo-preview" alt="Vista previa" class="w-14 h-14 object-cover rounded-sm">
+          <span id="report-photo-size" class="font-mono text-mono-sm text-on-surface-variant"></span>
+          <button id="btn-remove-report-photo" type="button" class="text-error font-label text-label-sm px-gutter-sm">Quitar</button>
+        </div>
+
+        <button type="submit" id="btn-submit-report" class="w-full mt-gutter-xs inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change active:scale-[0.99]">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">send</span>
+          <span class="font-label text-label-lg">Enviar reporte a administración</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET 2: ACCESO TÉCNICO / ADMINISTRACIÓN -->
+  <div id="modal-auth" class="fixed inset-0 z-50 hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-auth-title">
+    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <h2 id="sheet-auth-title" class="font-headline text-headline-md text-on-surface">Acceso Técnico / Admin</h2>
+          <p class="font-body text-body-sm text-on-surface-variant">Inicia sesión para gestionar mantenciones o tickets</p>
+        </div>
+        <button type="button" data-close-modal="modal-auth" aria-label="Cerrar acceso" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-2 gap-gutter-xs">
+        <button type="button" data-auth-tab="login" class="auth-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-md">Iniciar sesión</button>
+        <button type="button" data-auth-tab="register" class="auth-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-md">Registro Técnico</button>
+      </div>
+
+      <form id="auth-form" class="flex flex-col gap-gutter-md">
+        <div id="auth-register-fields" class="hidden flex-col gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="auth-name" class="font-label text-label-sm text-on-surface-variant">Nombre completo</label>
+            <input id="auth-name" type="text" placeholder="Ej. Carlos Méndez" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="auth-company" class="font-label text-label-sm text-on-surface-variant">Empresa mantenedora</label>
+            <input id="auth-company" type="text" placeholder="Ej. TK Elevator" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="auth-email" class="font-label text-label-sm text-on-surface-variant">Correo electrónico</label>
+          <input id="auth-email" type="email" required placeholder="nombre@empresa.cl" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="auth-password" class="font-label text-label-sm text-on-surface-variant">Contraseña</label>
+          <input id="auth-password" type="password" required minlength="6" placeholder="••••••••" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+        </div>
+
+        <button type="submit" id="btn-auth-submit" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">login</span>
+          <span id="btn-auth-label" class="font-label text-label-lg">Ingresar</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET 3: REGISTRO DE MANTENCIÓN -->
+  <div id="modal-maintenance" class="fixed inset-0 z-50 hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-maint-title">
+    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <h2 id="sheet-maint-title" class="font-headline text-headline-md text-on-surface">Registro de Mantención</h2>
+          <p id="maint-eq-subtitle" class="font-mono text-mono-sm text-on-surface-variant">Equipo #---</p>
+        </div>
+        <button type="button" data-close-modal="modal-maintenance" aria-label="Cerrar registro" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <form id="sheet-maint-form" class="flex flex-col gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface">Tipo de intervención</span>
+          <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-3 gap-gutter-xs">
+            <button type="button" data-maint-type="Preventiva" class="maint-type-btn py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm transition-colors duration-state-change">Preventiva</button>
+            <button type="button" data-maint-type="Correctiva" class="maint-type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Correctiva</button>
+            <button type="button" data-maint-type="Emergencia" class="maint-type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Emergencia</button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface">Estado resultante del equipo</span>
+          <div class="grid grid-cols-3 gap-gutter-sm">
+            <button type="button" data-maint-state="Operativo" class="maint-state-pill py-gutter-sm px-gutter-xs rounded-md border-2 border-success bg-success-container text-on-success-container font-label text-label-sm transition-colors duration-state-change">Operativo</button>
+            <button type="button" data-maint-state="En Observacion" class="maint-state-pill py-gutter-sm px-gutter-xs rounded-md border border-outline bg-surface-subtle text-on-surface-variant font-label text-label-sm transition-colors duration-state-change">Observación</button>
+            <button type="button" data-maint-state="Fuera de Servicio" class="maint-state-pill py-gutter-sm px-gutter-xs rounded-md border border-outline bg-surface-subtle text-on-surface-variant font-label text-label-sm transition-colors duration-state-change">Sin servicio</button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="maint-sheet-notes" class="font-label text-label-md text-on-surface">Observaciones técnicas</label>
+          <textarea id="maint-sheet-notes" rows="3" required placeholder="Detalle breve de los trabajos efectuados..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+        </div>
+
+        <div>
+          <input id="maint-file-input" type="file" accept="application/pdf,image/*" class="hidden">
+          <button id="btn-maint-file" type="button" class="w-full flex items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container hover:bg-outline transition-colors duration-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">upload_file</span>
+            <span id="maint-file-label" class="font-label text-label-md truncate">Adjuntar Informe Técnico (PDF o Foto)</span>
+          </button>
+        </div>
+
+        <button type="submit" id="btn-maint-submit" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change active:scale-[0.99]">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">check_circle</span>
+          <span class="font-label text-label-lg">Guardar y publicar registro</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET 4: PANEL DE ADMINISTRACIÓN -->
+  <div id="modal-admin" class="fixed inset-0 z-50 hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-admin-title">
+    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <h2 id="sheet-admin-title" class="font-headline text-headline-md text-on-surface">Panel de Administración</h2>
+          <p class="font-body text-body-sm text-on-surface-variant">Gestión de tickets y aprobación de cuentas</p>
+        </div>
+        <button type="button" data-close-modal="modal-admin" aria-label="Cerrar panel" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-2 gap-gutter-xs" role="tablist">
+        <button type="button" data-admin-tab="tickets" class="admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-md">Tickets</button>
+        <button type="button" data-admin-tab="usuarios" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-md">Usuarios</button>
+      </div>
+
+      <div id="admin-tab-tickets" class="flex flex-col gap-gutter-md">
+        <p class="font-body text-body-sm text-on-surface-variant">Cargando tickets...</p>
+      </div>
+
+      <div id="admin-tab-usuarios" class="hidden flex-col gap-gutter-md">
+        <p class="font-body text-body-sm text-on-surface-variant">Cargando usuarios...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightweight Feedback Toast -->
+  <div id="feedback-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md max-w-[90vw]" role="status" aria-live="polite">
+    <span id="toast-icon" class="material-symbols-outlined text-[18px] text-success shrink-0" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">check_circle</span>
+    <span id="toast-message" class="font-label text-label-md truncate">Acción registrada</span>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
