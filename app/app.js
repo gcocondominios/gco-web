@@ -92,7 +92,7 @@
       btnReport.classList.toggle('inline-flex', name === 'equipment');
     }
     if (btnBack) {
-      const canSeeDir = Boolean(state.session && state.session.user && (state.session.user.rol === 'tecnico' || state.session.user.rol === 'admin'));
+      const canSeeDir = Boolean(state.session && state.session.user && (state.session.user.rol === 'tecnico' || state.session.user.rol === 'admin' || state.session.user.rol === 'comite'));
       const showBack = name === 'equipment' && canSeeDir;
       btnBack.classList.toggle('hidden', !showBack);
       btnBack.classList.toggle('inline-flex', showBack);
@@ -360,6 +360,7 @@
     const roleText = document.getElementById('role-session-text');
     const btnMaint = document.getElementById('btn-open-maintenance');
     const btnAdmin = document.getElementById('btn-open-admin');
+    const btnCommittee = document.getElementById('btn-open-committee');
     const btnAuth = document.getElementById('btn-open-auth');
     const btnLogout = document.getElementById('btn-logout');
 
@@ -370,6 +371,10 @@
       btnMaint.classList.remove('inline-flex');
       btnAdmin.classList.add('hidden');
       btnAdmin.classList.remove('inline-flex');
+      if (btnCommittee) {
+        btnCommittee.classList.add('hidden');
+        btnCommittee.classList.remove('inline-flex');
+      }
       btnAuth.classList.remove('hidden');
       btnLogout.classList.add('hidden');
       return;
@@ -381,8 +386,9 @@
 
     const canMaint = Boolean((user.rol === 'tecnico' || user.rol === 'admin') && state.equipoId);
     const isAdmin = user.rol === 'admin';
+    const isCommittee = user.rol === 'comite' || user.rol === 'admin';
 
-    if (canMaint || isAdmin) {
+    if (canMaint || isAdmin || isCommittee) {
       roleBar.classList.remove('hidden');
       roleBar.classList.add('flex');
     } else {
@@ -394,6 +400,10 @@
     btnMaint.classList.toggle('inline-flex', canMaint);
     btnAdmin.classList.toggle('hidden', !isAdmin);
     btnAdmin.classList.toggle('inline-flex', isAdmin);
+    if (btnCommittee) {
+      btnCommittee.classList.toggle('hidden', !isCommittee);
+      btnCommittee.classList.toggle('inline-flex', isCommittee);
+    }
 
     const unitInput = document.getElementById('resident-unit');
     if (unitInput && !unitInput.value && user.deptoOEmpresa) {
@@ -414,13 +424,21 @@
       });
     });
 
-    ['modal-report', 'modal-auth', 'modal-maintenance', 'modal-admin', 'modal-qr'].forEach(function (id) {
+    ['modal-report', 'modal-auth', 'modal-maintenance', 'modal-admin', 'modal-qr', 'modal-committee'].forEach(function (id) {
       const m = document.getElementById(id);
       if (!m) return;
       m.addEventListener('click', function (e) {
         if (e.target === m) closeModal(id);
       });
     });
+
+    const btnOpenCommittee = document.getElementById('btn-open-committee');
+    if (btnOpenCommittee) {
+      btnOpenCommittee.addEventListener('click', function () {
+        openModal('modal-committee');
+        loadCommitteeData();
+      });
+    }
 
     document.querySelectorAll('.dir-filter-chip').forEach(function (chip) {
       chip.addEventListener('click', function () {
@@ -536,7 +554,7 @@
         const regFields = document.getElementById('auth-register-fields');
         regFields.classList.toggle('hidden', state.authMode !== 'register');
         regFields.classList.toggle('flex', state.authMode === 'register');
-        document.getElementById('btn-auth-label').textContent = state.authMode === 'register' ? 'Solicitar registro técnico' : 'Ingresar';
+        document.getElementById('btn-auth-label').textContent = state.authMode === 'register' ? 'Solicitar acceso' : 'Ingresar';
       });
     });
 
@@ -555,11 +573,11 @@
         payload.nombre = document.getElementById('auth-name').value.trim();
         payload.deptoOEmpresa = document.getElementById('auth-company').value.trim();
         payload.edificioId = state.edificioId;
-        payload.rol = 'tecnico';
+        payload.rol = document.getElementById('auth-role').value || 'tecnico';
       }
 
       const res = await postApi(payload);
-      setLoadingBtn(btn, false, state.authMode === 'register' ? 'Solicitar registro técnico' : 'Ingresar');
+      setLoadingBtn(btn, false, state.authMode === 'register' ? 'Solicitar acceso' : 'Ingresar');
 
       if (!res.ok) {
         showToast(res.error || 'Error de autenticación', true);
@@ -1146,9 +1164,156 @@
       });
     });
 
+    const committeeSheet = document.getElementById('print-committee-sheet');
+    if (committeeSheet) committeeSheet.classList.remove('print-active');
+    sheet.classList.add('print-active');
+
     setTimeout(function () {
       window.print();
     }, 250);
+  }
+
+  async function loadCommitteeData() {
+    if (!state.session) return;
+    const url = new URL(API_URL);
+    url.searchParams.set('action', 'committeeData');
+    url.searchParams.set('token', state.session.token);
+    url.searchParams.set('edificio', state.edificioId);
+
+    try {
+      const res = await fetch(url.toString(), { method: 'GET' });
+      const json = await res.json();
+      if (!json.ok) {
+        showToast(json.error || 'No se pudo cargar el resumen de comité', true);
+        return;
+      }
+      renderCommitteeModal(json);
+    } catch (err) {
+      showToast('Error de red al cargar portal comité', true);
+    }
+  }
+
+  function renderCommitteeModal(data) {
+    document.getElementById('committee-building-subtitle').textContent = data.edificio.nombre + ' · Actualizado ' + formatShortDate(data.generadoEn);
+
+    const r = data.resumen;
+    document.getElementById('committee-summary-cards').innerHTML =
+      '<div class="bg-success-container text-on-success-container rounded-md p-gutter-md flex flex-col gap-gutter-xs">' +
+        '<span class="font-label text-label-sm">Operativos</span>' +
+        '<span class="font-headline text-headline-md tabular-nums">' + r.operativos + '/' + r.totalEquipos + '</span>' +
+      '</div>' +
+      '<div class="bg-warning-container text-on-warning-container rounded-md p-gutter-md flex flex-col gap-gutter-xs">' +
+        '<span class="font-label text-label-sm">Observación</span>' +
+        '<span class="font-headline text-headline-md tabular-nums">' + r.observacion + '</span>' +
+      '</div>' +
+      '<div class="bg-error-container text-on-error-container rounded-md p-gutter-md flex flex-col gap-gutter-xs">' +
+        '<span class="font-label text-label-sm">Alerta / Fuera</span>' +
+        '<span class="font-headline text-headline-md tabular-nums">' + r.fueraServicio + '</span>' +
+      '</div>';
+
+    document.getElementById('committee-equipment-list').innerHTML = data.equipos.map(function (eq) {
+      const sem = eq.semaforo;
+      const badgeClass = sem.color === 'rojo'
+        ? 'bg-error-container text-on-error-container'
+        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
+      const pdfLink = splitLinks(eq.ultimoPdf)[0] || '';
+      const pdfHtml = pdfLink
+        ? '<a href="' + escapeHtml(pdfLink) + '" target="_blank" rel="noopener noreferrer" class="font-label text-label-sm text-primary hover:underline">Ver PDF</a>'
+        : '<span class="font-label text-label-sm text-on-surface-variant">Sin PDF</span>';
+
+      return (
+        '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-xs">' +
+          '<div class="flex items-center justify-between gap-gutter-sm">' +
+            '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(eq.nombre) + '</span>' +
+            '<span class="px-gutter-sm py-gutter-xs rounded-full ' + badgeClass + ' font-label text-label-sm shrink-0">' + escapeHtml(sem.etiquetaCorta) + '</span>' +
+          '</div>' +
+          '<div class="flex items-center justify-between text-on-surface-variant font-label text-label-sm">' +
+            '<span>#' + escapeHtml(eq.id) + ' · ' + escapeHtml(eq.empresa) + '</span>' +
+            pdfHtml +
+          '</div>' +
+          '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(eq.ultimaObservacion) + '</p>' +
+        '</article>'
+      );
+    }).join('');
+
+    document.getElementById('btn-print-committee').onclick = function () {
+      printCommitteeReport(data);
+    };
+  }
+
+  function printCommitteeReport(data) {
+    const qrSheet = document.getElementById('print-qr-sheet');
+    if (qrSheet) qrSheet.classList.remove('print-active');
+    const sheet = document.getElementById('print-committee-sheet');
+    sheet.classList.add('print-active');
+
+    const userName = state.session && state.session.user ? state.session.user.nombre : 'Comité de Administración';
+    const r = data.resumen;
+
+    const eqRows = data.equipos.map(function (eq) {
+      const sem = eq.semaforo;
+      return (
+        '<tr>' +
+          '<td style="border:1px solid #DEE3ED; padding:8px;"><strong>' + escapeHtml(eq.nombre) + '</strong><br><span style="font-size:11px; color:#49607C;">#' + escapeHtml(eq.id) + '</span></td>' +
+          '<td style="border:1px solid #DEE3ED; padding:8px;">' + escapeHtml(eq.empresa) + '</td>' +
+          '<td style="border:1px solid #DEE3ED; padding:8px;">' + escapeHtml(formatShortDate(sem.ultimaVisita)) + '</td>' +
+          '<td style="border:1px solid #DEE3ED; padding:8px;">' + escapeHtml(formatShortDate(sem.proximaVisita)) + '</td>' +
+          '<td style="border:1px solid #DEE3ED; padding:8px;"><strong>' + escapeHtml(sem.etiquetaCorta) + '</strong></td>' +
+          '<td style="border:1px solid #DEE3ED; padding:8px; font-size:12px;">' + escapeHtml(eq.ultimaObservacion) + '</td>' +
+        '</tr>'
+      );
+    }).join('');
+
+    const ticketRows = (data.tickets || []).slice(0, 15).map(function (t) {
+      return (
+        '<tr>' +
+          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">' + escapeHtml(t.id) + '</td>' +
+          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">' + escapeHtml(formatShortDate(t.fecha)) + '</td>' +
+          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">#' + escapeHtml(t.equipoId) + ' (' + escapeHtml(t.depto) + ')</td>' +
+          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">' + escapeHtml(t.estado) + '</td>' +
+          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">' + escapeHtml(t.descripcion) + (t.solucion ? '<br><em>Solución: ' + escapeHtml(t.solucion) + '</em>' : '') + '</td>' +
+        '</tr>'
+      );
+    }).join('');
+
+    sheet.innerHTML =
+      '<div style="font-family: \'Plus Jakarta Sans\', \'Rubik\', sans-serif; color: #0F2942; max-width: 900px; margin: 0 auto;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 2px solid #1D5B96; padding-bottom: 12px; margin-bottom: 16px;">' +
+          '<div>' +
+            '<h1 style="font-size: 20px; font-weight: 700; margin: 0;">Acta de Revisión de Equipos y Mantenciones</h1>' +
+            '<p style="font-size: 13px; color: #49607C; margin: 4px 0 0 0;">Comunidad: <strong>' + escapeHtml(data.edificio.nombre) + '</strong> (' + escapeHtml(data.edificio.id) + ')</p>' +
+          '</div>' +
+          '<div style="text-align:right; font-size: 12px; color: #49607C;">' +
+            '<div>GCO Gestión de Condominios</div>' +
+            '<div>Fecha: ' + escapeHtml(data.generadoEn) + '</div>' +
+            '<div>Emitido por: ' + escapeHtml(userName) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px;">' +
+          '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">Operativos</div><div style="font-size:18px; font-weight:700; color:#005236;">' + r.operativos + ' / ' + r.totalEquipos + '</div></div>' +
+          '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">En Observación</div><div style="font-size:18px; font-weight:700; color:#653E00;">' + r.observacion + '</div></div>' +
+          '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">Fuera de Servicio</div><div style="font-size:18px; font-weight:700; color:#930013;">' + r.fueraServicio + '</div></div>' +
+          '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">Tickets Activos / Resueltos</div><div style="font-size:18px; font-weight:700;">' + (r.ticketsAbiertos + r.ticketsEnProceso) + ' / ' + r.ticketsResueltos + '</div></div>' +
+        '</div>' +
+        '<h2 style="font-size: 15px; font-weight: 700; margin: 16px 0 8px 0;">1. Estado de Equipos e Instalaciones</h2>' +
+        '<table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px;">' +
+          '<thead><tr style="background:#F4F6F9; text-align:left;"><th style="border:1px solid #DEE3ED; padding:8px;">Equipo</th><th style="border:1px solid #DEE3ED; padding:8px;">Empresa</th><th style="border:1px solid #DEE3ED; padding:8px;">Última Visita</th><th style="border:1px solid #DEE3ED; padding:8px;">Próx. Visita</th><th style="border:1px solid #DEE3ED; padding:8px;">Estado</th><th style="border:1px solid #DEE3ED; padding:8px;">Última Observación</th></tr></thead>' +
+          '<tbody>' + eqRows + '</tbody>' +
+        '</table>' +
+        '<h2 style="font-size: 15px; font-weight: 700; margin: 16px 0 8px 0;">2. Registro Reciente de Incidencias (Tickets)</h2>' +
+        '<table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:28px;">' +
+          '<thead><tr style="background:#F4F6F9; text-align:left;"><th style="border:1px solid #DEE3ED; padding:6px;">ID</th><th style="border:1px solid #DEE3ED; padding:6px;">Fecha</th><th style="border:1px solid #DEE3ED; padding:6px;">Equipo / Depto</th><th style="border:1px solid #DEE3ED; padding:6px;">Estado</th><th style="border:1px solid #DEE3ED; padding:6px;">Detalle y Solución</th></tr></thead>' +
+          '<tbody>' + (ticketRows || '<tr><td colspan="5" style="border:1px solid #DEE3ED; padding:8px;">Sin tickets registrados.</td></tr>') + '</tbody>' +
+        '</table>' +
+        '<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 36px; page-break-inside: avoid;">' +
+          '<div style="border-top: 1px solid #0F2942; padding-top: 8px; font-size: 12px; text-align: center;">Toma de Conocimiento · Comité de Administración</div>' +
+          '<div style="border-top: 1px solid #0F2942; padding-top: 8px; font-size: 12px; text-align: center;">GCO Gestión de Condominios · Respaldo Ley 21.442</div>' +
+        '</div>' +
+      '</div>';
+
+    setTimeout(function () {
+      window.print();
+    }, 200);
   }
 
   function renderAdminUsers(usuarios) {

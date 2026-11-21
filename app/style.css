@@ -65,10 +65,10 @@ details > summary::-webkit-details-marker {
 }
 
 @media print {
-  body > *:not(#print-qr-sheet) {
+  body > *:not(.print-active) {
     display: none !important;
   }
-  #print-qr-sheet {
+  .print-active {
     display: block !important;
   }
 }
