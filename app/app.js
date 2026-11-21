@@ -656,6 +656,14 @@
     });
 
     document.getElementById('btn-open-maintenance').addEventListener('click', function () {
+      const dateInput = document.getElementById('maint-date');
+      if (dateInput && !dateInput.value) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        dateInput.value = yyyy + '-' + mm + '-' + dd;
+      }
       openModal('modal-maintenance');
     });
 
@@ -727,6 +735,7 @@
         token: state.session.token,
         edificioId: state.edificioId,
         equipoId: state.equipoId,
+        fecha: document.getElementById('maint-date').value,
         tipo: state.maintType,
         estadoResultante: state.maintState,
         observaciones: document.getElementById('maint-sheet-notes').value.trim(),
@@ -1005,19 +1014,41 @@
   function renderAdminEquipos(equipos) {
     const container = document.getElementById('admin-tab-equipos');
     if (!container) return;
-    if (equipos.length === 0) {
-      container.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">No hay equipos registrados en esta comunidad.</p>';
-      return;
-    }
 
     const base = window.location.origin + window.location.pathname;
-    const printTopBtn =
-      '<button type="button" id="btn-print-all-qr" class="w-full min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-secondary text-on-secondary font-label text-label-md shadow-sm hover:bg-primary transition-colors duration-state-change">' +
-        '<span class="material-symbols-outlined text-[18px]" aria-hidden="true">print</span>' +
-        '<span>Imprimir láminas QR (' + equipos.length + ' equipos)</span>' +
-      '</button>';
+    const addBoxHtml =
+      '<details class="bg-surface-subtle rounded-lg border border-outline p-gutter-md">' +
+        '<summary class="font-title text-title-sm text-primary cursor-pointer flex items-center justify-between">' +
+          '<span class="inline-flex items-center gap-gutter-xs"><span class="material-symbols-outlined text-[18px]">add_circle</span>Agregar equipo o certificación</span>' +
+          '<span class="material-symbols-outlined text-[18px]">expand_more</span>' +
+        '</summary>' +
+        '<form id="admin-add-eq-form" class="flex flex-col gap-gutter-sm mt-gutter-md">' +
+          '<div class="grid grid-cols-2 gap-gutter-xs">' +
+            '<input id="new-eq-id" type="text" required placeholder="Código (ej. GAS-01)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-mono text-body-sm px-gutter-sm py-gutter-xs">' +
+            '<input id="new-eq-name" type="text" required placeholder="Nombre (ej. Sello Verde Gas)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+          '</div>' +
+          '<input id="new-eq-company" type="text" placeholder="Empresa / Certificador (ej. Certificadora SEC)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+          '<select id="new-eq-days" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+            '<option value="30">Mensual (30 días)</option>' +
+            '<option value="90">Trimestral (90 días)</option>' +
+            '<option value="180">Semestral (180 días)</option>' +
+            '<option value="365">Anual · Extintores / Ascensores (365 días)</option>' +
+            '<option value="730">Cada 2 años · Sello Verde Gas / Ascensores (730 días)</option>' +
+          '</select>' +
+          '<button type="submit" id="btn-add-eq-submit" class="w-full min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-md">Guardar equipo</button>' +
+        '</form>' +
+      '</details>';
 
-    container.innerHTML = printTopBtn + equipos.map(function (eq, idx) {
+    const printTopBtn = equipos.length > 0
+      ? '<button type="button" id="btn-print-all-qr" class="w-full min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-secondary text-on-secondary font-label text-label-md shadow-sm hover:bg-primary transition-colors duration-state-change">' +
+          '<span class="material-symbols-outlined text-[18px]" aria-hidden="true">print</span>' +
+          '<span>Imprimir láminas QR (' + equipos.length + ' equipos)</span>' +
+        '</button>'
+      : '';
+
+    const cardsHtml = equipos.length === 0
+      ? '<p class="font-body text-body-sm text-on-surface-variant">No hay equipos registrados en esta comunidad.</p>'
+      : equipos.map(function (eq, idx) {
       const qrUrl = base + '?edificio=' + encodeURIComponent(eq.edificioId) + '&equipo=' + encodeURIComponent(eq.equipoId);
       const waUrl = 'https://wa.me/?text=' + encodeURIComponent('Ficha QR ' + eq.nombre + ' (' + eq.edificioId + '): ' + qrUrl);
       return (
@@ -1037,6 +1068,34 @@
         '</article>'
       );
     }).join('');
+
+    container.innerHTML = addBoxHtml + printTopBtn + cardsHtml;
+
+    const addForm = document.getElementById('admin-add-eq-form');
+    if (addForm) {
+      addForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-add-eq-submit');
+        setLoadingBtn(btn, true, 'Guardando...');
+        const res = await postApi({
+          action: 'addEquipment',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          equipoId: document.getElementById('new-eq-id').value.trim(),
+          nombreEquipo: document.getElementById('new-eq-name').value.trim(),
+          empresa: document.getElementById('new-eq-company').value.trim(),
+          periodicidadDias: Number(document.getElementById('new-eq-days').value || 30),
+        });
+        setLoadingBtn(btn, false, 'Guardar equipo');
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo agregar', true);
+          return;
+        }
+        showToast(res.message);
+        loadAdminPanelData();
+        loadData();
+      });
+    }
 
     const btnPrintAll = document.getElementById('btn-print-all-qr');
     if (btnPrintAll) {
@@ -1510,6 +1569,9 @@
     if (t.includes('bomba') || t.includes('agua') || t.includes('bmb')) return 'water_pump';
     if (t.includes('port') || t.includes('acceso') || t.includes('prt')) return 'garage';
     if (t.includes('generador') || t.includes('electr') || t.includes('gen')) return 'bolt';
+    if (t.includes('gas') || t.includes('sello')) return 'propane_tank';
+    if (t.includes('extintor') || t.includes('incendio') || t.includes('red')) return 'local_fire_department';
+    if (t.includes('cert')) return 'verified';
     if (t.includes('jard') || t.includes('riego')) return 'yard';
     return 'precision_manufacturing';
   }

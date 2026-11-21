@@ -530,11 +530,17 @@
       <form id="sheet-maint-form" class="flex flex-col gap-gutter-md">
         <div class="flex flex-col gap-gutter-xs">
           <span class="font-label text-label-md text-on-surface">Tipo de intervención</span>
-          <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-3 gap-gutter-xs">
+          <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-2 gap-gutter-xs">
             <button type="button" data-maint-type="Preventiva" class="maint-type-btn py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm transition-colors duration-state-change">Preventiva</button>
             <button type="button" data-maint-type="Correctiva" class="maint-type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Correctiva</button>
             <button type="button" data-maint-type="Emergencia" class="maint-type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Emergencia</button>
+            <button type="button" data-maint-type="Certificación" class="maint-type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Certificación</button>
           </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="maint-date" class="font-label text-label-md text-on-surface">Fecha de emisión / visita</label>
+          <input id="maint-date" type="date" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
         </div>
 
         <div class="flex flex-col gap-gutter-xs">
