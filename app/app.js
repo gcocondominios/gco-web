@@ -414,8 +414,9 @@
       });
     });
 
-    ['modal-report', 'modal-auth', 'modal-maintenance', 'modal-admin'].forEach(function (id) {
+    ['modal-report', 'modal-auth', 'modal-maintenance', 'modal-admin', 'modal-qr'].forEach(function (id) {
       const m = document.getElementById(id);
+      if (!m) return;
       m.addEventListener('click', function (e) {
         if (e.target === m) closeModal(id);
       });
@@ -985,8 +986,14 @@
       return;
     }
 
-    container.innerHTML = equipos.map(function (eq) {
-      const base = window.location.origin + window.location.pathname;
+    const base = window.location.origin + window.location.pathname;
+    const printTopBtn =
+      '<button type="button" id="btn-print-all-qr" class="w-full min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-secondary text-on-secondary font-label text-label-md shadow-sm hover:bg-primary transition-colors duration-state-change">' +
+        '<span class="material-symbols-outlined text-[18px]" aria-hidden="true">print</span>' +
+        '<span>Imprimir láminas QR (' + equipos.length + ' equipos)</span>' +
+      '</button>';
+
+    container.innerHTML = printTopBtn + equipos.map(function (eq, idx) {
       const qrUrl = base + '?edificio=' + encodeURIComponent(eq.edificioId) + '&equipo=' + encodeURIComponent(eq.equipoId);
       const waUrl = 'https://wa.me/?text=' + encodeURIComponent('Ficha QR ' + eq.nombre + ' (' + eq.edificioId + '): ' + qrUrl);
       return (
@@ -997,14 +1004,31 @@
               '<span class="font-mono text-mono-sm text-on-surface-variant">#' + escapeHtml(eq.equipoId) + ' · ' + escapeHtml(eq.empresa) + '</span>' +
             '</div>' +
           '</div>' +
-          '<div class="grid grid-cols-3 gap-gutter-xs">' +
-            '<button type="button" data-go-eq="' + escapeHtml(eq.equipoId) + '" class="min-h-[38px] rounded-md bg-primary text-on-primary font-label text-label-sm">Abrir</button>' +
-            '<button type="button" data-copy-qr="' + escapeHtml(qrUrl) + '" class="min-h-[38px] rounded-md bg-surface-card border border-outline text-on-surface font-label text-label-sm">Copiar QR</button>' +
-            '<a href="' + escapeHtml(waUrl) + '" target="_blank" rel="noopener noreferrer" class="min-h-[38px] rounded-md bg-success-container text-on-success-container font-label text-label-sm inline-flex items-center justify-center">WhatsApp</a>' +
+          '<div class="grid grid-cols-2 gap-gutter-xs">' +
+            '<button type="button" data-show-qr="' + idx + '" class="min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs"><span class="material-symbols-outlined text-[16px]">qr_code_2</span>Ver / Descargar QR</button>' +
+            '<button type="button" data-go-eq="' + escapeHtml(eq.equipoId) + '" class="min-h-[40px] rounded-md bg-surface-card border border-outline text-on-surface font-label text-label-sm">Abrir ficha</button>' +
+            '<button type="button" data-copy-qr="' + escapeHtml(qrUrl) + '" class="min-h-[40px] rounded-md bg-surface-card border border-outline text-on-surface font-label text-label-sm">Copiar link</button>' +
+            '<a href="' + escapeHtml(waUrl) + '" target="_blank" rel="noopener noreferrer" class="min-h-[40px] rounded-md bg-success-container text-on-success-container font-label text-label-sm inline-flex items-center justify-center">WhatsApp</a>' +
           '</div>' +
         '</article>'
       );
     }).join('');
+
+    const btnPrintAll = document.getElementById('btn-print-all-qr');
+    if (btnPrintAll) {
+      btnPrintAll.addEventListener('click', function () {
+        printQrCards(equipos);
+      });
+    }
+
+    container.querySelectorAll('[data-show-qr]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const eq = equipos[Number(btn.getAttribute('data-show-qr'))];
+        if (!eq) return;
+        const qrUrl = base + '?edificio=' + encodeURIComponent(eq.edificioId) + '&equipo=' + encodeURIComponent(eq.equipoId);
+        openQrModal(eq, qrUrl);
+      });
+    });
 
     container.querySelectorAll('[data-go-eq]').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -1025,6 +1049,100 @@
         }
       });
     });
+  }
+
+  function openQrModal(eq, qrUrl) {
+    document.getElementById('sheet-qr-title').textContent = eq.nombre;
+    document.getElementById('qr-modal-subtitle').textContent = eq.edificioId + ' · Equipo #' + eq.equipoId;
+    document.getElementById('qr-url-preview').textContent = qrUrl;
+
+    const box = document.getElementById('qr-canvas-box');
+    box.innerHTML = '';
+    if (typeof QRCode === 'undefined') {
+      box.textContent = 'Librería QR no cargada. Recarga la página.';
+      openModal('modal-qr');
+      return;
+    }
+
+    new QRCode(box, {
+      text: qrUrl,
+      width: 220,
+      height: 220,
+      colorDark: '#0F2942',
+      colorLight: '#FFFFFF',
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+
+    document.getElementById('btn-download-qr').onclick = function () {
+      const canvas = box.querySelector('canvas');
+      const img = box.querySelector('img');
+      const dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : '');
+      if (!dataUrl) {
+        showToast('No se pudo generar la imagen QR', true);
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = 'QR_' + eq.edificioId + '_' + eq.equipoId + '.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Imagen QR descargada');
+    };
+
+    document.getElementById('btn-print-single-qr').onclick = function () {
+      printQrCards([eq]);
+    };
+
+    openModal('modal-qr');
+  }
+
+  function printQrCards(equipos) {
+    if (typeof QRCode === 'undefined') {
+      showToast('Librería QR no disponible', true);
+      return;
+    }
+    const sheet = document.getElementById('print-qr-sheet');
+    const base = window.location.origin + window.location.pathname;
+    const buildingTitle = document.getElementById('header-building-name').textContent || state.edificioId;
+
+    sheet.innerHTML =
+      '<div style="font-family: \'Plus Jakarta Sans\', sans-serif; max-width: 820px; margin: 0 auto;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #1D5B96; padding-bottom: 12px; margin-bottom: 20px;">' +
+          '<div>' +
+            '<h1 style="font-size: 20px; font-weight: 700; color: #0F2942; margin: 0;">GCO Gestión de Condominios</h1>' +
+            '<p style="font-size: 13px; color: #49607C; margin: 4px 0 0 0;">Láminas QR de Equipos · ' + escapeHtml(buildingTitle) + '</p>' +
+          '</div>' +
+          '<span style="font-family: \'Red Hat Mono\', monospace; font-size: 12px; color: #1D5B96;">gcoadmin.cl/app</span>' +
+        '</div>' +
+        '<div id="print-qr-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;"></div>' +
+      '</div>';
+
+    const grid = document.getElementById('print-qr-grid');
+    equipos.forEach(function (eq, idx) {
+      const qrUrl = base + '?edificio=' + encodeURIComponent(eq.edificioId) + '&equipo=' + encodeURIComponent(eq.equipoId);
+      const card = document.createElement('div');
+      card.style.cssText = 'border: 1px solid #DEE3ED; border-radius: 12px; padding: 16px; text-align: center; page-break-inside: avoid; background: #FFFFFF;';
+      card.innerHTML =
+        '<div style="font-size: 15px; font-weight: 700; color: #0F2942; margin-bottom: 4px;">' + escapeHtml(eq.nombre) + '</div>' +
+        '<div style="font-family: \'Red Hat Mono\', monospace; font-size: 12px; color: #49607C; margin-bottom: 12px;">Equipo #' + escapeHtml(eq.equipoId) + '</div>' +
+        '<div id="print-qr-box-' + idx + '" style="display: inline-block; padding: 8px; background: #FFFFFF;"></div>' +
+        '<div style="font-size: 11px; color: #49607C; margin-top: 10px;">Escanea para ver estado, PDF o reportar fallas</div>';
+      grid.appendChild(card);
+
+      new QRCode(document.getElementById('print-qr-box-' + idx), {
+        text: qrUrl,
+        width: 150,
+        height: 150,
+        colorDark: '#0F2942',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+    });
+
+    setTimeout(function () {
+      window.print();
+    }, 250);
   }
 
   function renderAdminUsers(usuarios) {

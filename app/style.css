@@ -63,3 +63,12 @@ details > summary::-webkit-details-marker {
     animation: none;
   }
 }
+
+@media print {
+  body > *:not(#print-qr-sheet) {
+    display: none !important;
+  }
+  #print-qr-sheet {
+    display: block !important;
+  }
+}

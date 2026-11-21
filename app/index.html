@@ -594,12 +594,49 @@
     </div>
   </div>
 
+  <!-- BOTTOM SHEET 5: VISOR / DESCARGA DE CÓDIGO QR INDIVIDUAL -->
+  <div id="modal-qr" class="fixed inset-0 z-[55] hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-qr-title">
+    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg items-center text-center">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+
+      <header class="w-full flex items-start justify-between gap-gutter-md text-left">
+        <div class="flex flex-col gap-gutter-xs min-w-0">
+          <h2 id="sheet-qr-title" class="font-headline text-headline-md text-on-surface truncate">Código QR del Equipo</h2>
+          <p id="qr-modal-subtitle" class="font-mono text-mono-sm text-on-surface-variant">Equipo #---</p>
+        </div>
+        <button type="button" data-close-modal="modal-qr" aria-label="Cerrar QR" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <div class="bg-surface-card border border-outline rounded-lg p-gutter-xl shadow-sm flex flex-col items-center gap-gutter-md">
+        <div id="qr-canvas-box" class="p-2 bg-white rounded-md"></div>
+        <p id="qr-url-preview" class="font-mono text-[11px] text-on-surface-variant break-all max-w-[260px]"></p>
+      </div>
+
+      <div class="w-full grid grid-cols-2 gap-gutter-sm">
+        <button id="btn-download-qr" type="button" class="inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">download</span>
+          <span class="font-label text-label-md">Descargar PNG</span>
+        </button>
+        <button id="btn-print-single-qr" type="button" class="inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-md rounded-md bg-surface-subtle border border-outline text-on-surface hover:bg-surface-variant transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">print</span>
+          <span class="font-label text-label-md">Imprimir</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LÁMINA IMPRIMIBLE QR (Solo visible al imprimir) -->
+  <div id="print-qr-sheet" class="hidden p-6 bg-white text-on-surface"></div>
+
   <!-- Lightweight Feedback Toast -->
   <div id="feedback-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md max-w-[90vw]" role="status" aria-live="polite">
     <span id="toast-icon" class="material-symbols-outlined text-[18px] text-success shrink-0" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">check_circle</span>
     <span id="toast-message" class="font-label text-label-md truncate">Acción registrada</span>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
