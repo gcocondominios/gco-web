@@ -138,6 +138,26 @@
       </span>
     </header>
 
+    <!-- Barra de herramientas según rol (Técnico / Admin) -->
+    <section id="role-actions-bar" class="hidden flex-col gap-gutter-sm">
+      <div class="flex items-center justify-between px-gutter-xs">
+        <span id="role-session-badge" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-primary">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">verified_user</span>
+          <span id="role-session-text">Sesión activa</span>
+        </span>
+      </div>
+      <div class="grid grid-cols-1 gap-gutter-sm" id="role-buttons-grid">
+        <button id="btn-open-maintenance" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-secondary text-on-secondary shadow-sm hover:bg-primary transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">build</span>
+          <span class="font-label text-label-lg">Registrar Nueva Mantención</span>
+        </button>
+        <button id="btn-open-admin" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-primary-container text-on-primary-container border border-primary/20 hover:bg-outline transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">admin_panel_settings</span>
+          <span class="font-label text-label-lg">Panel de Administración (Tickets, Equipos y Usuarios)</span>
+        </button>
+      </div>
+    </section>
+
     <!-- ESTADO DE CARGA (SKELETON) -->
     <main id="view-loading" class="flex flex-col gap-section flex-1" aria-busy="true" aria-label="Cargando información del equipo">
       <div class="w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-gco flex flex-col gap-gutter-lg">
@@ -181,26 +201,6 @@
 
     <!-- VISTA 1: FICHA DE EQUIPO INDIVIDUAL -->
     <main id="view-equipment" class="hidden flex-col gap-section flex-1">
-
-      <!-- Barra de herramientas según rol (Técnico / Admin) -->
-      <section id="role-actions-bar" class="hidden flex-col gap-gutter-sm">
-        <div class="flex items-center justify-between px-gutter-xs">
-          <span id="role-session-badge" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-primary">
-            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">verified_user</span>
-            <span id="role-session-text">Sesión activa</span>
-          </span>
-        </div>
-        <div class="grid grid-cols-1 gap-gutter-sm" id="role-buttons-grid">
-          <button id="btn-open-maintenance" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-secondary text-on-secondary shadow-sm hover:bg-primary transition-colors duration-state-change">
-            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">build</span>
-            <span class="font-label text-label-lg">Registrar Nueva Mantención</span>
-          </button>
-          <button id="btn-open-admin" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-primary-container text-on-primary-container border border-primary/20 hover:bg-outline transition-colors duration-state-change">
-            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">admin_panel_settings</span>
-            <span class="font-label text-label-lg">Panel de Administración (Tickets y Usuarios)</span>
-          </button>
-        </div>
-      </section>
 
       <!-- Main Asset Status Card (Hero Card) -->
       <article class="w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-gco flex flex-col gap-gutter-lg">

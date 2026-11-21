@@ -319,6 +319,7 @@
       });
     });
 
+    updateSessionUI();
     showView('directory');
   }
 
@@ -378,7 +379,7 @@
     btnLogout.classList.remove('hidden');
     roleText.textContent = user.nombre + ' (' + user.rol.toUpperCase() + ')';
 
-    const canMaint = user.rol === 'tecnico' || user.rol === 'admin';
+    const canMaint = Boolean((user.rol === 'tecnico' || user.rol === 'admin') && state.equipoId);
     const isAdmin = user.rol === 'admin';
 
     if (canMaint || isAdmin) {
