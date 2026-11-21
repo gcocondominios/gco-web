@@ -8,7 +8,7 @@
   'use strict';
 
   // REEMPLAZAR CON LA URL DE TU WEB APP DE GOOGLE APPS SCRIPT DESPLEGADA
-  const API_URL = 'https://script.google.com/macros/s/REEMPLAZAR_CON_TU_DEPLOYMENT_ID/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbw_hB2YcR0HZeOVRY_ss7egIQWqATVgZe3RtJXXvsY-ZvsYFVjUgInhJNN1I9EKYT0aTA/exec';
 
   const STORAGE_KEY = 'gco_session_v1';
 
