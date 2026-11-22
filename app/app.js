@@ -2513,33 +2513,15 @@
   }
 
   function guessEquipmentIcon(nombre, id) {
-    const t = (String(nombre) + ' ' + String(id))
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-
+    const t = (String(nombre) + ' ' + String(id)).toLowerCase();
     if (t.includes('ascensor') || t.includes('asc')) return 'elevator';
-    if (t.includes('estanque')) return 'water_drop';
     if (t.includes('bomba') || t.includes('agua') || t.includes('bmb')) return 'water_pump';
-    if (t.includes('generador') || t.includes('gen')) return 'power';
-    if (t.includes('electr') || t.includes('tablero')) return 'bolt';
-    if (t.includes('basura') || t.includes('recicl')) return 'recycling';
-    if (t.includes('pasillo')) return 'sensor_door';
-    if (t.includes('caldera') || t.includes('clima')) return 'local_fire_department';
-    if (t.includes('piscina')) return 'pool';
-    if (t.includes('conserj')) return 'support_agent';
-    if (t.includes('estacionamiento') || t.includes('parking')) return 'local_parking';
-    if (t.includes('escala') || t.includes('escalera')) return 'stairs';
-    if (t.includes('porton') || t.includes('prt')) return 'garage';
-    if (t.includes('jardin') || t.includes('riego')) return 'local_florist';
-    if (t.includes('quincho') || t.includes('evento') || t.includes('asado')) return 'outdoor_grill';
-    if (t.includes('gimnasio') || t.includes('gym')) return 'fitness_center';
-    if (t.includes('camara') || t.includes('cctv')) return 'videocam';
-    if (t.includes('lavander')) return 'local_laundry_service';
-    if (t.includes('extintor') || t.includes('incendio') || t.includes('red humeda') || t.includes('red seca')) return 'fire_extinguisher';
-    if (t.includes('citofon') || t.includes('acceso')) return 'doorbell';
+    if (t.includes('port') || t.includes('acceso') || t.includes('prt')) return 'garage';
+    if (t.includes('generador') || t.includes('electr') || t.includes('gen')) return 'bolt';
     if (t.includes('gas') || t.includes('sello')) return 'propane_tank';
+    if (t.includes('extintor') || t.includes('incendio') || t.includes('red')) return 'local_fire_department';
     if (t.includes('cert')) return 'verified';
+    if (t.includes('jard') || t.includes('riego')) return 'yard';
     return 'precision_manufacturing';
   }
 
