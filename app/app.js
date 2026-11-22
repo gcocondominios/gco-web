@@ -523,7 +523,7 @@
     btnLogout.classList.remove('hidden');
     roleText.textContent = user.nombre + ' (' + user.rol.toUpperCase() + ')';
 
-    const canMaint = Boolean((user.rol === 'tecnico' || user.rol === 'admin') && state.equipoId);
+    const canMaint = Boolean(user.rol === 'tecnico' || user.rol === 'admin');
     const isAdmin = user.rol === 'admin';
     const isCommittee = user.rol === 'comite' || user.rol === 'admin';
 
@@ -846,7 +846,46 @@
         const dd = String(now.getDate()).padStart(2, '0');
         dateInput.value = yyyy + '-' + mm + '-' + dd;
       }
+
+      const areaWrap = document.getElementById('maint-area-select-wrap');
+      const areaSel = document.getElementById('maint-area-select');
+      if (areaWrap && areaSel) {
+        if (!state.equipoId && state.data && Array.isArray(state.data.equipos) && state.data.equipos.length > 0) {
+          areaSel.innerHTML = state.data.equipos.map(function (eq) {
+            return '<option value="' + escapeHtml(eq.id) + '">' + escapeHtml(eq.nombre) + ' (#' + escapeHtml(eq.id) + ')</option>';
+          }).join('');
+          document.getElementById('maint-eq-subtitle').textContent = state.data.edificio.nombre + ' · Ronda rápida';
+          areaWrap.classList.remove('hidden');
+          areaWrap.classList.add('flex');
+        } else {
+          areaWrap.classList.add('hidden');
+          areaWrap.classList.remove('flex');
+        }
+      }
+
       openModal('modal-maintenance');
+    });
+
+    document.querySelectorAll('.quick-issue-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        const txt = chip.getAttribute('data-issue-text') || '';
+        const isOk = chip.getAttribute('data-issue-ok') === '1';
+        const notesEl = document.getElementById('maint-sheet-notes');
+        if (!notesEl) return;
+
+        if (isOk) {
+          notesEl.value = txt;
+          const okPill = document.querySelector('.maint-state-pill[data-maint-state="Operativo"]');
+          if (okPill) okPill.click();
+        } else {
+          const current = notesEl.value.trim();
+          if (!current || current === 'Recorrido conforme, sin novedades ni observaciones.') {
+            notesEl.value = txt;
+          } else if (current.indexOf(txt) === -1) {
+            notesEl.value = current + '. ' + txt;
+          }
+        }
+      });
     });
 
     document.querySelectorAll('.maint-type-btn').forEach(function (btn) {
@@ -930,11 +969,14 @@
         archivosPayload.push({ base64: sigData, mimeType: 'image/png', name: 'Firma_Terreno.png' });
       }
 
+      const areaSel = document.getElementById('maint-area-select');
+      const targetEquipoId = state.equipoId || (areaSel ? areaSel.value : '');
+
       const res = await postApi({
         action: 'addMaintenance',
         token: state.session.token,
         edificioId: state.edificioId,
-        equipoId: state.equipoId,
+        equipoId: targetEquipoId,
         fecha: document.getElementById('maint-date').value,
         tipo: state.maintType,
         estadoResultante: state.maintState,
@@ -942,6 +984,21 @@
         costoClp: Number(document.getElementById('maint-cost').value || 0),
         archivos: archivosPayload,
       });
+
+      const createTicketChk = document.getElementById('maint-create-ticket');
+      if (res.ok && createTicketChk && createTicketChk.checked && targetEquipoId) {
+        const imgPhotos = state.maintFiles.filter(function (f) { return f.isImage; }).map(function (f) { return f.base64; });
+        await postApi({
+          action: 'createTicket',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          equipoId: targetEquipoId,
+          depto: 'Ronda Administración',
+          emailVecino: state.session.user.email,
+          descripcion: '[Hallazgo en Ronda] ' + notesRaw,
+          fotos: imgPhotos,
+        });
+      }
 
       setLoadingBtn(btn, false, 'Guardar y publicar registro');
 
@@ -2513,15 +2570,33 @@
   }
 
   function guessEquipmentIcon(nombre, id) {
-    const t = (String(nombre) + ' ' + String(id)).toLowerCase();
+    const t = (String(nombre) + ' ' + String(id))
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
     if (t.includes('ascensor') || t.includes('asc')) return 'elevator';
+    if (t.includes('estanque')) return 'water_drop';
     if (t.includes('bomba') || t.includes('agua') || t.includes('bmb')) return 'water_pump';
-    if (t.includes('port') || t.includes('acceso') || t.includes('prt')) return 'garage';
-    if (t.includes('generador') || t.includes('electr') || t.includes('gen')) return 'bolt';
+    if (t.includes('generador') || t.includes('gen')) return 'power';
+    if (t.includes('electr') || t.includes('tablero')) return 'bolt';
+    if (t.includes('basura') || t.includes('recicl')) return 'recycling';
+    if (t.includes('pasillo')) return 'sensor_door';
+    if (t.includes('caldera') || t.includes('clima')) return 'local_fire_department';
+    if (t.includes('piscina')) return 'pool';
+    if (t.includes('conserj')) return 'support_agent';
+    if (t.includes('estacionamiento') || t.includes('parking')) return 'local_parking';
+    if (t.includes('escala') || t.includes('escalera')) return 'stairs';
+    if (t.includes('porton') || t.includes('prt')) return 'garage';
+    if (t.includes('jardin') || t.includes('riego')) return 'local_florist';
+    if (t.includes('quincho') || t.includes('evento') || t.includes('asado')) return 'outdoor_grill';
+    if (t.includes('gimnasio') || t.includes('gym')) return 'fitness_center';
+    if (t.includes('camara') || t.includes('cctv')) return 'videocam';
+    if (t.includes('lavander')) return 'local_laundry_service';
+    if (t.includes('extintor') || t.includes('incendio') || t.includes('red humeda') || t.includes('red seca')) return 'fire_extinguisher';
+    if (t.includes('citofon') || t.includes('acceso')) return 'doorbell';
     if (t.includes('gas') || t.includes('sello')) return 'propane_tank';
-    if (t.includes('extintor') || t.includes('incendio') || t.includes('red')) return 'local_fire_department';
     if (t.includes('cert')) return 'verified';
-    if (t.includes('jard') || t.includes('riego')) return 'yard';
     return 'precision_manufacturing';
   }
 
