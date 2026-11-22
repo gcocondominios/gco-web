@@ -322,7 +322,7 @@
             pdfLinkHtml +
             '<div class="flex flex-wrap items-center gap-gutter-md mt-gutter-sm">' +
               '<button type="button" data-receipt-idx="' + idx + '" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-secondary hover:text-primary"><span class="material-symbols-outlined text-[15px]">qr_code_2</span>Comprobante PDF con QR</button>' +
-              (pdfLinks.length > 0 && state.session && ['admin', 'comite', 'tecnico'].indexOf(state.session.user.rol) !== -1
+              (pdfLinks.length > 0 && state.session && ['admin', 'comite'].indexOf(state.session.user.rol) !== -1
                 ? '<button type="button" data-ai-maint="' + idx + '" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[15px]">auto_awesome</span>Analizar con IA</button>'
                 : '') +
             '</div>' +
