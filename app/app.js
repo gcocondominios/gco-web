@@ -1586,6 +1586,52 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(function () {});
     }
+    setupInstallPrompt();
+  }
+
+  let deferredInstallPrompt = null;
+  function setupInstallPrompt() {
+    const btn = document.getElementById('btn-install-app');
+    if (!btn) return;
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone) return;
+
+    const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+
+    if (isIos) {
+      btn.classList.remove('hidden');
+      btn.classList.add('inline-flex');
+      btn.addEventListener('click', function () {
+        showToast('En iPhone/iPad: toca Compartir (↑) y luego "Agregar a inicio"');
+      });
+      return;
+    }
+
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      btn.classList.remove('hidden');
+      btn.classList.add('inline-flex');
+    });
+
+    btn.addEventListener('click', async function () {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') {
+        btn.classList.add('hidden');
+        btn.classList.remove('inline-flex');
+        showToast('Instalando GCO App...');
+      }
+      deferredInstallPrompt = null;
+    });
+
+    window.addEventListener('appinstalled', function () {
+      btn.classList.add('hidden');
+      btn.classList.remove('inline-flex');
+      deferredInstallPrompt = null;
+    });
   }
 
   function loadOfflineQueue() {
