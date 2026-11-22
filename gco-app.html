@@ -230,25 +230,25 @@
                             data-tab-target="mod-tec"
                             data-img="img/app/acceso-roles.png"
                             data-alt="Acceso técnico para registro de mantenciones en terreno"
-                            data-caption="Acceso Técnico: órdenes pendientes, pauta, firma digital y modo offline.">
+                            data-caption="Acceso Técnico y Comité: pauta de chequeo, firma digital en pantalla y modo offline.">
                             <strong>Terreno y Offline</strong>
                             <span>Registro técnico + firma</span>
                         </button>
                         <button type="button" class="app-tab-btn" role="tab" aria-selected="false"
                             data-tab-target="mod-com"
-                            data-img="img/app/directorio-equipos.png"
-                            data-alt="Portal Comité con resumen y actas PDF"
-                            data-caption="Portal Comité: resumen del edificio, cotizaciones y Acta Ejecutiva PDF.">
+                            data-img="img/app/ficha-observacion.png"
+                            data-alt="Estado de equipos en observación y seguimiento para comité"
+                            data-caption="Control Comité: seguimiento de equipos en observación, cotizaciones y Acta Ejecutiva PDF.">
                             <strong>Portal Comité</strong>
                             <span>Cotizaciones y Actas PDF</span>
                         </button>
                         <button type="button" class="app-tab-btn" role="tab" aria-selected="false"
                             data-tab-target="mod-adm"
-                            data-img="img/app/acceso-roles.png"
-                            data-alt="Panel de Administración multi-comunidad"
-                            data-caption="Panel Administración: Tickets, Órdenes, Cotizaciones, Equipos (QR) y Usuarios.">
+                            data-img="img/app/ficha-alerta.png"
+                            data-alt="Alerta de equipo fuera de servicio y gestión de órdenes"
+                            data-caption="Alertas y Panel Admin: gestión de emergencias, órdenes, equipos, láminas QR y usuarios.">
                             <strong>Panel Admin y QR</strong>
-                            <span>Gestión y láminas QR</span>
+                            <span>Alertas y láminas QR</span>
                         </button>
                     </div>
 
@@ -339,8 +339,8 @@
                 <div>
                     <div class="app-steps-list">
                         <button type="button" class="app-step-btn is-active" data-step-index="0"
-                            data-img="img/app/ficha-equipo-qr.png"
-                            data-alt="Paso 1: Escaneo de QR y consulta del equipo">
+                            data-img="img/app/directorio-equipos.png"
+                            data-alt="Paso 1: Directorio de equipos y escaneo de QR">
                             <span class="app-step-num">01</span>
                             <strong>Escanear QR o abrir el Directorio</strong>
                         </button>
@@ -363,7 +363,7 @@
                             <strong>Actualizar semáforo y publicar PDF</strong>
                         </button>
                         <button type="button" class="app-step-btn" data-step-index="4"
-                            data-img="img/app/directorio-equipos.png"
+                            data-img="img/app/ficha-observacion.png"
                             data-alt="Paso 5: Revisión en Portal Comité y Acta PDF">
                             <span class="app-step-num">05</span>
                             <strong>Revisar cotizaciones y generar Acta Comité PDF</strong>
@@ -377,52 +377,54 @@
                     </div>
                 </div>
 
-                <div>
-                    <div class="app-detail-box" data-step-panel="0">
-                        <h3>01 · Escanear QR o abrir el Directorio</h3>
-                        <p>Cada equipo del edificio tiene un código QR único. Al escanearlo desde cualquier cámara se abre al instante su ficha en GCO App sin descargar nada.</p>
-                        <ul class="app-bullets">
-                            <li>Semáforo visible al instante (Operativo / Observación / Alerta).</li>
-                            <li>Acceso al directorio completo para comparar todos los equipos del condominio.</li>
-                        </ul>
-                    </div>
-                    <div class="app-detail-box" data-step-panel="1" hidden>
-                        <h3>02 · Reportar falla con foto o asignar orden</h3>
-                        <p>Si un residente detecta un problema, envía un ticket en segundos con foto y síntoma. Si es mantención programada, administración asigna la orden al técnico.</p>
-                        <ul class="app-bullets">
-                            <li>Evita avisos perdidos en WhatsApp.</li>
-                            <li>El técnico ve sus órdenes pendientes directamente en la ficha del equipo.</li>
-                        </ul>
-                    </div>
-                    <div class="app-detail-box" data-step-panel="2" hidden>
-                        <h3>03 · Ejecutar en terreno (incluso Offline) y firmar</h3>
-                        <p>El técnico selecciona el tipo de intervención, marca la pauta de chequeo, adjunta fotos o PDF y captura su firma digital en la pantalla.</p>
-                        <ul class="app-bullets">
-                            <li>Funciona en subterráneos o salas de bombas sin cobertura móvil.</li>
-                            <li>Sincronización automática apenas el teléfono recupera señal.</li>
-                        </ul>
-                    </div>
-                    <div class="app-detail-box" data-step-panel="3" hidden>
-                        <h3>04 · Actualizar semáforo y publicar PDF</h3>
-                        <p>Al guardar el registro, el estado del equipo se actualiza en tiempo real y el comprobante o informe certificado queda disponible para toda la comunidad.</p>
-                        <ul class="app-bullets">
-                            <li>Comprobante de visita con QR verificable.</li>
-                            <li>Historial cronológico ordenado por equipo para auditorías Ley 21.442.</li>
-                        </ul>
-                    </div>
-                    <div class="app-detail-box" data-step-panel="4" hidden>
-                        <h3>05 · Revisar cotizaciones y generar Acta Comité PDF</h3>
-                        <p>El comité ingresa al Portal Comité para evaluar cotizaciones pendientes y descargar el Acta / Informe Ejecutivo PDF con el resumen completo del edificio.</p>
-                        <ul class="app-bullets">
-                            <li>Transparencia total frente a copropietarios y asambleas.</li>
-                            <li>Respaldo ordenado en caso de fiscalización o cambio de proveedor.</li>
-                        </ul>
+                <div class="app-steps-right">
+                    <div>
+                        <div class="app-detail-box" data-step-panel="0">
+                            <h3>01 · Escanear QR o abrir el Directorio</h3>
+                            <p>Cada equipo del edificio tiene un código QR único. Al escanearlo desde cualquier cámara se abre al instante su ficha en GCO App sin descargar nada.</p>
+                            <ul class="app-bullets">
+                                <li>Semáforo visible al instante (Operativo / Observación / Alerta).</li>
+                                <li>Acceso al directorio completo para comparar todos los equipos del condominio.</li>
+                            </ul>
+                        </div>
+                        <div class="app-detail-box" data-step-panel="1" hidden>
+                            <h3>02 · Reportar falla con foto o asignar orden</h3>
+                            <p>Si un residente detecta un problema, envía un ticket en segundos con foto y síntoma. Si es mantención programada, administración asigna la orden al técnico.</p>
+                            <ul class="app-bullets">
+                                <li>Evita avisos perdidos en WhatsApp y advierte reportes activos.</li>
+                                <li>El técnico ve sus órdenes pendientes directamente en la ficha del equipo.</li>
+                            </ul>
+                        </div>
+                        <div class="app-detail-box" data-step-panel="2" hidden>
+                            <h3>03 · Ejecutar en terreno (incluso Offline) y firmar</h3>
+                            <p>El técnico selecciona el tipo de intervención, marca la pauta de chequeo, adjunta fotos o PDF y captura su firma digital en la pantalla.</p>
+                            <ul class="app-bullets">
+                                <li>Funciona en subterráneos o salas de bombas sin cobertura móvil.</li>
+                                <li>Sincronización automática apenas el teléfono recupera señal.</li>
+                            </ul>
+                        </div>
+                        <div class="app-detail-box" data-step-panel="3" hidden>
+                            <h3>04 · Actualizar semáforo y publicar PDF</h3>
+                            <p>Al guardar el registro, el estado del equipo se actualiza en tiempo real y el comprobante o informe certificado queda disponible para toda la comunidad.</p>
+                            <ul class="app-bullets">
+                                <li>Comprobante de visita con QR verificable y pauta 4/4 (100%).</li>
+                                <li>Historial cronológico ordenado por equipo para auditorías Ley 21.442.</li>
+                            </ul>
+                        </div>
+                        <div class="app-detail-box" data-step-panel="4" hidden>
+                            <h3>05 · Revisar cotizaciones y generar Acta Comité PDF</h3>
+                            <p>El comité ingresa al Portal Comité para evaluar cotizaciones pendientes, monitorear equipos en observación y descargar el Acta / Informe Ejecutivo PDF.</p>
+                            <ul class="app-bullets">
+                                <li>Transparencia total frente a copropietarios y asambleas.</li>
+                                <li>Respaldo ordenado en caso de fiscalización o cambio de proveedor.</li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div class="app-phone-wrapper" style="margin-top: 20px;">
-                        <div class="app-phone-frame" style="max-width: 280px;">
+                    <div class="app-phone-wrapper">
+                        <div class="app-phone-frame" style="max-width: 240px;">
                             <div class="app-phone-screen">
-                                <img src="img/app/ficha-equipo-qr.png" alt="Paso 1: Escaneo de QR y consulta del equipo" data-step-img loading="lazy">
+                                <img src="img/app/directorio-equipos.png" alt="Paso 1: Directorio de equipos y escaneo de QR" data-step-img loading="lazy">
                             </div>
                         </div>
                     </div>
