@@ -107,7 +107,7 @@
 </head>
 <body class="bg-surface text-on-surface font-body antialiased">
 
-  <div class="min-h-screen w-full max-w-md mx-auto px-page-margin py-gutter-xl flex flex-col gap-section">
+  <div class="min-h-screen w-full max-w-md md:max-w-3xl lg:max-w-4xl mx-auto px-page-margin py-gutter-xl flex flex-col gap-section">
 
     <!-- Compact Top Header -->
     <header class="flex items-center justify-between gap-gutter-md">
@@ -154,7 +154,7 @@
           <span id="role-session-text">Sesión activa</span>
         </span>
       </div>
-      <div class="grid grid-cols-1 gap-gutter-sm" id="role-buttons-grid">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-sm" id="role-buttons-grid">
         <button id="btn-open-maintenance" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-secondary text-on-secondary shadow-sm hover:bg-primary transition-colors duration-state-change">
           <span class="material-symbols-outlined text-[20px]" aria-hidden="true">build</span>
           <span class="font-label text-label-lg">Registrar Nueva Mantención</span>
@@ -347,7 +347,7 @@
         </div>
       </section>
 
-      <section id="directory-list" class="flex flex-col gap-gutter-md" aria-label="Lista de equipos">
+      <section id="directory-list" class="flex flex-col md:grid md:grid-cols-2 gap-gutter-md" aria-label="Lista de equipos">
       </section>
     </main>
 
@@ -380,9 +380,9 @@
   </div>
 
   <!-- BOTTOM SHEET 1: REPORTAR PROBLEMA -->
-  <div id="modal-report" class="fixed inset-0 z-50 hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-report-title">
-    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
-      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+  <div id="modal-report" class="fixed inset-0 z-50 hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-report-title">
+    <div class="sheet-panel w-full max-w-md md:max-w-lg bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
 
       <header class="flex items-start justify-between gap-gutter-md">
         <div class="flex flex-col gap-gutter-xs">
@@ -448,9 +448,9 @@
   </div>
 
   <!-- BOTTOM SHEET 2: ACCESO TÉCNICO / ADMINISTRACIÓN -->
-  <div id="modal-auth" class="fixed inset-0 z-50 hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-auth-title">
-    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
-      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+  <div id="modal-auth" class="fixed inset-0 z-50 hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-auth-title">
+    <div class="sheet-panel w-full max-w-md md:max-w-lg bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
 
       <header class="flex items-start justify-between gap-gutter-md">
         <div class="flex flex-col gap-gutter-xs">
@@ -564,9 +564,9 @@
   </div>
 
   <!-- BOTTOM SHEET 3: REGISTRO DE MANTENCIÓN -->
-  <div id="modal-maintenance" class="fixed inset-0 z-50 hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-maint-title">
-    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
-      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+  <div id="modal-maintenance" class="fixed inset-0 z-50 hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-maint-title">
+    <div class="sheet-panel w-full max-w-md md:max-w-xl bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
 
       <header class="flex items-start justify-between gap-gutter-md">
         <div class="flex flex-col gap-gutter-xs">
@@ -661,10 +661,10 @@
     </div>
   </div>
 
-  <!-- BOTTOM SHEET 4: PANEL DE ADMINISTRACIÓN -->
-  <div id="modal-admin" class="fixed inset-0 z-50 hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-admin-title">
-    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
-      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+  <!-- BOTTOM SHEET 4: PANEL DE ADMINISTRACIÓN (Bottom sheet en móvil, Modal ancho en PC) -->
+  <div id="modal-admin" class="fixed inset-0 z-50 hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-admin-title">
+    <div class="sheet-panel w-full max-w-md md:max-w-3xl lg:max-w-4xl bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
 
       <header class="flex items-start justify-between gap-gutter-md">
         <div class="flex flex-col gap-gutter-xs">
@@ -713,9 +713,9 @@
   </div>
 
   <!-- BOTTOM SHEET 5: VISOR / DESCARGA DE CÓDIGO QR INDIVIDUAL -->
-  <div id="modal-qr" class="fixed inset-0 z-[55] hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-qr-title">
-    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg items-center text-center">
-      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+  <div id="modal-qr" class="fixed inset-0 z-[55] hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-qr-title">
+    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg items-center text-center">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
 
       <header class="w-full flex items-start justify-between gap-gutter-md text-left">
         <div class="flex flex-col gap-gutter-xs min-w-0">
@@ -748,10 +748,10 @@
   <!-- LÁMINA IMPRIMIBLE QR (Solo visible al imprimir) -->
   <div id="print-qr-sheet" class="hidden p-6 bg-white text-on-surface"></div>
 
-  <!-- BOTTOM SHEET 6: PORTAL COMITÉ DE ADMINISTRACIÓN -->
-  <div id="modal-committee" class="fixed inset-0 z-50 hidden items-end justify-center bg-secondary/45" role="dialog" aria-modal="true" aria-labelledby="sheet-committee-title">
-    <div class="sheet-panel w-full max-w-md bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
-      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+  <!-- BOTTOM SHEET 6: PORTAL COMITÉ DE ADMINISTRACIÓN (Bottom sheet en móvil, Modal ancho en PC) -->
+  <div id="modal-committee" class="fixed inset-0 z-50 hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-committee-title">
+    <div class="sheet-panel w-full max-w-md md:max-w-3xl lg:max-w-4xl bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
 
       <header class="flex items-start justify-between gap-gutter-md">
         <div class="flex flex-col gap-gutter-xs min-w-0">
