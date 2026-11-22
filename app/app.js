@@ -523,7 +523,7 @@
     btnLogout.classList.remove('hidden');
     roleText.textContent = user.nombre + ' (' + user.rol.toUpperCase() + ')';
 
-    const canMaint = Boolean((user.rol === 'tecnico' || user.rol === 'admin') && state.equipoId);
+    const canMaint = Boolean(user.rol === 'tecnico' || user.rol === 'admin');
     const isAdmin = user.rol === 'admin';
     const isCommittee = user.rol === 'comite' || user.rol === 'admin';
 
@@ -846,7 +846,46 @@
         const dd = String(now.getDate()).padStart(2, '0');
         dateInput.value = yyyy + '-' + mm + '-' + dd;
       }
+
+      const areaWrap = document.getElementById('maint-area-select-wrap');
+      const areaSel = document.getElementById('maint-area-select');
+      if (areaWrap && areaSel) {
+        if (!state.equipoId && state.data && Array.isArray(state.data.equipos) && state.data.equipos.length > 0) {
+          areaSel.innerHTML = state.data.equipos.map(function (eq) {
+            return '<option value="' + escapeHtml(eq.id) + '">' + escapeHtml(eq.nombre) + ' (#' + escapeHtml(eq.id) + ')</option>';
+          }).join('');
+          document.getElementById('maint-eq-subtitle').textContent = state.data.edificio.nombre + ' · Ronda rápida';
+          areaWrap.classList.remove('hidden');
+          areaWrap.classList.add('flex');
+        } else {
+          areaWrap.classList.add('hidden');
+          areaWrap.classList.remove('flex');
+        }
+      }
+
       openModal('modal-maintenance');
+    });
+
+    document.querySelectorAll('.quick-issue-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        const txt = chip.getAttribute('data-issue-text') || '';
+        const isOk = chip.getAttribute('data-issue-ok') === '1';
+        const notesEl = document.getElementById('maint-sheet-notes');
+        if (!notesEl) return;
+
+        if (isOk) {
+          notesEl.value = txt;
+          const okPill = document.querySelector('.maint-state-pill[data-maint-state="Operativo"]');
+          if (okPill) okPill.click();
+        } else {
+          const current = notesEl.value.trim();
+          if (!current || current === 'Recorrido conforme, sin novedades ni observaciones.') {
+            notesEl.value = txt;
+          } else if (current.indexOf(txt) === -1) {
+            notesEl.value = current + '. ' + txt;
+          }
+        }
+      });
     });
 
     document.querySelectorAll('.maint-type-btn').forEach(function (btn) {
@@ -930,11 +969,14 @@
         archivosPayload.push({ base64: sigData, mimeType: 'image/png', name: 'Firma_Terreno.png' });
       }
 
+      const areaSel = document.getElementById('maint-area-select');
+      const targetEquipoId = state.equipoId || (areaSel ? areaSel.value : '');
+
       const res = await postApi({
         action: 'addMaintenance',
         token: state.session.token,
         edificioId: state.edificioId,
-        equipoId: state.equipoId,
+        equipoId: targetEquipoId,
         fecha: document.getElementById('maint-date').value,
         tipo: state.maintType,
         estadoResultante: state.maintState,
@@ -942,6 +984,21 @@
         costoClp: Number(document.getElementById('maint-cost').value || 0),
         archivos: archivosPayload,
       });
+
+      const createTicketChk = document.getElementById('maint-create-ticket');
+      if (res.ok && createTicketChk && createTicketChk.checked && targetEquipoId) {
+        const imgPhotos = state.maintFiles.filter(function (f) { return f.isImage; }).map(function (f) { return f.base64; });
+        await postApi({
+          action: 'createTicket',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          equipoId: targetEquipoId,
+          depto: 'Ronda Administración',
+          emailVecino: state.session.user.email,
+          descripcion: '[Hallazgo en Ronda] ' + notesRaw,
+          fotos: imgPhotos,
+        });
+      }
 
       setLoadingBtn(btn, false, 'Guardar y publicar registro');
 

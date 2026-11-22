@@ -580,6 +580,11 @@
       </header>
 
       <form id="sheet-maint-form" class="flex flex-col gap-gutter-md">
+        <div id="maint-area-select-wrap" class="hidden flex-col gap-gutter-xs">
+          <label for="maint-area-select" class="font-label text-label-md text-on-surface">Área / Equipo de la ronda</label>
+          <select id="maint-area-select" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></select>
+        </div>
+
         <div class="flex flex-col gap-gutter-xs">
           <span class="font-label text-label-md text-on-surface">Tipo de intervención</span>
           <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-2 gap-gutter-xs">
@@ -628,6 +633,19 @@
         </div>
 
         <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-sm text-on-surface-variant">Hallazgos frecuentes (1 toque para rellenar)</span>
+          <div id="maint-quick-issues" class="flex flex-wrap gap-gutter-xs">
+            <button type="button" data-issue-text="Recorrido conforme, sin novedades ni observaciones." data-issue-ok="1" class="quick-issue-chip px-gutter-sm py-1 rounded-full bg-success-container text-on-success-container font-label text-[11px]">Todo OK</button>
+            <button type="button" data-issue-text="Luminaria quemada o parpadeando" class="quick-issue-chip px-gutter-sm py-1 rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-[11px]">Luminaria</button>
+            <button type="button" data-issue-text="Filtración o humedad detectada" class="quick-issue-chip px-gutter-sm py-1 rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-[11px]">Filtración</button>
+            <button type="button" data-issue-text="Falta aseo o presencia de mal olor" class="quick-issue-chip px-gutter-sm py-1 rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-[11px]">Aseo / Olor</button>
+            <button type="button" data-issue-text="Puerta, bisagra o chapa desajustada" class="quick-issue-chip px-gutter-sm py-1 rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-[11px]">Puerta / Chapa</button>
+            <button type="button" data-issue-text="Ruido o vibración inusual en operación" class="quick-issue-chip px-gutter-sm py-1 rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-[11px]">Ruido / Vibración</button>
+            <button type="button" data-issue-text="Señalética o extintor obstruido / vencido" class="quick-issue-chip px-gutter-sm py-1 rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-[11px]">Seguridad / Extintor</button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
           <label for="maint-sheet-notes" class="font-label text-label-md text-on-surface">Observaciones técnicas</label>
           <textarea id="maint-sheet-notes" rows="3" required placeholder="Detalle breve de los trabajos efectuados..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
         </div>
@@ -653,6 +671,11 @@
           </button>
           <div id="maint-file-preview-wrap" class="hidden flex-wrap gap-gutter-sm bg-surface-subtle border border-outline rounded-md p-gutter-sm mt-gutter-xs"></div>
         </div>
+
+        <label class="flex items-center gap-gutter-sm bg-warning-container/60 rounded-md px-gutter-md py-gutter-sm cursor-pointer">
+          <input id="maint-create-ticket" type="checkbox" class="rounded-sm border-outline text-primary focus:ring-primary">
+          <span class="font-label text-label-sm text-on-surface">Crear también Ticket de seguimiento con esta observación</span>
+        </label>
 
         <button type="submit" id="btn-maint-submit" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change active:scale-[0.99]">
           <span class="material-symbols-outlined text-[20px]" aria-hidden="true">check_circle</span>
