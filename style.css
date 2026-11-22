@@ -1027,6 +1027,11 @@ body.cookie-banner-visible .whatsapp-float { opacity: 0; pointer-events: none; }
     gap: 8px;
 }
 
+.app-compare-list[hidden],
+.app-detail-box[hidden] {
+    display: none !important;
+}
+
 .app-compare-list li {
     font-size: 0.92rem;
     color: var(--gray-text);
