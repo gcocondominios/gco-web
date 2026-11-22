@@ -525,6 +525,28 @@
           Volver a iniciar sesión
         </button>
       </div>
+
+      <!-- Cambio obligatorio de clave provisoria -->
+      <div id="auth-force-password-panel" class="hidden flex-col gap-gutter-md">
+        <div class="bg-primary-container text-on-primary-container rounded-md px-gutter-md py-gutter-sm flex items-center gap-gutter-sm">
+          <span class="material-symbols-outlined text-[18px] shrink-0" aria-hidden="true">key</span>
+          <span class="font-label text-label-sm">Es tu primer ingreso. Crea tu contraseña personal para continuar.</span>
+        </div>
+
+        <form id="force-password-form" class="flex flex-col gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="force-new-pass" class="font-label text-label-sm text-on-surface-variant">Nueva contraseña personal</label>
+            <input id="force-new-pass" type="password" minlength="6" required placeholder="Mínimo 6 caracteres" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="force-confirm-pass" class="font-label text-label-sm text-on-surface-variant">Repetir contraseña</label>
+            <input id="force-confirm-pass" type="password" minlength="6" required placeholder="Repite tu contraseña" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <button type="submit" id="btn-force-pass-submit" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
+            <span class="font-label text-label-lg">Guardar contraseña e ingresar</span>
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -551,6 +573,7 @@
             <button type="button" data-maint-type="Correctiva" class="maint-type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Correctiva</button>
             <button type="button" data-maint-type="Emergencia" class="maint-type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Emergencia</button>
             <button type="button" data-maint-type="Certificación" class="maint-type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Certificación</button>
+            <button type="button" data-maint-type="Ronda Administración" class="maint-type-btn col-span-2 py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change">Ronda Administración</button>
           </div>
         </div>
 

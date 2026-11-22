@@ -223,9 +223,11 @@
     }
 
     container.innerHTML = items.map(function (m, idx) {
-      const isCorr = m.tipo.toLowerCase() !== 'preventiva';
+      const tLow = m.tipo.toLowerCase();
+      const isRonda = tLow.indexOf('ronda') !== -1;
+      const isCorr = !isRonda && tLow !== 'preventiva' && tLow.indexOf('cert') === -1;
       const iconBg = isCorr ? 'bg-warning-container text-on-warning-container' : 'bg-primary-container text-on-primary-container';
-      const iconName = isCorr ? 'handyman' : 'build_circle';
+      const iconName = isRonda ? 'fact_check' : (isCorr ? 'handyman' : 'build_circle');
       const pdfLinks = splitLinks(m.linkPdf);
       const pdfLinkHtml = pdfLinks.length > 0
         ? '<div class="flex flex-wrap gap-gutter-sm mt-gutter-sm">' + pdfLinks.map(function (u, j) {
@@ -635,10 +637,53 @@
         return;
       }
 
+      if (res.requirePasswordChange) {
+        state.tempToken = res.token;
+        document.getElementById('auth-form').classList.add('hidden');
+        document.getElementById('auth-reset-panel').classList.add('hidden');
+        const forcePanel = document.getElementById('auth-force-password-panel');
+        forcePanel.classList.remove('hidden');
+        forcePanel.classList.add('flex');
+        return;
+      }
+
       saveSession({ token: res.token, user: res.user });
       closeModal('modal-auth');
       document.getElementById('auth-form').reset();
       showToast('Bienvenido/a, ' + res.user.nombre);
+    });
+
+    document.getElementById('force-password-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const p1 = document.getElementById('force-new-pass').value;
+      const p2 = document.getElementById('force-confirm-pass').value;
+      if (p1 !== p2) {
+        showToast('Las contraseñas no coinciden', true);
+        return;
+      }
+      const btn = document.getElementById('btn-force-pass-submit');
+      setLoadingBtn(btn, true, 'Guardando...');
+      const res = await postApi({
+        action: 'completeFirstPassword',
+        token: state.tempToken || '',
+        newPassword: p1,
+      });
+      setLoadingBtn(btn, false, 'Guardar contraseña e ingresar');
+
+      if (!res.ok) {
+        showToast(res.error || 'No se pudo guardar la clave', true);
+        return;
+      }
+
+      state.tempToken = '';
+      document.getElementById('force-password-form').reset();
+      document.getElementById('auth-force-password-panel').classList.add('hidden');
+      document.getElementById('auth-force-password-panel').classList.remove('flex');
+      document.getElementById('auth-form').classList.remove('hidden');
+      document.getElementById('auth-form').reset();
+      saveSession({ token: res.token, user: res.user });
+      closeModal('modal-auth');
+      showToast(res.message || 'Contraseña guardada');
     });
 
     // Recuperación de contraseña
@@ -1432,26 +1477,91 @@
 
   function renderAdminUsers(usuarios) {
     const container = document.getElementById('admin-tab-usuarios');
+
+    const createBoxHtml =
+      '<details class="bg-surface-subtle rounded-lg border border-outline p-gutter-md">' +
+        '<summary class="font-title text-title-sm text-primary cursor-pointer flex items-center justify-between">' +
+          '<span class="inline-flex items-center gap-gutter-xs"><span class="material-symbols-outlined text-[18px]">person_add</span>Crear usuario y enviar clave provisoria</span>' +
+          '<span class="material-symbols-outlined text-[18px]">expand_more</span>' +
+        '</summary>' +
+        '<form id="admin-create-user-form" class="flex flex-col gap-gutter-sm mt-gutter-md">' +
+          '<input id="new-usr-name" type="text" required placeholder="Nombre completo" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+          '<input id="new-usr-email" type="email" required placeholder="Correo electrónico" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+          '<div class="grid grid-cols-2 gap-gutter-xs">' +
+            '<select id="new-usr-role" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+              '<option value="comite">Comité</option>' +
+              '<option value="tecnico">Técnico</option>' +
+              '<option value="admin">Admin edificio</option>' +
+              '<option value="vecino">Vecino</option>' +
+            '</select>' +
+            '<input id="new-usr-extra" type="text" placeholder="Cargo / Empresa / Depto" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+          '</div>' +
+          '<button type="submit" id="btn-create-usr-submit" class="w-full min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-md">Crear y enviar clave por correo</button>' +
+        '</form>' +
+      '</details>';
+
     const pendientes = usuarios.filter(function (u) {
       return u.estado === 'pendiente';
     });
 
-    if (pendientes.length === 0) {
-      container.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">No hay cuentas pendientes de aprobación.</p>';
-      return;
-    }
+    const tempPending = usuarios.filter(function (u) {
+      return u.estado === 'cambio_clave';
+    });
 
-    container.innerHTML = pendientes.map(function (u) {
-      return (
-        '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-center justify-between gap-gutter-md">' +
-          '<div class="flex flex-col gap-gutter-xs min-w-0">' +
-            '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(u.nombre) + '</span>' +
-            '<span class="font-label text-label-sm text-on-surface-variant truncate">' + escapeHtml(u.rol.toUpperCase()) + ' · ' + escapeHtml(u.deptoOEmpresa || u.email) + '</span>' +
-          '</div>' +
-          '<button type="button" data-approve-user="' + escapeHtml(u.id) + '" class="px-gutter-md py-gutter-xs rounded-md bg-success-container text-on-success-container font-label text-label-sm shrink-0">Aprobar</button>' +
-        '</article>'
-      );
-    }).join('');
+    const pendientesHtml = pendientes.length === 0
+      ? '<p class="font-body text-body-sm text-on-surface-variant">No hay solicitudes pendientes de aprobación.</p>'
+      : pendientes.map(function (u) {
+          return (
+            '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-center justify-between gap-gutter-md">' +
+              '<div class="flex flex-col gap-gutter-xs min-w-0">' +
+                '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(u.nombre) + '</span>' +
+                '<span class="font-label text-label-sm text-on-surface-variant truncate">' + escapeHtml(u.rol.toUpperCase()) + ' · ' + escapeHtml(u.deptoOEmpresa || u.email) + '</span>' +
+              '</div>' +
+              '<button type="button" data-approve-user="' + escapeHtml(u.id) + '" class="px-gutter-md py-gutter-xs rounded-md bg-success-container text-on-success-container font-label text-label-sm shrink-0">Aprobar</button>' +
+            '</article>'
+          );
+        }).join('');
+
+    const tempHtml = tempPending.length === 0
+      ? ''
+      : '<div class="flex flex-col gap-gutter-xs pt-gutter-xs">' +
+          '<span class="font-label text-label-sm text-on-surface-variant">Esperando cambio de clave provisoria (' + tempPending.length + ')</span>' +
+          tempPending.map(function (u) {
+            return (
+              '<article class="w-full bg-surface-subtle rounded-md border border-outline px-gutter-md py-gutter-sm flex items-center justify-between gap-gutter-sm">' +
+                '<span class="font-body text-body-sm text-on-surface truncate">' + escapeHtml(u.nombre) + ' (' + escapeHtml(u.rol) + ')</span>' +
+                '<span class="px-gutter-sm py-0.5 rounded-full bg-warning-container text-on-warning-container font-label text-label-sm shrink-0">Clave provisoria</span>' +
+              '</article>'
+            );
+          }).join('') +
+        '</div>';
+
+    container.innerHTML = createBoxHtml + pendientesHtml + tempHtml;
+
+    const createForm = document.getElementById('admin-create-user-form');
+    if (createForm) {
+      createForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-create-usr-submit');
+        setLoadingBtn(btn, true, 'Enviando...');
+        const res = await postApi({
+          action: 'adminCreateUser',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          nombre: document.getElementById('new-usr-name').value.trim(),
+          email: document.getElementById('new-usr-email').value.trim(),
+          rol: document.getElementById('new-usr-role').value,
+          deptoOEmpresa: document.getElementById('new-usr-extra').value.trim(),
+        });
+        setLoadingBtn(btn, false, 'Crear y enviar clave por correo');
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo crear usuario', true);
+          return;
+        }
+        showToast(res.message);
+        loadAdminPanelData();
+      });
+    }
 
     container.querySelectorAll('[data-approve-user]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
