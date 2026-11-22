@@ -221,6 +221,7 @@
             <div class="flex flex-col gap-gutter-xs min-w-0">
               <h1 id="eq-name" class="font-headline text-headline-lg text-on-surface text-balance">Equipo</h1>
               <p id="eq-code" class="font-mono text-mono-sm text-on-surface-variant">Equipo #---</p>
+              <p id="eq-specs" class="hidden font-label text-label-sm text-on-surface-variant"></p>
             </div>
             <div id="eq-icon-box" class="w-10 h-10 rounded-md bg-primary-container text-on-primary-container flex items-center justify-center shrink-0" aria-hidden="true">
               <span id="eq-icon" class="material-symbols-outlined text-[22px]">precision_manufacturing</span>
@@ -682,12 +683,13 @@
         </select>
       </div>
 
-      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-5 gap-gutter-xs" role="tablist">
-        <button type="button" data-admin-tab="tickets" class="admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px]">Tickets</button>
-        <button type="button" data-admin-tab="ordenes" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]">Órdenes</button>
-        <button type="button" data-admin-tab="cotizaciones" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]">Cotiz.</button>
-        <button type="button" data-admin-tab="equipos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]">Equipos</button>
-        <button type="button" data-admin-tab="usuarios" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]">Usuarios</button>
+      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-3 md:grid-cols-6 gap-gutter-xs" role="tablist">
+        <button type="button" data-admin-tab="tickets" class="admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm">Tickets</button>
+        <button type="button" data-admin-tab="ordenes" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Órdenes</button>
+        <button type="button" data-admin-tab="cotizaciones" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Cotiz.</button>
+        <button type="button" data-admin-tab="equipos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Equipos</button>
+        <button type="button" data-admin-tab="bodega" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Bodega</button>
+        <button type="button" data-admin-tab="usuarios" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Usuarios</button>
       </div>
 
       <div id="admin-tab-tickets" class="flex flex-col gap-gutter-md">
@@ -704,6 +706,10 @@
 
       <div id="admin-tab-equipos" class="hidden flex-col gap-gutter-md">
         <p class="font-body text-body-sm text-on-surface-variant">Cargando equipos...</p>
+      </div>
+
+      <div id="admin-tab-bodega" class="hidden flex-col gap-gutter-md">
+        <p class="font-body text-body-sm text-on-surface-variant">Cargando bodega...</p>
       </div>
 
       <div id="admin-tab-usuarios" class="hidden flex-col gap-gutter-md">

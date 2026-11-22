@@ -123,6 +123,17 @@
     document.getElementById('eq-name').textContent = data.equipo.nombre;
     document.getElementById('eq-code').textContent = 'Equipo #' + data.equipo.id;
 
+    const specsEl = document.getElementById('eq-specs');
+    if (specsEl) {
+      const specs = [data.equipo.marca, data.equipo.modelo, data.equipo.numeroSerie ? 'S/N: ' + data.equipo.numeroSerie : ''].filter(Boolean);
+      if (specs.length > 0) {
+        specsEl.textContent = specs.join(' · ');
+        specsEl.classList.remove('hidden');
+      } else {
+        specsEl.classList.add('hidden');
+      }
+    }
+
     document.getElementById('report-eq-subtitle').textContent = data.equipo.nombre + ' · #' + data.equipo.id;
     document.getElementById('maint-eq-subtitle').textContent = data.equipo.nombre + ' · #' + data.equipo.id;
 
@@ -884,11 +895,13 @@
       const btn = document.getElementById('btn-maint-submit');
       setLoadingBtn(btn, true, 'Publicando...');
 
+      const totalChecks = document.querySelectorAll('.maint-check').length;
       const checks = Array.from(document.querySelectorAll('.maint-check:checked')).map(function (c) {
         return c.value;
       });
+      const pct = totalChecks > 0 ? Math.round((checks.length / totalChecks) * 100) : 0;
       const notesRaw = document.getElementById('maint-sheet-notes').value.trim();
-      const observaciones = (checks.length > 0 ? '[Verificado: ' + checks.join(', ') + '] ' : '') + notesRaw;
+      const observaciones = (checks.length > 0 ? '[Pauta ' + checks.length + '/' + totalChecks + ' (' + pct + '%): ' + checks.join(', ') + '] ' : '') + notesRaw;
 
       const archivosPayload = state.maintFiles.map(function (f) {
         return { base64: f.base64, mimeType: f.mimeType, name: f.name };
@@ -950,10 +963,10 @@
         const target = tab.getAttribute('data-admin-tab');
         document.querySelectorAll('.admin-panel-tab').forEach(function (t) {
           t.className = t === tab
-            ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px]'
-            : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]';
+            ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm'
+            : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm';
         });
-        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'usuarios'].forEach(function (name) {
+        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'usuarios'].forEach(function (name) {
           const panel = document.getElementById('admin-tab-' + name);
           if (!panel) return;
           panel.classList.toggle('hidden', target !== name);
@@ -1067,6 +1080,7 @@
       renderAdminOrdenes(json.ordenes || [], json.equipos || []);
       renderAdminCotizaciones(json.cotizaciones || [], json.equipos || []);
       renderAdminEquipos(json.equipos || []);
+      renderAdminBodega(json.inventario || []);
       renderAdminUsers(json.usuarios || []);
     } catch (err) {
       showToast('Error de red al cargar panel', true);
@@ -1205,9 +1219,26 @@
             '<option value="365">Anual · Extintores / Ascensores (365 días)</option>' +
             '<option value="730">Cada 2 años · Sello Verde Gas / Ascensores (730 días)</option>' +
           '</select>' +
+          '<div class="grid grid-cols-3 gap-gutter-xs">' +
+            '<input id="new-eq-marca" type="text" placeholder="Marca (opcional)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+            '<input id="new-eq-modelo" type="text" placeholder="Modelo (opcional)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+            '<input id="new-eq-serie" type="text" placeholder="N° Serie (opc.)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-mono text-body-sm px-gutter-sm py-gutter-xs">' +
+          '</div>' +
           '<button type="submit" id="btn-add-eq-submit" class="w-full min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-md">Guardar equipo</button>' +
         '</form>' +
       '</details>';
+
+    const vencidas = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'rojo'; }).length;
+    const porVencer = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'amarillo'; }).length;
+    const alDia = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'verde'; }).length;
+
+    const agendaStrip = equipos.length > 0
+      ? '<div class="grid grid-cols-3 gap-gutter-xs">' +
+          '<div class="bg-error-container text-on-error-container rounded-md p-gutter-sm text-center"><div class="font-headline text-title-md">' + vencidas + '</div><div class="font-label text-[11px]">Vencidas/Alerta</div></div>' +
+          '<div class="bg-warning-container text-on-warning-container rounded-md p-gutter-sm text-center"><div class="font-headline text-title-md">' + porVencer + '</div><div class="font-label text-[11px]">Por vencer</div></div>' +
+          '<div class="bg-success-container text-on-success-container rounded-md p-gutter-sm text-center"><div class="font-headline text-title-md">' + alDia + '</div><div class="font-label text-[11px]">Al día</div></div>' +
+        '</div>'
+      : '';
 
     const printTopBtn = equipos.length > 0
       ? '<button type="button" id="btn-print-all-qr" class="w-full min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-secondary text-on-secondary font-label text-label-md shadow-sm hover:bg-primary transition-colors duration-state-change">' +
@@ -1221,13 +1252,19 @@
       : equipos.map(function (eq, idx) {
       const qrUrl = base + '?edificio=' + encodeURIComponent(eq.edificioId) + '&equipo=' + encodeURIComponent(eq.equipoId);
       const waUrl = 'https://wa.me/?text=' + encodeURIComponent('Ficha QR ' + eq.nombre + ' (' + eq.edificioId + '): ' + qrUrl);
+      const sem = eq.semaforo || { color: 'verde', etiquetaCorta: 'Al día', proximaVisita: '--' };
+      const semCls = sem.color === 'rojo'
+        ? 'bg-error-container text-on-error-container'
+        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
       return (
         '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
-          '<div class="flex items-center justify-between gap-gutter-sm">' +
+          '<div class="flex items-start justify-between gap-gutter-sm">' +
             '<div class="flex flex-col min-w-0">' +
               '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(eq.nombre) + '</span>' +
               '<span class="font-mono text-mono-sm text-on-surface-variant">#' + escapeHtml(eq.equipoId) + ' · ' + escapeHtml(eq.empresa) + '</span>' +
+              '<span class="font-label text-[11px] text-on-surface-variant">Próx: ' + escapeHtml(formatShortDate(sem.proximaVisita)) + '</span>' +
             '</div>' +
+            '<span class="px-gutter-sm py-0.5 rounded-full ' + semCls + ' font-label text-[11px] shrink-0">' + escapeHtml(sem.etiquetaCorta) + '</span>' +
           '</div>' +
           '<div class="grid grid-cols-2 gap-gutter-xs">' +
             '<button type="button" data-show-qr="' + idx + '" class="min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs"><span class="material-symbols-outlined text-[16px]">qr_code_2</span>Ver / Descargar QR</button>' +
@@ -1239,7 +1276,7 @@
       );
     }).join('');
 
-    container.innerHTML = addBoxHtml + printTopBtn + cardsHtml;
+    container.innerHTML = addBoxHtml + agendaStrip + printTopBtn + cardsHtml;
 
     const addForm = document.getElementById('admin-add-eq-form');
     if (addForm) {
@@ -1255,6 +1292,9 @@
           nombreEquipo: document.getElementById('new-eq-name').value.trim(),
           empresa: document.getElementById('new-eq-company').value.trim(),
           periodicidadDias: Number(document.getElementById('new-eq-days').value || 30),
+          marca: document.getElementById('new-eq-marca').value.trim(),
+          modelo: document.getElementById('new-eq-modelo').value.trim(),
+          numeroSerie: document.getElementById('new-eq-serie').value.trim(),
         });
         setLoadingBtn(btn, false, 'Guardar equipo');
         if (!res.ok) {
@@ -1487,12 +1527,18 @@
       const pdfHtml = c.linkPdf
         ? '<a href="' + escapeHtml(c.linkPdf) + '" target="_blank" rel="noopener noreferrer" class="font-label text-label-sm text-primary hover:underline">Ver PDF / Foto</a>'
         : '';
-      const actionHtml = allowAction && estLow === 'pendiente'
-        ? '<div class="grid grid-cols-2 gap-gutter-xs mt-gutter-xs">' +
+      const isAdmin = Boolean(state.session && state.session.user && state.session.user.rol === 'admin');
+      let actionHtml = '';
+      if (allowAction && estLow === 'pendiente') {
+        actionHtml =
+          '<div class="grid grid-cols-2 gap-gutter-xs mt-gutter-xs">' +
             '<button type="button" data-quote-id="' + escapeHtml(c.id) + '" data-quote-state="Aprobada" class="btn-quote-status min-h-[36px] rounded-md bg-success-container text-on-success-container font-label text-label-sm">Aprobar</button>' +
             '<button type="button" data-quote-id="' + escapeHtml(c.id) + '" data-quote-state="Rechazada" class="btn-quote-status min-h-[36px] rounded-md bg-error-container text-on-error-container font-label text-label-sm">Rechazar</button>' +
-          '</div>'
-        : '';
+          '</div>';
+      } else if (isAdmin && estLow === 'aprobada') {
+        actionHtml =
+          '<button type="button" data-q2o-eq="' + escapeHtml(c.equipoId) + '" data-q2o-title="' + escapeHtml('Trabajo ' + c.id + ' · ' + c.proveedor) + '" data-q2o-desc="' + escapeHtml(c.descripcion + ' ($' + Number(c.montoClp || 0).toLocaleString('es-CL') + ' CLP)') + '" class="btn-quote-to-order w-full min-h-[36px] mt-gutter-xs rounded-md bg-primary text-on-primary font-label text-label-sm">Generar Orden de Trabajo</button>';
+      }
       return (
         '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-xs">' +
           '<div class="flex items-center justify-between gap-gutter-sm">' +
@@ -1526,6 +1572,113 @@
         }
         showToast(res.message);
         if (onSuccess) onSuccess();
+      });
+    });
+
+    container.querySelectorAll('.btn-quote-to-order').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const res = await postApi({
+          action: 'addOrder',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          equipoId: btn.getAttribute('data-q2o-eq') || 'GENERAL',
+          titulo: btn.getAttribute('data-q2o-title'),
+          detalle: btn.getAttribute('data-q2o-desc'),
+          prioridad: 'Normal',
+        });
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo generar la orden', true);
+          return;
+        }
+        showToast(res.message);
+        if (onSuccess) onSuccess();
+      });
+    });
+  }
+
+  function renderAdminBodega(inventario) {
+    const container = document.getElementById('admin-tab-bodega');
+    if (!container) return;
+
+    const formHtml =
+      '<details class="bg-surface-subtle rounded-lg border border-outline p-gutter-md">' +
+        '<summary class="font-title text-title-sm text-primary cursor-pointer flex items-center justify-between">' +
+          '<span class="inline-flex items-center gap-gutter-xs"><span class="material-symbols-outlined text-[18px]">inventory_2</span>Agregar insumo a bodega</span>' +
+          '<span class="material-symbols-outlined text-[18px]">expand_more</span>' +
+        '</summary>' +
+        '<form id="admin-add-inv-form" class="flex flex-col gap-gutter-sm mt-gutter-md">' +
+          '<input id="inv-producto" type="text" required placeholder="Producto (ej. Tubo LED 18W)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+          '<div class="grid grid-cols-3 gap-gutter-xs">' +
+            '<input id="inv-stock" type="number" min="0" required placeholder="Stock inicial" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-mono text-body-sm px-gutter-sm py-gutter-xs">' +
+            '<input id="inv-min" type="number" min="0" value="2" placeholder="Mínimo" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-mono text-body-sm px-gutter-sm py-gutter-xs">' +
+            '<input id="inv-unidad" type="text" value="unid" placeholder="Unidad" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+          '</div>' +
+          '<button type="submit" id="btn-add-inv-submit" class="w-full min-h-[38px] rounded-md bg-primary text-on-primary font-label text-label-sm">Guardar insumo</button>' +
+        '</form>' +
+      '</details>';
+
+    const listHtml = (!inventario || inventario.length === 0)
+      ? '<p class="font-body text-body-sm text-on-surface-variant">No hay insumos registrados en la bodega de esta comunidad.</p>'
+      : inventario.map(function (item) {
+          const low = item.stockActual <= item.stockMinimo;
+          const badgeCls = low ? 'bg-error-container text-on-error-container' : 'bg-success-container text-on-success-container';
+          return (
+            '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-center justify-between gap-gutter-sm">' +
+              '<div class="flex flex-col gap-gutter-xs min-w-0">' +
+                '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(item.producto) + '</span>' +
+                '<span class="font-label text-[11px] text-on-surface-variant">Mínimo: ' + item.stockMinimo + ' ' + escapeHtml(item.unidad) + '</span>' +
+              '</div>' +
+              '<div class="flex items-center gap-gutter-xs shrink-0">' +
+                '<button type="button" data-inv-id="' + escapeHtml(item.id) + '" data-inv-delta="-1" class="btn-inv-adj w-9 h-9 rounded-md bg-surface-card border border-outline font-title text-title-md text-on-surface">-</button>' +
+                '<span class="px-gutter-sm py-1 rounded-md ' + badgeCls + ' font-mono text-mono-sm min-w-[56px] text-center">' + item.stockActual + ' ' + escapeHtml(item.unidad) + '</span>' +
+                '<button type="button" data-inv-id="' + escapeHtml(item.id) + '" data-inv-delta="1" class="btn-inv-adj w-9 h-9 rounded-md bg-surface-card border border-outline font-title text-title-md text-on-surface">+</button>' +
+              '</div>' +
+            '</article>'
+          );
+        }).join('');
+
+    container.innerHTML = formHtml + listHtml;
+
+    const form = document.getElementById('admin-add-inv-form');
+    if (form) {
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-add-inv-submit');
+        setLoadingBtn(btn, true, 'Guardando...');
+        const res = await postApi({
+          action: 'saveInventoryItem',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          producto: document.getElementById('inv-producto').value.trim(),
+          stockActual: Number(document.getElementById('inv-stock').value || 0),
+          stockMinimo: Number(document.getElementById('inv-min').value || 1),
+          unidad: document.getElementById('inv-unidad').value.trim() || 'unid',
+        });
+        setLoadingBtn(btn, false, 'Guardar insumo');
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo guardar insumo', true);
+          return;
+        }
+        showToast(res.message);
+        loadAdminPanelData();
+      });
+    }
+
+    container.querySelectorAll('.btn-inv-adj').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const res = await postApi({
+          action: 'saveInventoryItem',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          itemId: btn.getAttribute('data-inv-id'),
+          delta: Number(btn.getAttribute('data-inv-delta')),
+        });
+        if (!res.ok) {
+          showToast(res.error || 'Error al ajustar stock', true);
+          return;
+        }
+        showToast(res.message);
+        loadAdminPanelData();
       });
     });
   }
