@@ -176,9 +176,64 @@
     renderHistory(data.historial || []);
     renderActiveTickets(data.ticketsActivos || []);
     renderResolvedTickets(data.ticketsResueltos || []);
+    renderEquipmentOrders(data.ordenesPendientes || []);
 
     updateSessionUI();
     showView('equipment');
+  }
+
+  function renderEquipmentOrders(orders) {
+    const sec = document.getElementById('equipment-orders-section');
+    const list = document.getElementById('equipment-orders-list');
+    const num = document.getElementById('orders-count-num');
+    if (!sec || !list) return;
+
+    const user = state.session ? state.session.user : null;
+    const canSee = Boolean(user && (user.rol === 'tecnico' || user.rol === 'admin'));
+    if (!canSee || !orders || orders.length === 0) {
+      sec.classList.add('hidden');
+      sec.classList.remove('flex');
+      return;
+    }
+
+    sec.classList.remove('hidden');
+    sec.classList.add('flex');
+    num.textContent = String(orders.length);
+
+    list.innerHTML = orders.map(function (o) {
+      const urg = o.prioridad.toLowerCase() === 'urgente';
+      const badgeCls = urg ? 'bg-error-container text-on-error-container' : 'bg-primary-container text-on-primary-container';
+      return (
+        '<article class="w-full bg-surface-card rounded-lg border border-outline-subtle border-l-4 ' + (urg ? 'border-l-error' : 'border-l-primary') + ' p-gutter-md shadow-gco flex items-start justify-between gap-gutter-md">' +
+          '<div class="flex flex-col gap-gutter-xs min-w-0">' +
+            '<div class="flex items-center gap-gutter-xs">' +
+              '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-label-sm">' + escapeHtml(o.prioridad) + '</span>' +
+              '<span class="font-mono text-mono-sm text-on-surface-variant">' + escapeHtml(o.id) + '</span>' +
+            '</div>' +
+            '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(o.titulo) + '</span>' +
+            (o.detalle ? '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(o.detalle) + '</p>' : '') +
+          '</div>' +
+          '<button type="button" data-complete-order="' + escapeHtml(o.id) + '" class="px-gutter-md py-gutter-xs rounded-md bg-success-container text-on-success-container font-label text-label-sm shrink-0">Completar</button>' +
+        '</article>'
+      );
+    }).join('');
+
+    list.querySelectorAll('[data-complete-order]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const orderId = btn.getAttribute('data-complete-order');
+        const res = await postApi({
+          action: 'completeOrder',
+          token: state.session.token,
+          orderId: orderId,
+        });
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo completar la orden', true);
+          return;
+        }
+        showToast(res.message);
+        loadData();
+      });
+    });
   }
 
   function renderResolvedTickets(tickets) {
@@ -254,10 +309,18 @@
             '<p class="font-body text-body-sm text-on-surface-variant text-pretty">' + escapeHtml(m.observaciones) + '</p>' +
             '<p class="font-label text-label-sm text-on-surface-variant mt-gutter-xs">Técnico: ' + escapeHtml(m.tecnico || 'No informado') + ' · Estado: ' + escapeHtml(m.estadoResultante) + '</p>' +
             pdfLinkHtml +
+            '<div class="mt-gutter-sm"><button type="button" data-receipt-idx="' + idx + '" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-secondary hover:text-primary"><span class="material-symbols-outlined text-[15px]">qr_code_2</span>Comprobante PDF con QR</button></div>' +
           '</div>' +
         '</details>'
       );
     }).join('');
+
+    container.querySelectorAll('[data-receipt-idx]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const m = items[Number(btn.getAttribute('data-receipt-idx'))];
+        if (m) printMaintenanceReceipt(m);
+      });
+    });
   }
 
   function renderActiveTickets(tickets) {
@@ -812,12 +875,28 @@
       e.target.value = '';
     });
 
+    setupSignaturePad();
+
     document.getElementById('sheet-maint-form').addEventListener('submit', async function (e) {
       e.preventDefault();
       if (!state.session) return;
 
       const btn = document.getElementById('btn-maint-submit');
       setLoadingBtn(btn, true, 'Publicando...');
+
+      const checks = Array.from(document.querySelectorAll('.maint-check:checked')).map(function (c) {
+        return c.value;
+      });
+      const notesRaw = document.getElementById('maint-sheet-notes').value.trim();
+      const observaciones = (checks.length > 0 ? '[Verificado: ' + checks.join(', ') + '] ' : '') + notesRaw;
+
+      const archivosPayload = state.maintFiles.map(function (f) {
+        return { base64: f.base64, mimeType: f.mimeType, name: f.name };
+      });
+      const sigData = getSignatureDataUrl();
+      if (sigData) {
+        archivosPayload.push({ base64: sigData, mimeType: 'image/png', name: 'Firma_Terreno.png' });
+      }
 
       const res = await postApi({
         action: 'addMaintenance',
@@ -827,11 +906,9 @@
         fecha: document.getElementById('maint-date').value,
         tipo: state.maintType,
         estadoResultante: state.maintState,
-        observaciones: document.getElementById('maint-sheet-notes').value.trim(),
+        observaciones: observaciones,
         costoClp: Number(document.getElementById('maint-cost').value || 0),
-        archivos: state.maintFiles.map(function (f) {
-          return { base64: f.base64, mimeType: f.mimeType, name: f.name };
-        }),
+        archivos: archivosPayload,
       });
 
       setLoadingBtn(btn, false, 'Guardar y publicar registro');
@@ -842,6 +919,7 @@
       }
 
       document.getElementById('sheet-maint-form').reset();
+      clearSignaturePad();
       state.maintFiles = [];
       renderMaintFilesPreview();
       closeModal('modal-maintenance');
@@ -872,10 +950,10 @@
         const target = tab.getAttribute('data-admin-tab');
         document.querySelectorAll('.admin-panel-tab').forEach(function (t) {
           t.className = t === tab
-            ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm'
-            : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-sm';
+            ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px]'
+            : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]';
         });
-        ['tickets', 'equipos', 'usuarios'].forEach(function (name) {
+        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'usuarios'].forEach(function (name) {
           const panel = document.getElementById('admin-tab-' + name);
           if (!panel) return;
           panel.classList.toggle('hidden', target !== name);
@@ -986,6 +1064,8 @@
       }
 
       renderAdminTickets(json.tickets || []);
+      renderAdminOrdenes(json.ordenes || [], json.equipos || []);
+      renderAdminCotizaciones(json.cotizaciones || [], json.equipos || []);
       renderAdminEquipos(json.equipos || []);
       renderAdminUsers(json.usuarios || []);
     } catch (err) {
@@ -1385,9 +1465,356 @@
       );
     }).join('');
 
+    document.getElementById('committee-quotes-list').innerHTML = renderQuotesCardsHtml(data.cotizaciones || [], true);
+    bindQuoteStatusButtons(document.getElementById('committee-quotes-list'), function () {
+      loadCommitteeData();
+    });
+
     document.getElementById('btn-print-committee').onclick = function () {
       printCommitteeReport(data);
     };
+  }
+
+  function renderQuotesCardsHtml(cotizaciones, allowAction) {
+    if (!cotizaciones || cotizaciones.length === 0) {
+      return '<p class="font-body text-body-sm text-on-surface-variant">No hay cotizaciones registradas en esta comunidad.</p>';
+    }
+    return cotizaciones.map(function (c) {
+      const estLow = c.estado.toLowerCase();
+      const badgeCls = estLow === 'aprobada'
+        ? 'bg-success-container text-on-success-container'
+        : (estLow === 'rechazada' ? 'bg-error-container text-on-error-container' : 'bg-warning-container text-on-warning-container');
+      const pdfHtml = c.linkPdf
+        ? '<a href="' + escapeHtml(c.linkPdf) + '" target="_blank" rel="noopener noreferrer" class="font-label text-label-sm text-primary hover:underline">Ver PDF / Foto</a>'
+        : '';
+      const actionHtml = allowAction && estLow === 'pendiente'
+        ? '<div class="grid grid-cols-2 gap-gutter-xs mt-gutter-xs">' +
+            '<button type="button" data-quote-id="' + escapeHtml(c.id) + '" data-quote-state="Aprobada" class="btn-quote-status min-h-[36px] rounded-md bg-success-container text-on-success-container font-label text-label-sm">Aprobar</button>' +
+            '<button type="button" data-quote-id="' + escapeHtml(c.id) + '" data-quote-state="Rechazada" class="btn-quote-status min-h-[36px] rounded-md bg-error-container text-on-error-container font-label text-label-sm">Rechazar</button>' +
+          '</div>'
+        : '';
+      return (
+        '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-xs">' +
+          '<div class="flex items-center justify-between gap-gutter-sm">' +
+            '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(c.proveedor) + '</span>' +
+            '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-label-sm shrink-0">' + escapeHtml(c.estado) + '</span>' +
+          '</div>' +
+          '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(c.descripcion) + '</p>' +
+          '<div class="flex items-center justify-between font-mono text-mono-sm text-on-surface">' +
+            '<span>$' + Number(c.montoClp || 0).toLocaleString('es-CL') + ' CLP · #' + escapeHtml(c.equipoId) + '</span>' +
+            pdfHtml +
+          '</div>' +
+          actionHtml +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function bindQuoteStatusButtons(container, onSuccess) {
+    if (!container) return;
+    container.querySelectorAll('.btn-quote-status').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const res = await postApi({
+          action: 'updateQuoteStatus',
+          token: state.session.token,
+          quoteId: btn.getAttribute('data-quote-id'),
+          estado: btn.getAttribute('data-quote-state'),
+        });
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo actualizar cotización', true);
+          return;
+        }
+        showToast(res.message);
+        if (onSuccess) onSuccess();
+      });
+    });
+  }
+
+  function renderAdminOrdenes(ordenes, equipos) {
+    const container = document.getElementById('admin-tab-ordenes');
+    if (!container) return;
+
+    const eqOptions = (equipos || []).map(function (eq) {
+      return '<option value="' + escapeHtml(eq.equipoId) + '">' + escapeHtml(eq.nombre) + ' (#' + escapeHtml(eq.equipoId) + ')</option>';
+    }).join('');
+
+    const formHtml =
+      '<form id="admin-add-order-form" class="bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
+        '<span class="font-title text-title-sm text-on-surface">Nueva Orden de Trabajo</span>' +
+        '<select id="ord-equipo" required class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+          (eqOptions || '<option value="GENERAL">General</option>') +
+        '</select>' +
+        '<input id="ord-titulo" type="text" required placeholder="Título (ej. Revisar fuga en válvula 2)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+        '<textarea id="ord-detalle" rows="2" placeholder="Instrucciones para el técnico o conserje..." class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs"></textarea>' +
+        '<div class="grid grid-cols-2 gap-gutter-xs">' +
+          '<select id="ord-prioridad" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+            '<option value="Normal">Prioridad Normal</option>' +
+            '<option value="Urgente">Prioridad Urgente</option>' +
+          '</select>' +
+          '<button type="submit" id="btn-add-order-submit" class="min-h-[38px] rounded-md bg-primary text-on-primary font-label text-label-sm">Asignar Orden</button>' +
+        '</div>' +
+      '</form>';
+
+    const pendientes = (ordenes || []).filter(function (o) {
+      return o.estado.toLowerCase() !== 'completada';
+    });
+
+    const listHtml = pendientes.length === 0
+      ? '<p class="font-body text-body-sm text-on-surface-variant">No hay órdenes de trabajo pendientes.</p>'
+      : pendientes.map(function (o) {
+          return (
+            '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-center justify-between gap-gutter-sm">' +
+              '<div class="flex flex-col gap-gutter-xs min-w-0">' +
+                '<span class="font-mono text-mono-sm text-on-surface-variant">' + escapeHtml(o.id) + ' · #' + escapeHtml(o.equipoId) + ' · ' + escapeHtml(o.prioridad) + '</span>' +
+                '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(o.titulo) + '</span>' +
+              '</div>' +
+              '<button type="button" data-admin-complete-order="' + escapeHtml(o.id) + '" class="px-gutter-sm py-gutter-xs rounded-md bg-success-container text-on-success-container font-label text-label-sm shrink-0">Listo</button>' +
+            '</article>'
+          );
+        }).join('');
+
+    container.innerHTML = formHtml + listHtml;
+
+    const form = document.getElementById('admin-add-order-form');
+    if (form) {
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-add-order-submit');
+        setLoadingBtn(btn, true, 'Enviando...');
+        const res = await postApi({
+          action: 'addOrder',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          equipoId: document.getElementById('ord-equipo').value,
+          titulo: document.getElementById('ord-titulo').value.trim(),
+          detalle: document.getElementById('ord-detalle').value.trim(),
+          prioridad: document.getElementById('ord-prioridad').value,
+        });
+        setLoadingBtn(btn, false, 'Asignar Orden');
+        if (!res.ok) {
+          showToast(res.error || 'Error al crear orden', true);
+          return;
+        }
+        showToast(res.message);
+        loadAdminPanelData();
+        loadData();
+      });
+    }
+
+    container.querySelectorAll('[data-admin-complete-order]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const res = await postApi({
+          action: 'completeOrder',
+          token: state.session.token,
+          orderId: btn.getAttribute('data-admin-complete-order'),
+        });
+        if (!res.ok) {
+          showToast(res.error || 'Error', true);
+          return;
+        }
+        showToast(res.message);
+        loadAdminPanelData();
+        loadData();
+      });
+    });
+  }
+
+  function renderAdminCotizaciones(cotizaciones, equipos) {
+    const container = document.getElementById('admin-tab-cotizaciones');
+    if (!container) return;
+
+    const eqOptions = '<option value="GENERAL">General Comunidad</option>' + (equipos || []).map(function (eq) {
+      return '<option value="' + escapeHtml(eq.equipoId) + '">' + escapeHtml(eq.nombre) + ' (#' + escapeHtml(eq.equipoId) + ')</option>';
+    }).join('');
+
+    let quoteFileBase64 = '';
+    let quoteFileMime = '';
+
+    const formHtml =
+      '<form id="admin-add-quote-form" class="bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
+        '<span class="font-title text-title-sm text-on-surface">Subir Cotización para Comité</span>' +
+        '<div class="grid grid-cols-2 gap-gutter-xs">' +
+          '<select id="cot-equipo" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' + eqOptions + '</select>' +
+          '<input id="cot-monto" type="number" min="0" step="1000" required placeholder="Monto CLP" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-mono text-body-sm px-gutter-sm py-gutter-xs">' +
+        '</div>' +
+        '<input id="cot-proveedor" type="text" required placeholder="Proveedor (ej. TK Elevator)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
+        '<textarea id="cot-desc" rows="2" required placeholder="Descripción del trabajo cotizado..." class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs"></textarea>' +
+        '<div class="grid grid-cols-2 gap-gutter-xs">' +
+          '<input id="cot-file-input" type="file" accept="application/pdf,image/*" class="hidden">' +
+          '<button type="button" id="btn-cot-file" class="min-h-[38px] rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container font-label text-label-sm truncate px-2">Adjuntar PDF/Foto</button>' +
+          '<button type="submit" id="btn-add-quote-submit" class="min-h-[38px] rounded-md bg-primary text-on-primary font-label text-label-sm">Publicar</button>' +
+        '</div>' +
+      '</form>';
+
+    container.innerHTML = formHtml + renderQuotesCardsHtml(cotizaciones, true);
+    bindQuoteStatusButtons(container, loadAdminPanelData);
+
+    const fileBtn = document.getElementById('btn-cot-file');
+    const fileInput = document.getElementById('cot-file-input');
+    if (fileBtn && fileInput) {
+      fileBtn.addEventListener('click', function () {
+        fileInput.click();
+      });
+      fileInput.addEventListener('change', async function (e) {
+        const f = e.target.files[0];
+        if (!f) return;
+        if (f.type.startsWith('image/')) {
+          const comp = await compressImage(f, 1280, 0.8);
+          quoteFileBase64 = comp.dataUrl;
+          quoteFileMime = 'image/jpeg';
+        } else {
+          quoteFileBase64 = await readFileAsDataUrl(f);
+          quoteFileMime = f.type || 'application/pdf';
+        }
+        fileBtn.textContent = f.name;
+      });
+    }
+
+    const form = document.getElementById('admin-add-quote-form');
+    if (form) {
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-add-quote-submit');
+        setLoadingBtn(btn, true, 'Subiendo...');
+        const res = await postApi({
+          action: 'addQuote',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          equipoId: document.getElementById('cot-equipo').value,
+          proveedor: document.getElementById('cot-proveedor').value.trim(),
+          descripcion: document.getElementById('cot-desc').value.trim(),
+          montoClp: Number(document.getElementById('cot-monto').value || 0),
+          archivoBase64: quoteFileBase64,
+          archivoMimeType: quoteFileMime,
+        });
+        setLoadingBtn(btn, false, 'Publicar');
+        if (!res.ok) {
+          showToast(res.error || 'Error al subir cotización', true);
+          return;
+        }
+        showToast(res.message);
+        loadAdminPanelData();
+      });
+    }
+  }
+
+  let sigHasStroke = false;
+  function setupSignaturePad() {
+    const canvas = document.getElementById('maint-sig-canvas');
+    const clearBtn = document.getElementById('btn-clear-sig');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#0F2942';
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    let drawing = false;
+    function getPos(ev) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      const clientY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      return {
+        x: ((clientX - rect.left) / rect.width) * canvas.width,
+        y: ((clientY - rect.top) / rect.height) * canvas.height,
+      };
+    }
+
+    function start(ev) {
+      drawing = true;
+      sigHasStroke = true;
+      const p = getPos(ev);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+    }
+
+    function move(ev) {
+      if (!drawing) return;
+      ev.preventDefault();
+      const p = getPos(ev);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+    }
+
+    function stop() {
+      drawing = false;
+    }
+
+    canvas.addEventListener('pointerdown', start);
+    canvas.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', stop);
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', clearSignaturePad);
+    }
+  }
+
+  function clearSignaturePad() {
+    const canvas = document.getElementById('maint-sig-canvas');
+    if (!canvas) return;
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    sigHasStroke = false;
+  }
+
+  function getSignatureDataUrl() {
+    if (!sigHasStroke) return '';
+    const canvas = document.getElementById('maint-sig-canvas');
+    return canvas ? canvas.toDataURL('image/png') : '';
+  }
+
+  function printMaintenanceReceipt(m) {
+    const qrSheet = document.getElementById('print-qr-sheet');
+    const commSheet = document.getElementById('print-committee-sheet');
+    if (qrSheet) qrSheet.classList.remove('print-active');
+    if (commSheet) commSheet.classList.remove('print-active');
+
+    const sheet = document.getElementById('print-receipt-sheet');
+    if (!sheet || !state.data) return;
+    sheet.classList.add('print-active');
+
+    const eq = state.data.equipo;
+    const edif = state.data.edificio;
+    const qrUrl = window.location.origin + window.location.pathname + '?edificio=' + encodeURIComponent(edif.id) + '&equipo=' + encodeURIComponent(eq.id);
+
+    sheet.innerHTML =
+      '<div style="font-family: \'Plus Jakarta Sans\', \'Rubik\', sans-serif; color: #0F2942; max-width: 720px; margin: 0 auto; border: 1px solid #DEE3ED; border-radius: 12px; padding: 24px;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #1D5B96; padding-bottom: 12px; margin-bottom: 16px;">' +
+          '<div>' +
+            '<h1 style="font-size: 19px; font-weight: 700; margin: 0;">Comprobante de Visita / Mantención</h1>' +
+            '<p style="font-size: 13px; color: #49607C; margin: 4px 0 0 0;">' + escapeHtml(edif.nombre) + ' · ' + escapeHtml(eq.nombre) + ' (#' + escapeHtml(eq.id) + ')</p>' +
+          '</div>' +
+          '<div id="receipt-qr-box" style="padding: 4px; background: #fff;"></div>' +
+        '</div>' +
+        '<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; margin-bottom: 16px;">' +
+          '<div><strong>Folio:</strong> ' + escapeHtml(m.id) + '</div>' +
+          '<div><strong>Fecha:</strong> ' + escapeHtml(formatShortDate(m.fecha)) + '</div>' +
+          '<div><strong>Tipo:</strong> ' + escapeHtml(m.tipo) + '</div>' +
+          '<div><strong>Estado resultante:</strong> ' + escapeHtml(m.estadoResultante) + '</div>' +
+          '<div><strong>Responsable:</strong> ' + escapeHtml(m.tecnico || eq.empresa) + '</div>' +
+          (m.costoClp > 0 ? '<div><strong>Costo:</strong> $' + Number(m.costoClp).toLocaleString('es-CL') + ' CLP</div>' : '') +
+        '</div>' +
+        '<div style="background: #F4F6F9; border-radius: 8px; padding: 14px; font-size: 13px; margin-bottom: 24px;">' +
+          '<strong>Observaciones / Verificación:</strong><br>' + escapeHtml(m.observaciones) +
+        '</div>' +
+        '<div style="font-size: 11px; color: #49607C; text-align: center; border-top: 1px solid #E8ECF2; padding-top: 10px;">' +
+          'GCO Gestión de Condominios · Escanea el código QR superior para verificar en línea (' + escapeHtml(qrUrl) + ')' +
+        '</div>' +
+      '</div>';
+
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(document.getElementById('receipt-qr-box'), {
+        text: qrUrl,
+        width: 84,
+        height: 84,
+        colorDark: '#0F2942',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+    }
+
+    setTimeout(function () {
+      window.print();
+    }, 200);
   }
 
   function printCommitteeReport(data) {

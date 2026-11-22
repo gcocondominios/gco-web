@@ -265,6 +265,15 @@
         </footer>
       </article>
 
+      <!-- Órdenes de trabajo pendientes (Solo visible para Técnicos / Admin) -->
+      <section id="equipment-orders-section" class="hidden flex-col gap-gutter-sm" aria-labelledby="heading-orders">
+        <div class="flex items-center justify-between px-gutter-xs">
+          <h2 id="heading-orders" class="font-headline text-title-md text-on-surface">Órdenes de Trabajo Pendientes</h2>
+          <span id="orders-count-num" class="inline-flex items-center justify-center min-w-6 h-6 px-gutter-sm rounded-full bg-primary-container text-on-primary-container font-label text-label-sm">0</span>
+        </div>
+        <div id="equipment-orders-list" class="flex flex-col gap-gutter-sm"></div>
+      </section>
+
       <!-- Collapsible Accordion Section: Historial Reciente -->
       <section class="flex flex-col gap-gutter-md" aria-labelledby="heading-history">
         <div class="flex items-center justify-between px-gutter-xs">
@@ -596,8 +605,38 @@
         </div>
 
         <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface">Pauta de chequeo rápida (opcional)</span>
+          <div class="grid grid-cols-2 gap-gutter-xs">
+            <label class="flex items-center gap-gutter-xs bg-surface-subtle rounded-md px-gutter-sm py-gutter-xs border border-outline-subtle cursor-pointer">
+              <input type="checkbox" value="Inspección visual" class="maint-check rounded-sm border-outline text-primary focus:ring-primary">
+              <span class="font-body text-body-sm text-on-surface">Inspección visual</span>
+            </label>
+            <label class="flex items-center gap-gutter-xs bg-surface-subtle rounded-md px-gutter-sm py-gutter-xs border border-outline-subtle cursor-pointer">
+              <input type="checkbox" value="Limpieza y orden" class="maint-check rounded-sm border-outline text-primary focus:ring-primary">
+              <span class="font-body text-body-sm text-on-surface">Limpieza y orden</span>
+            </label>
+            <label class="flex items-center gap-gutter-xs bg-surface-subtle rounded-md px-gutter-sm py-gutter-xs border border-outline-subtle cursor-pointer">
+              <input type="checkbox" value="Seguridad y sensores" class="maint-check rounded-sm border-outline text-primary focus:ring-primary">
+              <span class="font-body text-body-sm text-on-surface">Seguridad/sensores</span>
+            </label>
+            <label class="flex items-center gap-gutter-xs bg-surface-subtle rounded-md px-gutter-sm py-gutter-xs border border-outline-subtle cursor-pointer">
+              <input type="checkbox" value="Prueba funcionamiento" class="maint-check rounded-sm border-outline text-primary focus:ring-primary">
+              <span class="font-body text-body-sm text-on-surface">Prueba funcional</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
           <label for="maint-sheet-notes" class="font-label text-label-md text-on-surface">Observaciones técnicas</label>
           <textarea id="maint-sheet-notes" rows="3" required placeholder="Detalle breve de los trabajos efectuados..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-label text-label-sm text-on-surface-variant">Firma digital en terreno (opcional)</span>
+            <button type="button" id="btn-clear-sig" class="font-label text-label-sm text-primary hover:underline">Limpiar firma</button>
+          </div>
+          <canvas id="maint-sig-canvas" width="360" height="110" style="touch-action: none;" class="w-full h-[110px] rounded-md border border-outline bg-white cursor-crosshair"></canvas>
         </div>
 
         <div class="flex flex-col gap-gutter-xs">
@@ -643,14 +682,24 @@
         </select>
       </div>
 
-      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-3 gap-gutter-xs" role="tablist">
-        <button type="button" data-admin-tab="tickets" class="admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm">Tickets</button>
-        <button type="button" data-admin-tab="equipos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-sm">Equipos / QR</button>
-        <button type="button" data-admin-tab="usuarios" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-label-sm">Usuarios</button>
+      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-5 gap-gutter-xs" role="tablist">
+        <button type="button" data-admin-tab="tickets" class="admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px]">Tickets</button>
+        <button type="button" data-admin-tab="ordenes" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]">Órdenes</button>
+        <button type="button" data-admin-tab="cotizaciones" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]">Cotiz.</button>
+        <button type="button" data-admin-tab="equipos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]">Equipos</button>
+        <button type="button" data-admin-tab="usuarios" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px]">Usuarios</button>
       </div>
 
       <div id="admin-tab-tickets" class="flex flex-col gap-gutter-md">
         <p class="font-body text-body-sm text-on-surface-variant">Cargando tickets...</p>
+      </div>
+
+      <div id="admin-tab-ordenes" class="hidden flex-col gap-gutter-md">
+        <p class="font-body text-body-sm text-on-surface-variant">Cargando órdenes...</p>
+      </div>
+
+      <div id="admin-tab-cotizaciones" class="hidden flex-col gap-gutter-md">
+        <p class="font-body text-body-sm text-on-surface-variant">Cargando cotizaciones...</p>
       </div>
 
       <div id="admin-tab-equipos" class="hidden flex-col gap-gutter-md">
@@ -724,11 +773,19 @@
       <div id="committee-equipment-list" class="flex flex-col gap-gutter-sm">
         <p class="font-body text-body-sm text-on-surface-variant">Cargando estado de la comunidad...</p>
       </div>
+
+      <div class="flex flex-col gap-gutter-sm">
+        <h3 class="font-headline text-title-sm text-on-surface">Cotizaciones de Trabajos</h3>
+        <div id="committee-quotes-list" class="flex flex-col gap-gutter-sm"></div>
+      </div>
     </div>
   </div>
 
   <!-- ACTA / INFORME EJECUTIVO IMPRIMIBLE PARA COMITÉ -->
   <div id="print-committee-sheet" class="hidden p-8 bg-white text-on-surface"></div>
+
+  <!-- COMPROBANTE PDF DE VISITA / RONDA CON QR -->
+  <div id="print-receipt-sheet" class="hidden p-8 bg-white text-on-surface"></div>
 
   <!-- Lightweight Feedback Toast -->
   <div id="feedback-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md max-w-[90vw]" role="status" aria-live="polite">
