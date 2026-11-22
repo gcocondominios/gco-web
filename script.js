@@ -102,4 +102,127 @@ document.addEventListener('DOMContentLoaded', () => {
 
         actualizarSimulador();
     }
+
+    // Visores interactivos con pestañas (GCO App en index.html y gco-app.html)
+    document.querySelectorAll('[data-app-tabs]').forEach((container) => {
+        const buttons = container.querySelectorAll('[data-tab-target]');
+        const panels = container.querySelectorAll('[data-tab-panel]');
+        const previewImg = container.querySelector('[data-tab-img]');
+        const previewCaption = container.querySelector('[data-tab-caption]');
+
+        const activateTab = (btn) => {
+            const target = btn.getAttribute('data-tab-target');
+            const imgSrc = btn.getAttribute('data-img');
+            const imgAlt = btn.getAttribute('data-alt');
+            const caption = btn.getAttribute('data-caption');
+
+            buttons.forEach((b) => {
+                const active = b === btn;
+                b.classList.toggle('is-active', active);
+                b.setAttribute('aria-selected', String(active));
+            });
+
+            panels.forEach((p) => {
+                p.hidden = p.getAttribute('data-tab-panel') !== target;
+            });
+
+            if (previewImg && imgSrc) {
+                previewImg.src = imgSrc;
+                if (imgAlt) previewImg.alt = imgAlt;
+            }
+            if (previewCaption && caption) {
+                previewCaption.textContent = caption;
+            }
+        };
+
+        buttons.forEach((btn) => {
+            btn.addEventListener('click', () => activateTab(btn));
+        });
+    });
+
+    // Comparador Sin / Con GCO App
+    document.querySelectorAll('[data-app-compare]').forEach((box) => {
+        const toggleBtns = box.querySelectorAll('[data-mode]');
+        const lists = box.querySelectorAll('[data-active-mode]');
+
+        toggleBtns.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const mode = btn.getAttribute('data-mode');
+                toggleBtns.forEach((b) => {
+                    const active = b === btn;
+                    b.classList.toggle('is-active', active);
+                    b.setAttribute('aria-pressed', String(active));
+                });
+                lists.forEach((list) => {
+                    list.hidden = list.getAttribute('data-active-mode') !== mode;
+                });
+            });
+        });
+    });
+
+    // Recorrido guiado paso a paso (gco-app.html)
+    document.querySelectorAll('[data-app-steps]').forEach((walkthrough) => {
+        const stepBtns = Array.from(walkthrough.querySelectorAll('[data-step-index]'));
+        const stepPanels = Array.from(walkthrough.querySelectorAll('[data-step-panel]'));
+        const prevBtn = walkthrough.querySelector('[data-step-prev]');
+        const nextBtn = walkthrough.querySelector('[data-step-next]');
+        const pauseBtn = walkthrough.querySelector('[data-step-pause]');
+        const stepImg = walkthrough.querySelector('[data-step-img]');
+
+        if (!stepBtns.length) return;
+
+        let current = 0;
+        let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let timerId = null;
+
+        const showStep = (idx) => {
+            current = (idx + stepBtns.length) % stepBtns.length;
+            stepBtns.forEach((b, i) => {
+                const active = i === current;
+                b.classList.toggle('is-active', active);
+                b.setAttribute('aria-current', active ? 'step' : 'false');
+            });
+            stepPanels.forEach((p, i) => {
+                p.hidden = i !== current;
+            });
+            const imgSrc = stepBtns[current].getAttribute('data-img');
+            const imgAlt = stepBtns[current].getAttribute('data-alt');
+            if (stepImg && imgSrc) {
+                stepImg.src = imgSrc;
+                if (imgAlt) stepImg.alt = imgAlt;
+            }
+        };
+
+        const syncPauseBtn = () => {
+            if (pauseBtn) pauseBtn.textContent = paused ? 'Reanudar' : 'Pausar';
+        };
+
+        const startAuto = () => {
+            if (timerId) clearInterval(timerId);
+            if (!paused) {
+                timerId = setInterval(() => showStep(current + 1), 5000);
+            }
+        };
+
+        stepBtns.forEach((b, i) => {
+            b.addEventListener('click', () => {
+                showStep(i);
+                startAuto();
+            });
+        });
+
+        if (prevBtn) prevBtn.addEventListener('click', () => { showStep(current - 1); startAuto(); });
+        if (nextBtn) nextBtn.addEventListener('click', () => { showStep(current + 1); startAuto(); });
+        if (pauseBtn) {
+            syncPauseBtn();
+            pauseBtn.addEventListener('click', () => {
+                paused = !paused;
+                syncPauseBtn();
+                startAuto();
+            });
+        }
+
+        showStep(0);
+        startAuto();
+    });
 });

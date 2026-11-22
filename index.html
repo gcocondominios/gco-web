@@ -359,38 +359,131 @@
     <section id="plataforma-qr" class="services section-padding" style="background-color: var(--bg-light);">
         <div class="container">
             <div class="section-title text-center">
+                <div class="app-pill-row" style="justify-content: center;">
+                    <span class="app-badge">✓ Software propio GCO</span>
+                    <span class="app-badge">✓ Sin descargas (Web / PWA)</span>
+                    <span class="app-badge">✓ Funciona Offline en subterráneos</span>
+                </div>
                 <h2>GCO App: Trazabilidad de Mantenciones por QR</h2>
-                <p>Software propio sin instalación para residentes, técnicos y comités. Escanea el código QR de cada equipo y consulta su estado operativo en tiempo real.</p>
+                <p>Control completo para residentes, técnicos, comité y administración. Escanea el QR de cada equipo para ver su estado en tiempo real, reportar incidencias con foto y respaldar cada mantención bajo la Ley 21.442.</p>
             </div>
 
-            <div class="grid-three-columns">
-                <div class="card service-card methodology-card" style="background-color: var(--white);">
-                    <div class="service-card-body">
-                        <span class="step-badge">Semáforo QR</span>
-                        <h3>Estado Operativo en Tiempo Real</h3>
-                        <p>Cada ascensor, sala de bombas, portón o grupo electrógeno cuenta con un código QR que muestra al instante si su mantención está al día, próxima a vencer o en observación.</p>
+            <div class="app-showcase-grid" data-app-tabs>
+                <div>
+                    <div class="app-tabs-list" role="tablist" aria-label="Módulos principales de GCO App">
+                        <button type="button" class="app-tab-btn is-active" role="tab" aria-selected="true"
+                            data-tab-target="qr"
+                            data-img="img/app/ficha-equipo-qr.png"
+                            data-alt="Ficha individual de equipo con semáforo QR e historial"
+                            data-caption="Ficha real de equipo (#ASC-A1): estado operativo, responsable, última y próxima visita, PDF e historial.">
+                            <strong>1. Semáforo QR por Equipo</strong>
+                            <span>Estado al día, en observación o alerta, con último informe PDF.</span>
+                        </button>
+
+                        <button type="button" class="app-tab-btn" role="tab" aria-selected="false"
+                            data-tab-target="dir"
+                            data-img="img/app/directorio-equipos.png"
+                            data-alt="Directorio completo de equipos del edificio con filtros por estado"
+                            data-caption="Directorio del edificio: contadores en tiempo real y filtros rápidos para comité y residentes.">
+                            <strong>2. Directorio del Edificio</strong>
+                            <span>Vista global de ascensores, bombas, portones y generadores.</span>
+                        </button>
+
+                        <button type="button" class="app-tab-btn" role="tab" aria-selected="false"
+                            data-tab-target="inc"
+                            data-img="img/app/reportar-incidencia.png"
+                            data-alt="Formulario móvil para reportar incidencias con foto"
+                            data-caption="Reporte de fallas desde el celular en segundos: síntomas rápidos, foto y aviso por correo.">
+                            <strong>3. Tickets con Foto</strong>
+                            <span>Residentes reportan fallas desde el celular sin instalar nada.</span>
+                        </button>
+
+                        <button type="button" class="app-tab-btn" role="tab" aria-selected="false"
+                            data-tab-target="roles"
+                            data-img="img/app/acceso-roles.png"
+                            data-alt="Acceso por roles para técnicos, comité y administración"
+                            data-caption="Acceso por perfiles: Técnico en terreno (firma y modo offline), Comité (Actas PDF) y Administración.">
+                            <strong>4. Terreno, Comité y Admin</strong>
+                            <span>Firma digital, modo offline, cotizaciones y Actas PDF.</span>
+                        </button>
+                    </div>
+
+                    <div class="app-detail-box" data-tab-panel="qr">
+                        <h3>Ficha técnica instantánea al escanear el código QR</h3>
+                        <p>Cada equipo crítico del edificio cuenta con una lámina QR imprimible. Cualquier residente o miembro del comité puede verificar al instante su estado operativo sin pedir archivos por correo.</p>
+                        <ul class="app-bullets">
+                            <li>Semáforo visual claro: Operativo, En Observación o Fuera de Servicio.</li>
+                            <li>Acceso directo al último informe técnico certificado en PDF y últimas 5 visitas.</li>
+                            <li>Incidencias activas y resueltas visibles en la misma ficha del equipo.</li>
+                        </ul>
+                    </div>
+
+                    <div class="app-detail-box" data-tab-panel="dir" hidden>
+                        <h3>Panorama completo de la infraestructura de tu comunidad</h3>
+                        <p>Desde una sola pantalla el comité y los residentes consultan todos los equipos del condominio con contadores automáticos de estado.</p>
+                        <ul class="app-bullets">
+                            <li>Resumen inmediato: cuántos equipos están Operativos, en Observación o en Alerta.</li>
+                            <li>Filtros rápidos para revisar solo los equipos con alertas pendientes.</li>
+                            <li>Acceso directo a cada ficha técnica y su calendario de próxima visita.</li>
+                        </ul>
+                    </div>
+
+                    <div class="app-detail-box" data-tab-panel="inc" hidden>
+                        <h3>Reporte de fallas trazable en menos de 30 segundos</h3>
+                        <p>Se acabaron los mensajes sueltos en grupos de WhatsApp que nadie recuerda quién atendió. El residente escanea el QR, elige el síntoma y adjunta evidencia.</p>
+                        <ul class="app-bullets">
+                            <li>Selector rápido de síntomas según el equipo (ej. ruido, puertas, iluminación, detenido).</li>
+                            <li>Carga directa de fotos desde cámara o galería y campo opcional de departamento.</li>
+                            <li>Notificación por correo y seguimiento del ticket hasta su cierre por administración.</li>
+                        </ul>
+                    </div>
+
+                    <div class="app-detail-box" data-tab-panel="roles" hidden>
+                        <h3>Flujo conectado para Técnicos, Comité y Administración</h3>
+                        <p>Mucho más que un lector QR: GCO App integra el trabajo en terreno con el control ejecutivo del comité y la gestión multi-comunidad.</p>
+                        <ul class="app-bullets">
+                            <li><strong>Técnicos en terreno:</strong> órdenes pendientes, pauta de chequeo, firma digital en pantalla y cola de sincronización <strong>offline</strong> en subterráneos sin señal.</li>
+                            <li><strong>Portal Comité:</strong> revisión de cotizaciones de trabajos y generación de <strong>Acta / Informe Ejecutivo PDF</strong> en un clic.</li>
+                            <li><strong>Administración:</strong> panel con Tickets, Órdenes, Cotizaciones, Equipos (descarga/impresión de láminas QR) y Usuarios.</li>
+                        </ul>
+                    </div>
+
+                    <div class="app-compare-box" data-app-compare>
+                        <div class="app-compare-header">
+                            <strong>¿Cómo cambia la gestión diaria?</strong>
+                            <div class="app-toggle-group" role="group" aria-label="Comparar operación sin o con GCO App">
+                                <button type="button" class="app-toggle-btn is-active" data-mode="sin" aria-pressed="true">Sin GCO App</button>
+                                <button type="button" class="app-toggle-btn" data-mode="con" aria-pressed="false">Con GCO App</button>
+                            </div>
+                        </div>
+                        <ul class="app-compare-list" data-active-mode="sin">
+                            <li>Mantenciones anotadas en planillas aisladas o correos difíciles de auditar.</li>
+                            <li>Reportes de fallas y fotos perdidos en conversaciones de WhatsApp.</li>
+                            <li>Técnicos sin señal en salas de bombas o subterráneos que envían informes días después.</li>
+                            <li>Comité sin visibilidad en tiempo real del cumplimiento bajo la Ley 21.442.</li>
+                        </ul>
+                        <ul class="app-compare-list" data-active-mode="con" hidden>
+                            <li>Semáforo QR en cada equipo con historial certificado e informe PDF inmediato.</li>
+                            <li>Tickets de residentes con foto, síntoma y trazabilidad hasta su resolución.</li>
+                            <li>Registro en terreno con firma digital y sincronización automática al recuperar señal.</li>
+                            <li>Portal Comité con cotizaciones y Acta Ejecutiva PDF lista para presentar.</li>
+                        </ul>
                     </div>
                 </div>
 
-                <div class="card service-card methodology-card" style="background-color: var(--white);">
-                    <div class="service-card-body">
-                        <span class="step-badge">Ley 21.442</span>
-                        <h3>Informes PDF y Respaldo Histórico</h3>
-                        <p>Acceso directo al último informe técnico certificado y al historial de mantenciones preventivas y correctivas, garantizando transparencia total ante el comité.</p>
+                <div class="app-phone-wrapper">
+                    <div class="app-phone-frame">
+                        <div class="app-phone-screen">
+                            <img src="img/app/ficha-equipo-qr.png" alt="Ficha individual de equipo con semáforo QR e historial" data-tab-img loading="lazy">
+                        </div>
                     </div>
-                </div>
-
-                <div class="card service-card methodology-card" style="background-color: var(--white);">
-                    <div class="service-card-body">
-                        <span class="step-badge">Sin Descargas</span>
-                        <h3>Tickets de Incidencias con Foto</h3>
-                        <p>Los residentes pueden reportar fallas en segundos desde su celular adjuntando evidencia fotográfica, permitiendo una respuesta rápida y trazable de la administración.</p>
-                    </div>
+                    <p class="app-phone-caption" data-tab-caption>Ficha real de equipo (#ASC-A1): estado operativo, responsable, última y próxima visita, PDF e historial.</p>
                 </div>
             </div>
 
-            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 2.5rem;">
-                <a href="https://gcoadmin.cl/app/?edificio=DEMO" target="_blank" rel="noopener noreferrer" class="btn-primary">Explorar GCO App en Vivo</a>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 2.8rem;">
+                <a href="https://gcoadmin.cl/app/?edificio=DEMO" target="_blank" rel="noopener noreferrer" class="btn-primary">Probar Demo en Vivo (Sin Registro)</a>
+                <a href="gco-app.html" class="btn-secondary">Ver Todos los Módulos y Recorrido →</a>
                 <a href="#cotizar" class="btn-secondary">Implementar en mi Comunidad</a>
             </div>
         </div>
