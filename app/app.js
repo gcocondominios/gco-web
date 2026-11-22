@@ -320,7 +320,12 @@
             '<p class="font-body text-body-sm text-on-surface-variant text-pretty">' + escapeHtml(m.observaciones) + '</p>' +
             '<p class="font-label text-label-sm text-on-surface-variant mt-gutter-xs">Técnico: ' + escapeHtml(m.tecnico || 'No informado') + ' · Estado: ' + escapeHtml(m.estadoResultante) + '</p>' +
             pdfLinkHtml +
-            '<div class="mt-gutter-sm"><button type="button" data-receipt-idx="' + idx + '" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-secondary hover:text-primary"><span class="material-symbols-outlined text-[15px]">qr_code_2</span>Comprobante PDF con QR</button></div>' +
+            '<div class="flex flex-wrap items-center gap-gutter-md mt-gutter-sm">' +
+              '<button type="button" data-receipt-idx="' + idx + '" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-secondary hover:text-primary"><span class="material-symbols-outlined text-[15px]">qr_code_2</span>Comprobante PDF con QR</button>' +
+              (pdfLinks.length > 0 && state.session && ['admin', 'comite', 'tecnico'].indexOf(state.session.user.rol) !== -1
+                ? '<button type="button" data-ai-maint="' + idx + '" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[15px]">auto_awesome</span>Analizar con IA</button>'
+                : '') +
+            '</div>' +
           '</div>' +
         '</details>'
       );
@@ -330,6 +335,20 @@
       btn.addEventListener('click', function () {
         const m = items[Number(btn.getAttribute('data-receipt-idx'))];
         if (m) printMaintenanceReceipt(m);
+      });
+    });
+
+    container.querySelectorAll('[data-ai-maint]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const m = items[Number(btn.getAttribute('data-ai-maint'))];
+        const firstLink = m ? splitLinks(m.linkPdf)[0] : '';
+        if (!firstLink) return;
+        openAiAnalysis('Informe ' + m.tipo + ' · ' + formatShortDate(m.fecha), {
+          action: 'analyzeDocument',
+          fileUrl: firstLink,
+          contexto: 'informe de mantención ' + m.tipo,
+          titulo: state.data ? state.data.equipo.nombre : '',
+        });
       });
     });
   }
@@ -544,7 +563,7 @@
       });
     });
 
-    ['modal-report', 'modal-auth', 'modal-maintenance', 'modal-admin', 'modal-qr', 'modal-committee'].forEach(function (id) {
+    ['modal-report', 'modal-auth', 'modal-maintenance', 'modal-admin', 'modal-qr', 'modal-committee', 'modal-ai'].forEach(function (id) {
       const m = document.getElementById(id);
       if (!m) return;
       m.addEventListener('click', function (e) {
@@ -1513,6 +1532,16 @@
     document.getElementById('btn-print-committee').onclick = function () {
       printCommitteeReport(data);
     };
+
+    const btnCommAi = document.getElementById('btn-committee-ai');
+    if (btnCommAi) {
+      btnCommAi.onclick = function () {
+        openAiAnalysis('Resumen Ejecutivo · ' + data.edificio.nombre, {
+          action: 'summarizeBuilding',
+          edificioId: data.edificio.id,
+        });
+      };
+    }
   }
 
   function renderQuotesCardsHtml(cotizaciones, allowAction) {
@@ -1525,7 +1554,10 @@
         ? 'bg-success-container text-on-success-container'
         : (estLow === 'rechazada' ? 'bg-error-container text-on-error-container' : 'bg-warning-container text-on-warning-container');
       const pdfHtml = c.linkPdf
-        ? '<a href="' + escapeHtml(c.linkPdf) + '" target="_blank" rel="noopener noreferrer" class="font-label text-label-sm text-primary hover:underline">Ver PDF / Foto</a>'
+        ? '<div class="flex items-center gap-gutter-sm">' +
+            '<a href="' + escapeHtml(c.linkPdf) + '" target="_blank" rel="noopener noreferrer" class="font-label text-label-sm text-primary hover:underline">Ver PDF</a>' +
+            '<button type="button" data-ai-quote-url="' + escapeHtml(c.linkPdf) + '" data-ai-quote-title="' + escapeHtml(c.proveedor + ' ($' + Number(c.montoClp || 0).toLocaleString('es-CL') + ')') + '" class="btn-ai-quote inline-flex items-center gap-0.5 font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[14px]">auto_awesome</span>IA</button>' +
+          '</div>'
         : '';
       const isAdmin = Boolean(state.session && state.session.user && state.session.user.rol === 'admin');
       let actionHtml = '';
@@ -1594,6 +1626,45 @@
         if (onSuccess) onSuccess();
       });
     });
+
+    container.querySelectorAll('.btn-ai-quote').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const title = btn.getAttribute('data-ai-quote-title') || 'Cotización';
+        openAiAnalysis('Cotización · ' + title, {
+          action: 'analyzeDocument',
+          fileUrl: btn.getAttribute('data-ai-quote-url'),
+          contexto: 'cotización de proveedor para condominio',
+          titulo: title,
+        });
+      });
+    });
+  }
+
+  async function openAiAnalysis(subtitle, payload) {
+    if (!state.session) return;
+    document.getElementById('ai-modal-subtitle').textContent = subtitle;
+    const box = document.getElementById('ai-result-box');
+    box.textContent = 'Analizando con Gemini IA, espera unos segundos...';
+    openModal('modal-ai');
+
+    const copyBtn = document.getElementById('btn-copy-ai');
+    if (copyBtn) {
+      copyBtn.onclick = async function () {
+        try {
+          await navigator.clipboard.writeText(box.textContent || '');
+          showToast('Resumen copiado');
+        } catch (e) {
+          showToast('Selecciona y copia el texto manualmente');
+        }
+      };
+    }
+
+    const res = await postApi(Object.assign({ token: state.session.token }, payload));
+    if (!res.ok) {
+      box.textContent = 'Error: ' + (res.error || 'No se pudo completar el análisis.');
+      return;
+    }
+    box.textContent = res.analysis || 'Sin respuesta.';
   }
 
   function renderAdminBodega(inventario) {

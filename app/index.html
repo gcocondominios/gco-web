@@ -771,10 +771,16 @@
 
       <div id="committee-summary-cards" class="grid grid-cols-3 gap-gutter-sm"></div>
 
-      <button id="btn-print-committee" type="button" class="w-full min-h-[44px] inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
-        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">picture_as_pdf</span>
-        <span class="font-label text-label-lg">Generar Acta / Informe PDF</span>
-      </button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-sm">
+        <button id="btn-print-committee" type="button" class="w-full min-h-[44px] inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">picture_as_pdf</span>
+          <span class="font-label text-label-lg">Generar Acta / Informe PDF</span>
+        </button>
+        <button id="btn-committee-ai" type="button" class="w-full min-h-[44px] inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary-container text-on-primary-container border border-primary/20 hover:bg-outline transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">auto_awesome</span>
+          <span class="font-label text-label-lg">Resumen Ejecutivo con IA</span>
+        </button>
+      </div>
 
       <div id="committee-equipment-list" class="flex flex-col gap-gutter-sm">
         <p class="font-body text-body-sm text-on-surface-variant">Cargando estado de la comunidad...</p>
@@ -792,6 +798,37 @@
 
   <!-- COMPROBANTE PDF DE VISITA / RONDA CON QR -->
   <div id="print-receipt-sheet" class="hidden p-8 bg-white text-on-surface"></div>
+
+  <!-- BOTTOM SHEET 7: ANALIZADOR GEMINI IA -->
+  <div id="modal-ai" class="fixed inset-0 z-[58] hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-ai-title">
+    <div class="sheet-panel w-full max-w-md md:max-w-2xl bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
+
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm min-w-0">
+          <div class="w-9 h-9 rounded-md bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">auto_awesome</span>
+          </div>
+          <div class="flex flex-col gap-gutter-xs min-w-0">
+            <h2 id="sheet-ai-title" class="font-headline text-headline-md text-on-surface">Análisis Gemini IA</h2>
+            <p id="ai-modal-subtitle" class="font-body text-body-sm text-on-surface-variant truncate">Revisión inteligente de documentos</p>
+          </div>
+        </div>
+        <button type="button" data-close-modal="modal-ai" aria-label="Cerrar análisis IA" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <div id="ai-result-box" class="bg-surface-subtle border border-outline rounded-lg p-gutter-lg font-body text-body-sm text-on-surface whitespace-pre-wrap leading-relaxed max-h-[55vh] overflow-y-auto">
+        Analizando documento...
+      </div>
+
+      <button id="btn-copy-ai" type="button" class="w-full min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-lg py-gutter-sm rounded-md bg-primary text-on-primary font-label text-label-md hover:bg-secondary transition-colors duration-state-change">
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">content_copy</span>
+        <span>Copiar resumen</span>
+      </button>
+    </div>
+  </div>
 
   <!-- Lightweight Feedback Toast -->
   <div id="feedback-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md max-w-[90vw]" role="status" aria-live="polite">
