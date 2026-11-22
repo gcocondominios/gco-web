@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gco-app-v1';
+const CACHE_NAME = 'gco-app-v2';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -35,8 +35,7 @@ self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
   const url = event.request.url;
 
-  // Para consultas GET a Google Apps Script: Network-first con respaldo en caché
-  if (url.indexOf('script.google.com') !== -1) {
+  if (url.indexOf('script.google.com') !== -1 || url.indexOf(self.location.origin) === 0) {
     event.respondWith(
       fetch(event.request)
         .then(function (response) {
@@ -51,29 +50,6 @@ self.addEventListener('fetch', function (event) {
         .catch(function () {
           return caches.match(event.request);
         })
-    );
-    return;
-  }
-
-  // Para archivos estáticos locales: Cache-first con actualización en segundo plano
-  if (url.indexOf(self.location.origin) === 0) {
-    event.respondWith(
-      caches.match(event.request).then(function (cached) {
-        const fetchPromise = fetch(event.request)
-          .then(function (networkResponse) {
-            if (networkResponse && networkResponse.ok) {
-              const clone = networkResponse.clone();
-              caches.open(CACHE_NAME).then(function (cache) {
-                cache.put(event.request, clone);
-              });
-            }
-            return networkResponse;
-          })
-          .catch(function () {
-            return cached;
-          });
-        return cached || fetchPromise;
-      })
     );
   }
 });
