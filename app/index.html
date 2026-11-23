@@ -317,6 +317,8 @@
           <p class="font-body text-body-sm text-on-surface-variant">Estado en tiempo real y mantenciones al día</p>
         </div>
 
+        <section id="directory-notices-box" class="hidden flex-col gap-gutter-sm" aria-label="Avisos de administración"></section>
+
         <div class="grid grid-cols-3 gap-gutter-sm">
           <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
             <div class="flex items-center gap-gutter-xs">
@@ -735,13 +737,14 @@
         </select>
       </div>
 
-      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-4 md:grid-cols-8 gap-gutter-xs" role="tablist">
+      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-3 md:grid-cols-9 gap-gutter-xs" role="tablist">
         <button type="button" data-admin-tab="tickets" class="admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm">Tickets</button>
         <button type="button" data-admin-tab="ordenes" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Órdenes</button>
         <button type="button" data-admin-tab="cotizaciones" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Cotiz.</button>
         <button type="button" data-admin-tab="equipos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Equipos</button>
         <button type="button" data-admin-tab="bodega" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Bodega</button>
         <button type="button" data-admin-tab="documentos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Docs</button>
+        <button type="button" data-admin-tab="avisos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Avisos</button>
         <button type="button" data-admin-tab="comunidad" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Ficha</button>
         <button type="button" data-admin-tab="usuarios" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Usuarios</button>
       </div>
@@ -768,6 +771,10 @@
 
       <div id="admin-tab-documentos" class="hidden flex-col gap-gutter-md">
         <p class="font-body text-body-sm text-on-surface-variant">Cargando documentos...</p>
+      </div>
+
+      <div id="admin-tab-avisos" class="hidden flex-col gap-gutter-md">
+        <p class="font-body text-body-sm text-on-surface-variant">Cargando avisos...</p>
       </div>
 
       <div id="admin-tab-comunidad" class="hidden flex-col gap-gutter-md">
@@ -899,6 +906,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="./app.js?v=20261122d"></script>
+  <script src="./app.js?v=20261122e"></script>
 </body>
 </html>

@@ -496,12 +496,57 @@
       });
     });
 
+    renderDirectoryNotices(data.avisos || []);
     renderDirectoryCalendar(data);
     renderDirectoryDocuments(data);
     renderCommunityProfileView(data);
 
     updateSessionUI();
     showView('directory');
+  }
+
+  function renderDirectoryNotices(avisos) {
+    const box = document.getElementById('directory-notices-box');
+    if (!box) return;
+    if (!avisos || avisos.length === 0) {
+      box.classList.add('hidden');
+      box.classList.remove('flex');
+      box.innerHTML = '';
+      return;
+    }
+
+    box.classList.remove('hidden');
+    box.classList.add('flex');
+    const latest = avisos[0];
+    const tipoLow = String(latest.tipo || '').toLowerCase();
+    const wrapCls = tipoLow === 'urgente'
+      ? 'bg-error-container/70 border-error/30 text-on-error-container'
+      : (tipoLow === 'preventivo' ? 'bg-warning-container/70 border-warning/30 text-on-warning-container' : 'bg-primary-container/70 border-primary/20 text-on-primary-container');
+    const iconName = tipoLow === 'urgente' ? 'campaign' : (tipoLow === 'preventivo' ? 'engineering' : 'info');
+
+    const extraHtml = avisos.length > 1
+      ? '<details class="mt-gutter-xs">' +
+          '<summary class="font-label text-[11px] cursor-pointer hover:underline">Ver ' + (avisos.length - 1) + ' aviso(s) anterior(es)</summary>' +
+          '<div class="flex flex-col gap-gutter-xs mt-gutter-xs pt-gutter-xs border-t border-current/15">' +
+            avisos.slice(1, 4).map(function (a) {
+              return '<div class="text-[12px]"><strong>' + escapeHtml(a.titulo) + ':</strong> ' + escapeHtml(a.mensaje) + '</div>';
+            }).join('') +
+          '</div>' +
+        '</details>'
+      : '';
+
+    box.innerHTML =
+      '<article class="w-full rounded-lg border px-gutter-md py-gutter-sm flex items-start gap-gutter-sm ' + wrapCls + '">' +
+        '<span class="material-symbols-outlined text-[20px] mt-0.5 shrink-0" aria-hidden="true">' + iconName + '</span>' +
+        '<div class="flex flex-col gap-0.5 min-w-0 flex-1">' +
+          '<div class="flex items-center justify-between gap-gutter-sm">' +
+            '<span class="font-title text-title-sm truncate">' + escapeHtml(latest.titulo) + '</span>' +
+            '<span class="font-label text-[11px] opacity-80 shrink-0">' + escapeHtml(latest.tipo) + '</span>' +
+          '</div>' +
+          '<p class="font-body text-body-sm opacity-90">' + escapeHtml(latest.mensaje) + '</p>' +
+          extraHtml +
+        '</div>' +
+      '</article>';
   }
 
   function switchDirectoryTab(target) {
@@ -1341,7 +1386,7 @@
             ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm'
             : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm';
         });
-        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'documentos', 'comunidad', 'usuarios'].forEach(function (name) {
+        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'documentos', 'avisos', 'comunidad', 'usuarios'].forEach(function (name) {
           const panel = document.getElementById('admin-tab-' + name);
           if (!panel) return;
           panel.classList.toggle('hidden', target !== name);
@@ -1474,8 +1519,93 @@
     renderAdminEquipos(json.equipos || []);
     renderAdminBodega(json.inventario || []);
     renderAdminDocumentos(json.documentos || (state.data && state.data.documentos) || []);
+    renderAdminAvisos(json.avisos || (state.data && state.data.avisos) || []);
     renderAdminComunidad(json.comunidad || (state.data && state.data.comunidad) || null);
     renderAdminUsers(json.usuarios || []);
+  }
+
+  function renderAdminAvisos(avisos) {
+    const container = document.getElementById('admin-tab-avisos');
+    if (!container) return;
+
+    const formHtml =
+      '<form id="admin-add-notice-form" class="bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
+        '<span class="font-title text-title-sm text-on-surface">Publicar aviso a la comunidad</span>' +
+        '<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-sm">' +
+          '<select id="aviso-tipo" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+            '<option value="Informativo">Informativo</option>' +
+            '<option value="Preventivo">Preventivo</option>' +
+            '<option value="Urgente">Urgente</option>' +
+          '</select>' +
+          '<input id="aviso-titulo" type="text" required placeholder="Título breve del aviso" class="md:col-span-2 rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '</div>' +
+        '<textarea id="aviso-mensaje" rows="2" required placeholder="Mensaje claro para residentes y comité (horarios, sectores afectados...)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm"></textarea>' +
+        '<button type="submit" id="btn-add-notice-submit" class="min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-md hover:bg-secondary transition-colors duration-state-change">Publicar Aviso</button>' +
+      '</form>';
+
+    const listHtml = (!avisos || avisos.length === 0)
+      ? '<p class="font-body text-body-sm text-on-surface-variant">No hay avisos registrados en esta comunidad.</p>'
+      : avisos.map(function (a) {
+          const badgeCls = a.activo ? 'bg-success-container text-on-success-container' : 'bg-surface-variant text-on-surface-variant';
+          const isDemo = a.id.indexOf('AV-DEMO') !== -1;
+          return (
+            '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-start justify-between gap-gutter-sm">' +
+              '<div class="flex flex-col gap-0.5 min-w-0">' +
+                '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(a.titulo) + '</span>' +
+                '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(a.mensaje) + '</p>' +
+                '<span class="font-label text-[11px] text-on-surface-variant">' + escapeHtml(a.tipo) + ' · ' + escapeHtml(formatShortDate(a.fecha)) + '</span>' +
+              '</div>' +
+              '<div class="flex flex-col items-end gap-1 shrink-0">' +
+                '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-[11px]">' + (a.activo ? 'Activo' : 'Archivado') + '</span>' +
+                (!isDemo
+                  ? '<button type="button" data-toggle-notice="' + escapeHtml(a.id) + '" data-next-active="' + (a.activo ? '0' : '1') + '" class="font-label text-[11px] text-primary hover:underline">' + (a.activo ? 'Archivar' : 'Reactivar') + '</button>'
+                  : '') +
+              '</div>' +
+            '</article>'
+          );
+        }).join('');
+
+    container.innerHTML = formHtml + listHtml;
+
+    document.getElementById('admin-add-notice-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-add-notice-submit');
+      setLoadingBtn(btn, true, 'Publicando...');
+      const res = await postApi({
+        action: 'addNotice',
+        token: state.session.token,
+        edificioId: state.edificioId,
+        tipo: document.getElementById('aviso-tipo').value,
+        titulo: document.getElementById('aviso-titulo').value.trim(),
+        mensaje: document.getElementById('aviso-mensaje').value.trim(),
+      });
+      setLoadingBtn(btn, false, 'Publicar Aviso');
+      if (!res.ok) {
+        showToast(res.error || 'No se pudo publicar el aviso', true);
+        return;
+      }
+      showToast(res.message || 'Aviso publicado');
+      loadData();
+      loadAdminPanelData();
+    });
+
+    container.querySelectorAll('[data-toggle-notice]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const res = await postApi({
+          action: 'toggleNotice',
+          token: state.session.token,
+          noticeId: btn.getAttribute('data-toggle-notice'),
+          activo: btn.getAttribute('data-next-active') === '1',
+        });
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo actualizar', true);
+          return;
+        }
+        showToast(res.message || 'Aviso actualizado');
+        loadData();
+        loadAdminPanelData();
+      });
+    });
   }
 
   function renderAdminDocumentos(docs) {
@@ -1683,11 +1813,27 @@
           }).join('') + '</div>'
         : '';
 
+      let slaHtml = '';
+      if (t.fecha) {
+        const dt = new Date(String(t.fecha).replace(' ', 'T'));
+        if (!isNaN(dt.getTime())) {
+          const diasAbierto = Math.max(0, Math.floor((Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24)));
+          const slaCls = diasAbierto >= 7
+            ? 'bg-error-container text-on-error-container'
+            : (diasAbierto >= 3 ? 'bg-warning-container text-on-warning-container' : 'bg-surface-card text-on-surface-variant border border-outline');
+          const slaTxt = diasAbierto === 0 ? 'Hoy' : ('SLA ' + diasAbierto + 'd');
+          slaHtml = '<span class="px-gutter-sm py-0.5 rounded-full font-label text-[11px] ' + slaCls + '">' + slaTxt + '</span>';
+        }
+      }
+
       return (
         '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm" data-ticket-id="' + escapeHtml(t.id) + '">' +
           '<div class="flex items-start justify-between gap-gutter-sm">' +
             '<span class="font-mono text-mono-sm text-on-surface-variant">' + escapeHtml(t.id) + ' · #' + escapeHtml(t.equipoId) + ' · ' + escapeHtml(t.depto) + '</span>' +
-            '<span class="px-gutter-sm py-gutter-xs rounded-full bg-warning-container text-on-warning-container font-label text-label-sm">' + escapeHtml(t.estado) + '</span>' +
+            '<div class="flex items-center gap-1 shrink-0">' +
+              slaHtml +
+              '<span class="px-gutter-sm py-gutter-xs rounded-full bg-warning-container text-on-warning-container font-label text-label-sm">' + escapeHtml(t.estado) + '</span>' +
+            '</div>' +
           '</div>' +
           '<p class="font-title text-title-sm text-on-surface">' + escapeHtml(t.descripcion) + '</p>' +
           fotosHtml +
