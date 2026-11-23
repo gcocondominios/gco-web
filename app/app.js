@@ -2294,6 +2294,98 @@
         });
       };
     }
+
+    const btnCompare = document.getElementById('btn-compare-quotes-ai');
+    if (btnCompare) {
+      const hasEnoughQuotes = (data.cotizaciones || []).length >= 2;
+      btnCompare.classList.toggle('hidden', !hasEnoughQuotes);
+      btnCompare.classList.toggle('inline-flex', hasEnoughQuotes);
+      btnCompare.onclick = function () {
+        openAiAnalysis('Comparador de Cotizaciones · ' + data.edificio.nombre, {
+          action: 'compareQuotesAi',
+          edificioId: data.edificio.id,
+        });
+      };
+    }
+
+    renderCommitteeAgreements(data);
+  }
+
+  function renderCommitteeAgreements(data) {
+    const list = document.getElementById('committee-agreements-list');
+    const form = document.getElementById('committee-agreement-form');
+    if (!list) return;
+
+    const acuerdos = data.acuerdos || [];
+    if (acuerdos.length === 0) {
+      list.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">Sin acuerdos registrados en esta comunidad.</p>';
+    } else {
+      list.innerHTML = acuerdos.map(function (a) {
+        const estLow = String(a.estado || '').toLowerCase();
+        const badgeCls = estLow === 'cumplido'
+          ? 'bg-success-container text-on-success-container'
+          : (estLow === 'en gestión' || estLow === 'en gestion' ? 'bg-primary-container text-on-primary-container' : 'bg-warning-container text-on-warning-container');
+        const isDemo = a.id.indexOf('AC-DEMO') !== -1;
+        const actionBtn = (!isDemo && estLow !== 'cumplido')
+          ? '<button type="button" data-agr-done="' + escapeHtml(a.id) + '" class="font-label text-[11px] text-primary hover:underline">Marcar cumplido</button>'
+          : '';
+        return (
+          '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-start justify-between gap-gutter-sm">' +
+            '<div class="flex flex-col gap-0.5 min-w-0">' +
+              '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(a.materia) + '</span>' +
+              '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(a.acuerdo) + '</p>' +
+              '<span class="font-label text-[11px] text-on-surface-variant">Resp: ' + escapeHtml(a.responsable || 'Por asignar') + (a.fechaComprometida ? ' · Plazo: ' + escapeHtml(formatShortDate(a.fechaComprometida)) : '') + '</span>' +
+            '</div>' +
+            '<div class="flex flex-col items-end gap-1 shrink-0">' +
+              '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-[11px]">' + escapeHtml(a.estado) + '</span>' +
+              actionBtn +
+            '</div>' +
+          '</article>'
+        );
+      }).join('');
+
+      list.querySelectorAll('[data-agr-done]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          const res = await postApi({
+            action: 'updateAgreementStatus',
+            token: state.session.token,
+            agreementId: btn.getAttribute('data-agr-done'),
+            estado: 'Cumplido',
+          });
+          if (!res.ok) {
+            showToast(res.error || 'No se pudo actualizar', true);
+            return;
+          }
+          showToast('Acuerdo marcado como cumplido');
+          loadCommitteeData();
+        });
+      });
+    }
+
+    if (form) {
+      form.onsubmit = async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-add-agreement');
+        setLoadingBtn(btn, true, 'Guardando...');
+        const res = await postApi({
+          action: 'addAgreement',
+          token: state.session.token,
+          edificioId: data.edificio.id,
+          materia: document.getElementById('agr-materia').value.trim(),
+          responsable: document.getElementById('agr-responsable').value.trim(),
+          acuerdo: document.getElementById('agr-acuerdo').value.trim(),
+          fechaComprometida: document.getElementById('agr-fecha').value,
+        });
+        setLoadingBtn(btn, false, 'Registrar');
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo registrar el acuerdo', true);
+          return;
+        }
+        form.reset();
+        showToast(res.message || 'Acuerdo registrado');
+        loadCommitteeData();
+      };
+    }
   }
 
   function renderQuotesCardsHtml(cotizaciones, allowAction) {

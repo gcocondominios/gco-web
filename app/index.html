@@ -866,8 +866,30 @@
       </div>
 
       <div class="flex flex-col gap-gutter-sm">
-        <h3 class="font-headline text-title-sm text-on-surface">Cotizaciones de Trabajos</h3>
+        <div class="flex items-center justify-between gap-gutter-sm">
+          <h3 class="font-headline text-title-sm text-on-surface">Cotizaciones de Trabajos</h3>
+          <button id="btn-compare-quotes-ai" type="button" class="hidden items-center gap-1 px-gutter-md py-1 rounded-md bg-primary-container text-on-primary-container font-label text-[11px] hover:bg-outline transition-colors duration-state-change">
+            <span class="material-symbols-outlined text-[14px]" aria-hidden="true">compare</span>
+            <span>Comparar con IA</span>
+          </button>
+        </div>
         <div id="committee-quotes-list" class="flex flex-col gap-gutter-sm"></div>
+      </div>
+
+      <div class="flex flex-col gap-gutter-sm pt-gutter-sm border-t border-outline-subtle">
+        <h3 class="font-headline text-title-sm text-on-surface">Acuerdos del Comité</h3>
+        <form id="committee-agreement-form" class="bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-xs">
+            <input id="agr-materia" type="text" required placeholder="Materia tratada (ej. Ascensor Torre B)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-xs">
+            <input id="agr-responsable" type="text" placeholder="Responsable (ej. Jorge / Admin)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-xs">
+          </div>
+          <div class="flex flex-col md:flex-row gap-gutter-xs">
+            <input id="agr-acuerdo" type="text" required placeholder="Acuerdo adoptado o tarea comprometida" class="flex-1 rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-xs">
+            <input id="agr-fecha" type="date" aria-label="Fecha comprometida" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-xs">
+            <button type="submit" id="btn-add-agreement" class="min-h-[36px] px-gutter-md rounded-md bg-primary text-on-primary font-label text-label-sm hover:bg-secondary shrink-0">Registrar</button>
+          </div>
+        </form>
+        <div id="committee-agreements-list" class="flex flex-col gap-gutter-xs"></div>
       </div>
     </div>
   </div>
@@ -916,6 +938,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="./app.js?v=20261122f"></script>
+  <script src="./app.js?v=20261122g"></script>
 </body>
 </html>
