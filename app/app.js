@@ -1386,7 +1386,7 @@
             ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm'
             : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm';
         });
-        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'documentos', 'avisos', 'comunidad', 'auditoria', 'usuarios'].forEach(function (name) {
+        ['control', 'tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'documentos', 'avisos', 'comunidad', 'auditoria', 'usuarios'].forEach(function (name) {
           const panel = document.getElementById('admin-tab-' + name);
           if (!panel) return;
           panel.classList.toggle('hidden', target !== name);
@@ -1513,6 +1513,7 @@
       selWrap.classList.remove('flex');
     }
 
+    renderAdminControlCenter(json.controlCenter || null);
     renderAdminTickets(json.tickets || []);
     renderAdminOrdenes(json.ordenes || [], json.equipos || []);
     renderAdminCotizaciones(json.cotizaciones || [], json.equipos || []);
@@ -1523,6 +1524,82 @@
     renderAdminComunidad(json.comunidad || (state.data && state.data.comunidad) || null);
     renderAdminAuditoria(json.auditoria || []);
     renderAdminUsers(json.usuarios || []);
+  }
+
+  function renderAdminControlCenter(cc) {
+    const container = document.getElementById('admin-tab-control');
+    if (!container) return;
+    if (!cc) {
+      container.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">Actualiza Code.gs en Apps Script para activar el Control Center multi-comunidad.</p>';
+      return;
+    }
+
+    const kpi = function (label, val, cls) {
+      return (
+        '<div class="bg-surface-subtle rounded-md border border-outline p-gutter-sm flex flex-col gap-0.5">' +
+          '<span class="font-label text-[11px] text-on-surface-variant">' + label + '</span>' +
+          '<span class="font-headline text-headline-md ' + (cls || 'text-on-surface') + ' tabular-nums">' + escapeHtml(String(val)) + '</span>' +
+        '</div>'
+      );
+    };
+
+    const kpisHtml =
+      '<div class="grid grid-cols-2 md:grid-cols-3 gap-gutter-sm">' +
+        kpi('Comunidades', cc.totalComunidades, 'text-primary') +
+        kpi('Equipos activos', cc.totalEquipos, 'text-on-surface') +
+        kpi('Incidencias abiertas', cc.ticketsPendientes, cc.ticketsPendientes > 0 ? 'text-warning' : 'text-success') +
+        kpi('Mant. atrasadas / falla', cc.mantencionesAtrasadas, cc.mantencionesAtrasadas > 0 ? 'text-error' : 'text-success') +
+        kpi('Cotizaciones pend.', cc.cotizacionesPendientes, 'text-on-surface') +
+        kpi('Docs por vencer/vencidos', cc.docsPorVencer, cc.docsPorVencer > 0 ? 'text-warning' : 'text-success') +
+      '</div>';
+
+    const listHtml = (cc.porComunidad || []).map(function (c) {
+      const hasErr = c.atrasadas > 0;
+      const hasWarn = c.porVencer > 0 || c.ticketsAbiertos > 0 || c.docsAlerta > 0;
+      const dotCls = hasErr ? 'bg-error' : (hasWarn ? 'bg-warning' : 'bg-success');
+      return (
+        '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-center justify-between gap-gutter-sm">' +
+          '<div class="flex items-start gap-gutter-sm min-w-0">' +
+            '<span class="w-2.5 h-2.5 rounded-full ' + dotCls + ' mt-1.5 shrink-0"></span>' +
+            '<div class="flex flex-col gap-0.5 min-w-0">' +
+              '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(c.nombre) + ' <span class="font-mono text-[11px] text-on-surface-variant">#' + escapeHtml(c.id) + '</span></span>' +
+              '<span class="font-label text-[11px] text-on-surface-variant">' +
+                c.equipos + ' equipos · ' + c.atrasadas + ' rojas · ' + c.ticketsAbiertos + ' tickets · ' + c.docsAlerta + ' docs alerta' +
+              '</span>' +
+            '</div>' +
+          '</div>' +
+          '<button type="button" data-cc-go="' + escapeHtml(c.id) + '" class="px-gutter-md py-1 rounded-md bg-primary-container text-on-primary-container font-label text-label-sm hover:bg-outline shrink-0">Abrir</button>' +
+        '</article>'
+      );
+    }).join('');
+
+    container.innerHTML =
+      '<div class="flex flex-col gap-gutter-md">' +
+        kpisHtml +
+        '<div class="flex flex-col gap-gutter-sm">' +
+          '<span class="font-title text-title-sm text-on-surface">Estado por comunidad (priorizado por urgencia)</span>' +
+          (listHtml || '<p class="font-body text-body-sm text-on-surface-variant">Sin comunidades registradas.</p>') +
+        '</div>' +
+      '</div>';
+
+    container.querySelectorAll('[data-cc-go]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const targetId = btn.getAttribute('data-cc-go');
+        if (!targetId) return;
+        state.edificioId = targetId;
+        state.equipoId = '';
+        const sel = document.getElementById('admin-building-select');
+        if (sel) sel.value = targetId;
+        const url = new URL(window.location.href);
+        url.searchParams.set('edificio', targetId);
+        url.searchParams.delete('equipo');
+        window.history.pushState({}, '', url.toString());
+        loadData();
+        loadAdminPanelData();
+        const ticketsTab = document.querySelector('[data-admin-tab="tickets"]');
+        if (ticketsTab) ticketsTab.click();
+      });
+    });
   }
 
   function renderAdminAuditoria(items) {
