@@ -1386,7 +1386,7 @@
             ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm'
             : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm';
         });
-        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'documentos', 'avisos', 'comunidad', 'usuarios'].forEach(function (name) {
+        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'documentos', 'avisos', 'comunidad', 'auditoria', 'usuarios'].forEach(function (name) {
           const panel = document.getElementById('admin-tab-' + name);
           if (!panel) return;
           panel.classList.toggle('hidden', target !== name);
@@ -1521,7 +1521,29 @@
     renderAdminDocumentos(json.documentos || (state.data && state.data.documentos) || []);
     renderAdminAvisos(json.avisos || (state.data && state.data.avisos) || []);
     renderAdminComunidad(json.comunidad || (state.data && state.data.comunidad) || null);
+    renderAdminAuditoria(json.auditoria || []);
     renderAdminUsers(json.usuarios || []);
+  }
+
+  function renderAdminAuditoria(items) {
+    const container = document.getElementById('admin-tab-auditoria');
+    if (!container) return;
+    if (!items || items.length === 0) {
+      container.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">Aún no hay movimientos registrados en la bitácora.</p>';
+      return;
+    }
+    container.innerHTML = items.map(function (a) {
+      return (
+        '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-start justify-between gap-gutter-sm">' +
+          '<div class="flex flex-col gap-0.5 min-w-0">' +
+            '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(a.accion) + '</span>' +
+            '<span class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(a.detalle) + '</span>' +
+            '<span class="font-label text-[11px] text-on-surface-variant">' + escapeHtml(a.usuario) + (a.rol ? ' (' + escapeHtml(a.rol) + ')' : '') + ' · #' + escapeHtml(a.edificioId) + '</span>' +
+          '</div>' +
+          '<span class="font-mono text-[11px] text-on-surface-variant shrink-0 tabular-nums">' + escapeHtml(formatShortDate(a.fecha)) + '</span>' +
+        '</article>'
+      );
+    }).join('');
   }
 
   function renderAdminAvisos(avisos) {
@@ -2254,6 +2276,21 @@
         openAiAnalysis('Resumen Ejecutivo · ' + data.edificio.nombre, {
           action: 'summarizeBuilding',
           edificioId: data.edificio.id,
+        });
+      };
+    }
+
+    const askForm = document.getElementById('committee-ai-ask-form');
+    if (askForm) {
+      askForm.onsubmit = function (e) {
+        e.preventDefault();
+        const inp = document.getElementById('committee-ai-question');
+        const q = inp ? inp.value.trim() : '';
+        if (!q) return;
+        openAiAnalysis('GCO IA · ' + data.edificio.nombre, {
+          action: 'askBuildingAi',
+          edificioId: data.edificio.id,
+          question: q,
         });
       };
     }
