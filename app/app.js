@@ -142,7 +142,7 @@
       btnReport.classList.toggle('inline-flex', name === 'equipment');
     }
     if (btnBack) {
-      const canSeeDir = Boolean(state.session && state.session.user && (state.session.user.rol === 'tecnico' || state.session.user.rol === 'admin' || state.session.user.rol === 'comite'));
+      const canSeeDir = Boolean(state.session && state.session.user && ['tecnico', 'operaciones', 'admin', 'comite'].indexOf(state.session.user.rol) !== -1);
       const showBack = name === 'equipment' && canSeeDir;
       btnBack.classList.toggle('hidden', !showBack);
       btnBack.classList.toggle('inline-flex', showBack);
@@ -238,7 +238,7 @@
     if (!sec || !list) return;
 
     const user = state.session ? state.session.user : null;
-    const canSee = Boolean(user && (user.rol === 'tecnico' || user.rol === 'admin'));
+    const canSee = Boolean(user && (user.rol === 'tecnico' || user.rol === 'operaciones' || user.rol === 'admin'));
     if (!canSee || !orders || orders.length === 0) {
       sec.classList.add('hidden');
       sec.classList.remove('flex');
@@ -861,11 +861,12 @@
     btnLogout.classList.remove('hidden');
     roleText.textContent = user.nombre + ' (' + user.rol.toUpperCase() + ')';
 
-    const canMaint = Boolean(user.rol === 'tecnico' || user.rol === 'admin');
-    const isAdmin = user.rol === 'admin';
+    const canMaint = Boolean(user.rol === 'tecnico' || user.rol === 'operaciones' || user.rol === 'admin');
+    const isAdminPanel = Boolean(user.rol === 'admin' || user.rol === 'operaciones');
+    const isOpsOnly = user.rol === 'operaciones';
     const isCommittee = user.rol === 'comite' || user.rol === 'admin';
 
-    if (canMaint || isAdmin || isCommittee) {
+    if (canMaint || isAdminPanel || isCommittee) {
       roleBar.classList.remove('hidden');
       roleBar.classList.add('flex');
     } else {
@@ -875,8 +876,24 @@
 
     btnMaint.classList.toggle('hidden', !canMaint);
     btnMaint.classList.toggle('inline-flex', canMaint);
-    btnAdmin.classList.toggle('hidden', !isAdmin);
-    btnAdmin.classList.toggle('inline-flex', isAdmin);
+    btnAdmin.classList.toggle('hidden', !isAdminPanel);
+    btnAdmin.classList.toggle('inline-flex', isAdminPanel);
+    const adminLbl = btnAdmin.querySelector('.font-label');
+    if (adminLbl) {
+      adminLbl.textContent = isOpsOnly
+        ? 'Panel de Operaciones (Tickets, Órdenes, Equipos y Bodega)'
+        : 'Panel de Administración (Tickets, Equipos y Usuarios)';
+    }
+    const adminTabsAllowedOps = ['tickets', 'ordenes', 'equipos', 'bodega'];
+    document.querySelectorAll('.admin-panel-tab').forEach(function (tabBtn) {
+      const tName = tabBtn.getAttribute('data-admin-tab');
+      const hideForOps = isOpsOnly && adminTabsAllowedOps.indexOf(tName) === -1;
+      tabBtn.classList.toggle('hidden', hideForOps);
+    });
+    const adminTitle = document.getElementById('sheet-admin-title');
+    if (adminTitle) {
+      adminTitle.textContent = isOpsOnly ? 'Panel de Operaciones' : 'Panel de Administración';
+    }
     if (btnCommittee) {
       btnCommittee.classList.toggle('hidden', !isCommittee);
       btnCommittee.classList.toggle('inline-flex', isCommittee);
@@ -3062,6 +3079,7 @@
           '<div class="grid grid-cols-2 gap-gutter-xs">' +
             '<select id="new-usr-role" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
               '<option value="comite">Comité</option>' +
+              '<option value="operaciones">Operaciones (Terreno)</option>' +
               '<option value="tecnico">Técnico</option>' +
               '<option value="admin">Admin edificio</option>' +
               '<option value="vecino">Vecino</option>' +
