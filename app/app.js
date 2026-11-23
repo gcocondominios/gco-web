@@ -61,8 +61,32 @@
     loadData();
   }
 
+  function saveDataCache(key, payload) {
+    try {
+      localStorage.setItem('gco_cache_v1_' + key, JSON.stringify({ savedAt: new Date().toISOString(), payload: payload }));
+    } catch (e) {}
+  }
+
+  function loadDataCache(key) {
+    try {
+      const raw = localStorage.getItem('gco_cache_v1_' + key);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function loadData() {
-    showView('loading');
+    const cacheKey = 'data_' + state.edificioId + '_' + (state.equipoId || 'DIR');
+    const cached = loadDataCache(cacheKey);
+    if (cached && cached.payload) {
+      state.data = cached.payload;
+      if (cached.payload.mode === 'equipo') renderEquipoView(cached.payload);
+      else renderDirectoryView(cached.payload);
+    } else {
+      showView('loading');
+    }
+
     const url = new URL(API_URL);
     url.searchParams.set('edificio', state.edificioId);
     if (state.equipoId) {
@@ -73,10 +97,11 @@
       const res = await fetch(url.toString(), { method: 'GET' });
       const json = await res.json();
       if (!json.ok) {
-        showErrorState(json.error || 'No se pudo cargar la información.');
+        if (!cached) showErrorState(json.error || 'No se pudo cargar la información.');
         return;
       }
 
+      saveDataCache(cacheKey, json);
       state.data = json;
       if (json.mode === 'equipo') {
         renderEquipoView(json);
@@ -84,7 +109,17 @@
         renderDirectoryView(json);
       }
     } catch (err) {
-      showErrorState('Error de conexión con el servidor. Verifica tu internet e intenta nuevamente.');
+      if (cached && cached.payload) {
+        const banner = document.getElementById('offline-banner');
+        const text = document.getElementById('offline-banner-text');
+        if (banner && text) {
+          text.textContent = 'Sin conexión · Mostrando datos guardados (' + formatShortDate(cached.savedAt) + ')';
+          banner.classList.remove('hidden');
+          banner.classList.add('flex');
+        }
+      } else {
+        showErrorState('Error de conexión con el servidor. Verifica tu internet e intenta nuevamente.');
+      }
     }
   }
 
@@ -1125,6 +1160,12 @@
 
   async function loadAdminPanelData() {
     if (!state.session) return;
+    const cacheKey = 'admin_' + (state.edificioId || 'ALL');
+    const cached = loadDataCache(cacheKey);
+    if (cached && cached.payload) {
+      applyAdminPanelData(cached.payload);
+    }
+
     const url = new URL(API_URL);
     url.searchParams.set('action', 'adminData');
     url.searchParams.set('token', state.session.token);
@@ -1134,33 +1175,41 @@
       const res = await fetch(url.toString(), { method: 'GET' });
       const json = await res.json();
       if (!json.ok) {
-        showToast(json.error || 'Error al cargar panel', true);
+        if (!cached) showToast(json.error || 'Error al cargar panel', true);
         return;
       }
-
-      const selWrap = document.getElementById('admin-building-selector-wrap');
-      const sel = document.getElementById('admin-building-select');
-      if (json.isGlobalAdmin && json.edificios && json.edificios.length > 0) {
-        selWrap.classList.remove('hidden');
-        selWrap.classList.add('flex');
-        sel.innerHTML = json.edificios.map(function (ed) {
-          const selected = ed.id === state.edificioId ? ' selected' : '';
-          return '<option value="' + escapeHtml(ed.id) + '"' + selected + '>' + escapeHtml(ed.nombre) + ' (' + escapeHtml(ed.id) + ')</option>';
-        }).join('');
-      } else {
-        selWrap.classList.add('hidden');
-        selWrap.classList.remove('flex');
-      }
-
-      renderAdminTickets(json.tickets || []);
-      renderAdminOrdenes(json.ordenes || [], json.equipos || []);
-      renderAdminCotizaciones(json.cotizaciones || [], json.equipos || []);
-      renderAdminEquipos(json.equipos || []);
-      renderAdminBodega(json.inventario || []);
-      renderAdminUsers(json.usuarios || []);
+      saveDataCache(cacheKey, json);
+      applyAdminPanelData(json);
     } catch (err) {
-      showToast('Error de red al cargar panel', true);
+      if (cached && cached.payload) {
+        showToast('Sin señal · Mostrando últimos datos del panel');
+      } else {
+        showToast('Error de red al cargar panel', true);
+      }
     }
+  }
+
+  function applyAdminPanelData(json) {
+    const selWrap = document.getElementById('admin-building-selector-wrap');
+    const sel = document.getElementById('admin-building-select');
+    if (json.isGlobalAdmin && json.edificios && json.edificios.length > 0) {
+      selWrap.classList.remove('hidden');
+      selWrap.classList.add('flex');
+      sel.innerHTML = json.edificios.map(function (ed) {
+        const selected = ed.id === state.edificioId ? ' selected' : '';
+        return '<option value="' + escapeHtml(ed.id) + '"' + selected + '>' + escapeHtml(ed.nombre) + ' (' + escapeHtml(ed.id) + ')</option>';
+      }).join('');
+    } else {
+      selWrap.classList.add('hidden');
+      selWrap.classList.remove('flex');
+    }
+
+    renderAdminTickets(json.tickets || []);
+    renderAdminOrdenes(json.ordenes || [], json.equipos || []);
+    renderAdminCotizaciones(json.cotizaciones || [], json.equipos || []);
+    renderAdminEquipos(json.equipos || []);
+    renderAdminBodega(json.inventario || []);
+    renderAdminUsers(json.usuarios || []);
   }
 
   function renderAdminTickets(tickets) {
@@ -1520,6 +1569,12 @@
 
   async function loadCommitteeData() {
     if (!state.session) return;
+    const cacheKey = 'comm_' + (state.edificioId || 'DEMO');
+    const cached = loadDataCache(cacheKey);
+    if (cached && cached.payload) {
+      renderCommitteeModal(cached.payload);
+    }
+
     const url = new URL(API_URL);
     url.searchParams.set('action', 'committeeData');
     url.searchParams.set('token', state.session.token);
@@ -1529,12 +1584,17 @@
       const res = await fetch(url.toString(), { method: 'GET' });
       const json = await res.json();
       if (!json.ok) {
-        showToast(json.error || 'No se pudo cargar el resumen de comité', true);
+        if (!cached) showToast(json.error || 'No se pudo cargar el resumen de comité', true);
         return;
       }
+      saveDataCache(cacheKey, json);
       renderCommitteeModal(json);
     } catch (err) {
-      showToast('Error de red al cargar portal comité', true);
+      if (cached && cached.payload) {
+        showToast('Sin señal · Mostrando último resumen guardado');
+      } else {
+        showToast('Error de red al cargar portal comité', true);
+      }
     }
   }
 
