@@ -50,12 +50,15 @@
 
   function readUrlAndLoad() {
     const params = new URLSearchParams(window.location.search);
-    state.edificioId = (params.get('edificio') || '').trim();
+    const paramEdificio = (params.get('edificio') || '').trim();
     state.equipoId = (params.get('equipo') || '').trim();
 
-    if (!state.edificioId) {
-      showErrorState('Falta el parámetro ?edificio= en la URL. Escanea el código QR del equipo.');
-      return;
+    if (paramEdificio) {
+      state.edificioId = paramEdificio;
+    } else if (state.session && state.session.user && state.session.user.edificioId && state.session.user.edificioId.toUpperCase() !== 'ALL') {
+      state.edificioId = state.session.user.edificioId;
+    } else {
+      state.edificioId = 'DEMO';
     }
 
     loadData();
@@ -493,8 +496,167 @@
       });
     });
 
+    renderDirectoryCalendar(data);
+    renderCommunityProfileView(data);
+
     updateSessionUI();
     showView('directory');
+  }
+
+  function switchDirectoryTab(target) {
+    document.querySelectorAll('.dir-view-tab').forEach(function (t) {
+      const isAct = t.getAttribute('data-dir-tab') === target;
+      t.className = isAct
+        ? 'dir-view-tab py-gutter-sm px-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs transition-colors duration-state-change'
+        : 'dir-view-tab py-gutter-sm px-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs transition-colors duration-state-change';
+    });
+    ['equipos', 'calendario', 'comunidad'].forEach(function (name) {
+      const panel = document.getElementById('dir-panel-' + name);
+      if (!panel) return;
+      panel.classList.toggle('hidden', target !== name);
+      panel.classList.toggle('flex', target === name);
+    });
+  }
+
+  function renderDirectoryCalendar(data) {
+    const panel = document.getElementById('dir-panel-calendario');
+    if (!panel) return;
+    const equipos = data.equipos || [];
+    if (equipos.length === 0) {
+      panel.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">Sin equipos registrados para programar.</p>';
+      return;
+    }
+
+    const vencidos = [];
+    const proximos = [];
+    const programados = [];
+    const sinRegistro = [];
+
+    equipos.forEach(function (eq) {
+      const sem = eq.semaforo || {};
+      if (sem.diasRestantes === null || sem.diasRestantes === undefined) {
+        sinRegistro.push(eq);
+      } else if (sem.color === 'rojo' || sem.diasRestantes < 0) {
+        vencidos.push(eq);
+      } else if (sem.diasRestantes <= 30) {
+        proximos.push(eq);
+      } else {
+        programados.push(eq);
+      }
+    });
+
+    const sortByDays = function (a, b) {
+      return (a.semaforo.diasRestantes || 0) - (b.semaforo.diasRestantes || 0);
+    };
+    vencidos.sort(sortByDays);
+    proximos.sort(sortByDays);
+    programados.sort(sortByDays);
+
+    function renderGroup(title, icon, badgeCls, items) {
+      if (items.length === 0) return '';
+      const cards = items.map(function (eq) {
+        const sem = eq.semaforo || {};
+        const diasTxt = sem.diasRestantes === null || sem.diasRestantes === undefined
+          ? 'Por programar'
+          : (sem.diasRestantes < 0 ? 'Vencida hace ' + Math.abs(sem.diasRestantes) + ' días' : (sem.diasRestantes === 0 ? 'Vence hoy' : 'En ' + sem.diasRestantes + ' días'));
+        return (
+          '<button type="button" data-cal-eq="' + escapeHtml(eq.id) + '" class="text-left w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-md shadow-sm flex items-center justify-between gap-gutter-md hover:bg-surface-subtle transition-colors duration-state-change">' +
+            '<div class="flex items-center gap-gutter-md min-w-0">' +
+              '<div class="w-9 h-9 rounded-md bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">' +
+                '<span class="material-symbols-outlined text-[18px]">' + guessEquipmentIcon(eq.nombre, eq.id) + '</span>' +
+              '</div>' +
+              '<div class="flex flex-col gap-0.5 min-w-0">' +
+                '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(eq.nombre) + '</span>' +
+                '<span class="font-label text-label-sm text-on-surface-variant truncate">' + escapeHtml(eq.empresa || 'Por asignar') + ' · Cada ' + escapeHtml(String(eq.periodicidadDias || 30)) + ' días</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="flex flex-col items-end gap-0.5 shrink-0">' +
+              '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-[11px]">' + escapeHtml(diasTxt) + '</span>' +
+              '<span class="font-mono text-[11px] text-on-surface-variant tabular-nums">' + escapeHtml(formatShortDate(sem.proximaVisita)) + '</span>' +
+            '</div>' +
+          '</button>'
+        );
+      }).join('');
+
+      return (
+        '<div class="flex flex-col gap-gutter-sm">' +
+          '<div class="flex items-center gap-gutter-xs px-gutter-xs">' +
+            '<span class="material-symbols-outlined text-[18px] text-primary">' + icon + '</span>' +
+            '<h2 class="font-headline text-title-sm text-on-surface">' + title + ' (' + items.length + ')</h2>' +
+          '</div>' +
+          '<div class="flex flex-col gap-gutter-sm">' + cards + '</div>' +
+        '</div>'
+      );
+    }
+
+    panel.innerHTML =
+      renderGroup('Requiere atención inmediata', 'warning', 'bg-error-container text-on-error-container', vencidos) +
+      renderGroup('Próximos 30 días', 'event_upcoming', 'bg-warning-container text-on-warning-container', proximos) +
+      renderGroup('Programados (+30 días)', 'event_available', 'bg-success-container text-on-success-container', programados) +
+      renderGroup('Sin mantención inicial', 'pending_actions', 'bg-surface-variant text-on-surface-variant', sinRegistro);
+
+    panel.querySelectorAll('[data-cal-eq]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        navigateToEquipo(btn.getAttribute('data-cal-eq'));
+      });
+    });
+  }
+
+  function renderCommunityProfileView(data) {
+    const panel = document.getElementById('dir-panel-comunidad');
+    if (!panel) return;
+    const c = data.comunidad || {
+      edificioId: data.edificio.id,
+      nombre: data.edificio.nombre,
+    };
+
+    const row = function (icon, label, val) {
+      return (
+        '<div class="flex items-start gap-gutter-md py-gutter-sm border-b border-outline-subtle last:border-b-0">' +
+          '<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 shrink-0">' + icon + '</span>' +
+          '<div class="flex flex-col gap-0.5 min-w-0">' +
+            '<span class="font-label text-label-sm text-on-surface-variant">' + label + '</span>' +
+            '<span class="font-body text-body-sm text-on-surface break-words">' + escapeHtml(val || 'Por completar en Administración') + '</span>' +
+          '</div>' +
+        '</div>'
+      );
+    };
+
+    const canEdit = Boolean(state.session && state.session.user && state.session.user.rol === 'admin');
+    const editBtn = canEdit
+      ? '<button type="button" id="btn-edit-community-shortcut" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-md bg-primary-container text-on-primary-container font-label text-label-sm hover:bg-outline transition-colors duration-state-change"><span class="material-symbols-outlined text-[16px]">edit</span>Editar ficha</button>'
+      : '';
+
+    panel.innerHTML =
+      '<article class="w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-gco flex flex-col gap-gutter-md">' +
+        '<div class="flex items-start justify-between gap-gutter-md">' +
+          '<div class="flex flex-col gap-gutter-xs min-w-0">' +
+            '<h2 class="font-headline text-headline-md text-on-surface truncate">' + escapeHtml(c.nombre || data.edificio.nombre) + '</h2>' +
+            '<span class="font-mono text-mono-sm text-on-surface-variant">Comunidad #' + escapeHtml(c.edificioId || data.edificio.id) + (c.comuna ? ' · ' + escapeHtml(c.comuna) : '') + '</span>' +
+          '</div>' +
+          editBtn +
+        '</div>' +
+        '<div class="flex flex-col">' +
+          row('location_on', 'Dirección', c.direccion) +
+          row('home_work', 'Unidades / Estacionamientos / Bodegas', [c.totalUnidades, c.estacionamientos ? c.estacionamientos + ' estac.' : '', c.bodegas ? c.bodegas + ' bodegas' : ''].filter(Boolean).join(' · ')) +
+          row('account_balance_wallet', 'Plataforma Financiera (Gastos Comunes)', c.plataformaFinanciera) +
+          row('groups', 'Comité de Administración y Vigencia', [c.comiteRepresentantes, c.comiteVigencia].filter(Boolean).join(' · ')) +
+          row('badge', 'Personal y Turnos', c.personalTurnos) +
+          row('emergency', 'Contactos de Emergencia', c.contactosEmergencia) +
+          row('support_agent', 'Responsables GCO Asignados', c.responsablesGco) +
+          (c.notasGenerales ? row('notes', 'Notas de Operación', c.notasGenerales) : '') +
+        '</div>' +
+      '</article>';
+
+    const shortcut = document.getElementById('btn-edit-community-shortcut');
+    if (shortcut) {
+      shortcut.addEventListener('click', function () {
+        openModal('modal-admin');
+        loadAdminPanelData();
+        const fichaTab = document.querySelector('[data-admin-tab="comunidad"]');
+        if (fichaTab) fichaTab.click();
+      });
+    }
   }
 
   function navigateToEquipo(equipoId) {
@@ -1069,6 +1231,12 @@
       loadAdminPanelData();
     });
 
+    document.querySelectorAll('.dir-view-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        switchDirectoryTab(tab.getAttribute('data-dir-tab'));
+      });
+    });
+
     document.querySelectorAll('.admin-panel-tab').forEach(function (tab) {
       tab.addEventListener('click', function () {
         const target = tab.getAttribute('data-admin-tab');
@@ -1077,7 +1245,7 @@
             ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm'
             : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm';
         });
-        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'usuarios'].forEach(function (name) {
+        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'comunidad', 'usuarios'].forEach(function (name) {
           const panel = document.getElementById('admin-tab-' + name);
           if (!panel) return;
           panel.classList.toggle('hidden', target !== name);
@@ -1209,7 +1377,82 @@
     renderAdminCotizaciones(json.cotizaciones || [], json.equipos || []);
     renderAdminEquipos(json.equipos || []);
     renderAdminBodega(json.inventario || []);
+    renderAdminComunidad(json.comunidad || (state.data && state.data.comunidad) || null);
     renderAdminUsers(json.usuarios || []);
+  }
+
+  function renderAdminComunidad(com) {
+    const container = document.getElementById('admin-tab-comunidad');
+    if (!container) return;
+
+    if (!state.edificioId || state.edificioId.toUpperCase() === 'ALL') {
+      container.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">Selecciona una comunidad específica arriba para editar su Ficha Maestra.</p>';
+      return;
+    }
+
+    const c = com || { edificioId: state.edificioId, nombre: state.edificioId };
+    container.innerHTML =
+      '<form id="admin-comunidad-form" class="bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
+        '<div class="flex items-center justify-between gap-gutter-sm">' +
+          '<span class="font-title text-title-sm text-on-surface">Ficha Maestra · #' + escapeHtml(state.edificioId) + '</span>' +
+          (c.ultimaActualizacion ? '<span class="font-label text-label-sm text-on-surface-variant">Act: ' + escapeHtml(formatShortDate(c.ultimaActualizacion)) + '</span>' : '') +
+        '</div>' +
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-sm">' +
+          '<input id="com-nombre" type="text" required value="' + escapeHtml(c.nombre || '') + '" placeholder="Nombre oficial de la comunidad" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+          '<input id="com-comuna" type="text" value="' + escapeHtml(c.comuna || '') + '" placeholder="Comuna (Ej. Concepción)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '</div>' +
+        '<input id="com-direccion" type="text" value="' + escapeHtml(c.direccion || '') + '" placeholder="Dirección exacta" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '<div class="grid grid-cols-3 gap-gutter-sm">' +
+          '<input id="com-unidades" type="text" value="' + escapeHtml(c.totalUnidades || '') + '" placeholder="Unidades (ej. 96 deptos)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+          '<input id="com-estac" type="text" value="' + escapeHtml(c.estacionamientos || '') + '" placeholder="Estacionamientos" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+          '<input id="com-bodegas" type="text" value="' + escapeHtml(c.bodegas || '') + '" placeholder="Bodegas" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '</div>' +
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-sm">' +
+          '<input id="com-plataforma" type="text" value="' + escapeHtml(c.plataformaFinanciera || '') + '" placeholder="Plataforma financiera (ComunidadFeliz, Kastor, EdiPro...)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+          '<input id="com-vigencia" type="text" value="' + escapeHtml(c.comiteVigencia || '') + '" placeholder="Vigencia Comité (Ej. Dic 2026)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '</div>' +
+        '<input id="com-comite" type="text" value="' + escapeHtml(c.comiteRepresentantes || '') + '" placeholder="Integrantes del Comité de Administración" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '<input id="com-personal" type="text" value="' + escapeHtml(c.personalTurnos || '') + '" placeholder="Personal contratado y turnos (Conserjería, Aseo)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '<input id="com-emergencia" type="text" value="' + escapeHtml(c.contactosEmergencia || '') + '" placeholder="Contactos de emergencia clave" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '<input id="com-gco" type="text" value="' + escapeHtml(c.responsablesGco || '') + '" placeholder="Responsables GCO asignados" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '<textarea id="com-notas" rows="2" placeholder="Notas operativas o reglamento relevante" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' + escapeHtml(c.notasGenerales || '') + '</textarea>' +
+        '<button type="submit" id="btn-save-comunidad" class="min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-md hover:bg-secondary transition-colors duration-state-change">Guardar Ficha Maestra</button>' +
+      '</form>';
+
+    document.getElementById('admin-comunidad-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-save-comunidad');
+      setLoadingBtn(btn, true, 'Guardando...');
+      const res = await postApi({
+        action: 'saveCommunityProfile',
+        token: state.session.token,
+        edificioId: state.edificioId,
+        nombre: document.getElementById('com-nombre').value.trim(),
+        comuna: document.getElementById('com-comuna').value.trim(),
+        direccion: document.getElementById('com-direccion').value.trim(),
+        totalUnidades: document.getElementById('com-unidades').value.trim(),
+        estacionamientos: document.getElementById('com-estac').value.trim(),
+        bodegas: document.getElementById('com-bodegas').value.trim(),
+        plataformaFinanciera: document.getElementById('com-plataforma').value.trim(),
+        comiteVigencia: document.getElementById('com-vigencia').value.trim(),
+        comiteRepresentantes: document.getElementById('com-comite').value.trim(),
+        personalTurnos: document.getElementById('com-personal').value.trim(),
+        contactosEmergencia: document.getElementById('com-emergencia').value.trim(),
+        responsablesGco: document.getElementById('com-gco').value.trim(),
+        notasGenerales: document.getElementById('com-notas').value.trim(),
+      });
+      setLoadingBtn(btn, false, 'Guardar Ficha Maestra');
+      if (!res.ok) {
+        showToast(res.error || 'No se pudo guardar la ficha', true);
+        return;
+      }
+      showToast(res.message || 'Ficha guardada');
+      if (state.data && res.comunidad) {
+        state.data.comunidad = res.comunidad;
+        renderCommunityProfileView(state.data);
+      }
+      loadAdminPanelData();
+    });
   }
 
   function renderAdminTickets(tickets) {
