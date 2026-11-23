@@ -471,18 +471,18 @@
         : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
 
       return (
-        '<button type="button" data-equipo-id="' + escapeHtml(eq.id) + '" data-state="' + dataState + '" class="dir-asset-item text-left w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle ' + borderLeft + ' p-gutter-lg shadow-gco flex items-center justify-between gap-gutter-md hover:bg-surface-subtle transition-colors duration-state-change">' +
-          '<div class="flex items-center gap-gutter-md min-w-0">' +
+        '<button type="button" data-equipo-id="' + escapeHtml(eq.id) + '" data-state="' + dataState + '" class="dir-asset-item text-left w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle ' + borderLeft + ' p-gutter-md lg:p-gutter-lg shadow-gco flex items-center justify-between gap-gutter-sm hover:bg-surface-subtle transition-colors duration-state-change">' +
+          '<div class="flex items-center gap-gutter-sm lg:gap-gutter-md min-w-0 flex-1">' +
             '<div class="w-10 h-10 rounded-md ' + iconBg + ' flex items-center justify-center shrink-0" aria-hidden="true">' +
               '<span class="material-symbols-outlined text-[20px]">' + guessEquipmentIcon(eq.nombre, eq.id) + '</span>' +
             '</div>' +
-            '<div class="flex flex-col gap-gutter-xs min-w-0">' +
-              '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(eq.nombre) + '</span>' +
-              '<span class="font-label text-label-sm text-on-surface-variant tabular-nums">#' + escapeHtml(eq.id) + ' · ' + escapeHtml(formatShortDate(sem.ultimaVisita)) + '</span>' +
+            '<div class="flex flex-col gap-0.5 min-w-0 flex-1">' +
+              '<span class="font-title text-title-sm text-on-surface leading-snug">' + escapeHtml(eq.nombre) + '</span>' +
+              '<span class="font-label text-[11px] lg:text-label-sm text-on-surface-variant tabular-nums whitespace-nowrap truncate">#' + escapeHtml(eq.id) + ' · ' + escapeHtml(formatShortDate(sem.ultimaVisita)) + '</span>' +
             '</div>' +
           '</div>' +
-          '<div class="flex items-center gap-gutter-xs shrink-0">' +
-            '<span class="inline-flex items-center px-gutter-sm py-gutter-xs rounded-full ' + badgeClass + ' font-label text-label-sm">' + escapeHtml(sem.etiquetaCorta) + '</span>' +
+          '<div class="flex items-center gap-1 shrink-0">' +
+            '<span class="inline-flex items-center px-gutter-sm py-gutter-xs rounded-full ' + badgeClass + ' font-label text-[11px] lg:text-label-sm whitespace-nowrap">' + escapeHtml(sem.etiquetaCorta) + '</span>' +
             '<span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">chevron_right</span>' +
           '</div>' +
         '</button>'
