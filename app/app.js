@@ -497,6 +497,7 @@
     });
 
     renderDirectoryCalendar(data);
+    renderDirectoryDocuments(data);
     renderCommunityProfileView(data);
 
     updateSessionUI();
@@ -507,10 +508,10 @@
     document.querySelectorAll('.dir-view-tab').forEach(function (t) {
       const isAct = t.getAttribute('data-dir-tab') === target;
       t.className = isAct
-        ? 'dir-view-tab py-gutter-sm px-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs transition-colors duration-state-change'
-        : 'dir-view-tab py-gutter-sm px-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs transition-colors duration-state-change';
+        ? 'dir-view-tab py-gutter-sm px-gutter-xs rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm inline-flex items-center justify-center gap-1 transition-colors duration-state-change'
+        : 'dir-view-tab py-gutter-sm px-gutter-xs rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-[11px] md:text-label-sm inline-flex items-center justify-center gap-1 transition-colors duration-state-change';
     });
-    ['equipos', 'calendario', 'comunidad'].forEach(function (name) {
+    ['equipos', 'calendario', 'documentos', 'comunidad'].forEach(function (name) {
       const panel = document.getElementById('dir-panel-' + name);
       if (!panel) return;
       panel.classList.toggle('hidden', target !== name);
@@ -552,16 +553,20 @@
     proximos.sort(sortByDays);
     programados.sort(sortByDays);
 
-    function renderGroup(title, icon, badgeCls, items) {
+    function renderGroup(title, icon, badgeCls, items, allowQuickOrder) {
       if (items.length === 0) return '';
+      const isAdmin = Boolean(state.session && state.session.user && state.session.user.rol === 'admin');
       const cards = items.map(function (eq) {
         const sem = eq.semaforo || {};
         const diasTxt = sem.diasRestantes === null || sem.diasRestantes === undefined
           ? 'Por programar'
           : (sem.diasRestantes < 0 ? 'Vencida hace ' + Math.abs(sem.diasRestantes) + ' días' : (sem.diasRestantes === 0 ? 'Vence hoy' : 'En ' + sem.diasRestantes + ' días'));
+        const quickOrderBtn = (isAdmin && allowQuickOrder)
+          ? '<button type="button" data-cal-order-eq="' + escapeHtml(eq.id) + '" data-cal-order-name="' + escapeHtml(eq.nombre) + '" class="px-gutter-sm py-0.5 rounded-sm bg-primary-container text-on-primary-container font-label text-[11px] hover:bg-outline">+ Orden</button>'
+          : '';
         return (
-          '<button type="button" data-cal-eq="' + escapeHtml(eq.id) + '" class="text-left w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-md shadow-sm flex items-center justify-between gap-gutter-md hover:bg-surface-subtle transition-colors duration-state-change">' +
-            '<div class="flex items-center gap-gutter-md min-w-0">' +
+          '<div class="w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-md shadow-sm flex items-center justify-between gap-gutter-md">' +
+            '<button type="button" data-cal-eq="' + escapeHtml(eq.id) + '" class="text-left flex items-center gap-gutter-md min-w-0 flex-1 hover:opacity-80">' +
               '<div class="w-9 h-9 rounded-md bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">' +
                 '<span class="material-symbols-outlined text-[18px]">' + guessEquipmentIcon(eq.nombre, eq.id) + '</span>' +
               '</div>' +
@@ -569,12 +574,15 @@
                 '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(eq.nombre) + '</span>' +
                 '<span class="font-label text-label-sm text-on-surface-variant truncate">' + escapeHtml(eq.empresa || 'Por asignar') + ' · Cada ' + escapeHtml(String(eq.periodicidadDias || 30)) + ' días</span>' +
               '</div>' +
-            '</div>' +
-            '<div class="flex flex-col items-end gap-0.5 shrink-0">' +
+            '</button>' +
+            '<div class="flex flex-col items-end gap-1 shrink-0">' +
               '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-[11px]">' + escapeHtml(diasTxt) + '</span>' +
-              '<span class="font-mono text-[11px] text-on-surface-variant tabular-nums">' + escapeHtml(formatShortDate(sem.proximaVisita)) + '</span>' +
+              '<div class="flex items-center gap-gutter-xs">' +
+                '<span class="font-mono text-[11px] text-on-surface-variant tabular-nums">' + escapeHtml(formatShortDate(sem.proximaVisita)) + '</span>' +
+                quickOrderBtn +
+              '</div>' +
             '</div>' +
-          '</button>'
+          '</div>'
         );
       }).join('');
 
@@ -590,14 +598,102 @@
     }
 
     panel.innerHTML =
-      renderGroup('Requiere atención inmediata', 'warning', 'bg-error-container text-on-error-container', vencidos) +
-      renderGroup('Próximos 30 días', 'event_upcoming', 'bg-warning-container text-on-warning-container', proximos) +
-      renderGroup('Programados (+30 días)', 'event_available', 'bg-success-container text-on-success-container', programados) +
-      renderGroup('Sin mantención inicial', 'pending_actions', 'bg-surface-variant text-on-surface-variant', sinRegistro);
+      renderGroup('Requiere atención inmediata', 'warning', 'bg-error-container text-on-error-container', vencidos, true) +
+      renderGroup('Próximos 30 días', 'event_upcoming', 'bg-warning-container text-on-warning-container', proximos, true) +
+      renderGroup('Programados (+30 días)', 'event_available', 'bg-success-container text-on-success-container', programados, false) +
+      renderGroup('Sin mantención inicial', 'pending_actions', 'bg-surface-variant text-on-surface-variant', sinRegistro, true);
 
     panel.querySelectorAll('[data-cal-eq]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         navigateToEquipo(btn.getAttribute('data-cal-eq'));
+      });
+    });
+
+    panel.querySelectorAll('[data-cal-order-eq]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const eqId = btn.getAttribute('data-cal-order-eq');
+        const eqName = btn.getAttribute('data-cal-order-name');
+        openModal('modal-admin');
+        loadAdminPanelData().then(function () {
+          const ordTab = document.querySelector('[data-admin-tab="ordenes"]');
+          if (ordTab) ordTab.click();
+          const eqSel = document.getElementById('ord-equipo');
+          const titleInp = document.getElementById('ord-titulo');
+          if (eqSel) eqSel.value = eqId;
+          if (titleInp) titleInp.value = 'Mantención preventiva · ' + eqName;
+        });
+      });
+    });
+  }
+
+  function renderDirectoryDocuments(data) {
+    const panel = document.getElementById('dir-panel-documentos');
+    if (!panel) return;
+    const docs = data.documentos || [];
+    const canAi = Boolean(state.session && state.session.user && ['admin', 'comite'].indexOf(state.session.user.rol) !== -1);
+    const canEdit = Boolean(state.session && state.session.user && state.session.user.rol === 'admin');
+
+    const headerBar =
+      '<div class="flex items-center justify-between gap-gutter-sm px-gutter-xs">' +
+        '<span class="font-label text-label-sm text-on-surface-variant">Certificaciones, reglamentos y contratos vigentes</span>' +
+        (canEdit
+          ? '<button type="button" id="btn-dir-add-doc" class="inline-flex items-center gap-1 px-gutter-md py-gutter-xs rounded-md bg-primary-container text-on-primary-container font-label text-label-sm hover:bg-outline"><span class="material-symbols-outlined text-[16px]">upload_file</span>Subir</button>'
+          : '') +
+      '</div>';
+
+    if (docs.length === 0) {
+      panel.innerHTML = headerBar + '<p class="font-body text-body-sm text-on-surface-variant px-gutter-xs">Aún no hay documentos cargados en esta comunidad.</p>';
+    } else {
+      panel.innerHTML = headerBar + docs.map(function (d) {
+        const badgeCls = d.colorVencimiento === 'rojo'
+          ? 'bg-error-container text-on-error-container'
+          : (d.colorVencimiento === 'amarillo'
+              ? 'bg-warning-container text-on-warning-container'
+              : (d.colorVencimiento === 'verde' ? 'bg-success-container text-on-success-container' : 'bg-surface-variant text-on-surface-variant'));
+        const vencLabel = d.fechaVencimiento ? (d.estadoVencimiento + ' · ' + formatShortDate(d.fechaVencimiento)) : d.estadoVencimiento;
+        const pdfActions = d.linkPdf
+          ? '<div class="flex items-center gap-gutter-md mt-gutter-xs">' +
+              '<a href="' + escapeHtml(d.linkPdf) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[15px]">picture_as_pdf</span>Ver documento</a>' +
+              (canAi
+                ? '<button type="button" data-ai-doc-url="' + escapeHtml(d.linkPdf) + '" data-ai-doc-title="' + escapeHtml(d.titulo) + '" class="inline-flex items-center gap-1 font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[15px]">auto_awesome</span>Analizar con IA</button>'
+                : '') +
+            '</div>'
+          : '<span class="font-label text-label-sm text-on-surface-variant mt-gutter-xs">Sin archivo adjunto (referencia)</span>';
+
+        return (
+          '<article class="w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-lg shadow-sm flex flex-col gap-gutter-xs">' +
+            '<div class="flex items-start justify-between gap-gutter-sm">' +
+              '<div class="flex flex-col gap-0.5 min-w-0">' +
+                '<span class="font-label text-[11px] text-primary uppercase tracking-wide">' + escapeHtml(d.categoria) + '</span>' +
+                '<h3 class="font-title text-title-sm text-on-surface">' + escapeHtml(d.titulo) + '</h3>' +
+              '</div>' +
+              '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-[11px] shrink-0">' + escapeHtml(vencLabel) + '</span>' +
+            '</div>' +
+            (d.notas ? '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(d.notas) + '</p>' : '') +
+            pdfActions +
+          '</article>'
+        );
+      }).join('');
+    }
+
+    const addBtn = document.getElementById('btn-dir-add-doc');
+    if (addBtn) {
+      addBtn.addEventListener('click', function () {
+        openModal('modal-admin');
+        loadAdminPanelData();
+        const docTab = document.querySelector('[data-admin-tab="documentos"]');
+        if (docTab) docTab.click();
+      });
+    }
+
+    panel.querySelectorAll('[data-ai-doc-url]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        openAiAnalysis(btn.getAttribute('data-ai-doc-title'), {
+          action: 'analyzeDocument',
+          fileUrl: btn.getAttribute('data-ai-doc-url'),
+          contexto: 'documento oficial o certificación de comunidad',
+          titulo: btn.getAttribute('data-ai-doc-title'),
+        });
       });
     });
   }
@@ -1245,7 +1341,7 @@
             ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm'
             : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm';
         });
-        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'comunidad', 'usuarios'].forEach(function (name) {
+        ['tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'documentos', 'comunidad', 'usuarios'].forEach(function (name) {
           const panel = document.getElementById('admin-tab-' + name);
           if (!panel) return;
           panel.classList.toggle('hidden', target !== name);
@@ -1377,8 +1473,121 @@
     renderAdminCotizaciones(json.cotizaciones || [], json.equipos || []);
     renderAdminEquipos(json.equipos || []);
     renderAdminBodega(json.inventario || []);
+    renderAdminDocumentos(json.documentos || (state.data && state.data.documentos) || []);
     renderAdminComunidad(json.comunidad || (state.data && state.data.comunidad) || null);
     renderAdminUsers(json.usuarios || []);
+  }
+
+  function renderAdminDocumentos(docs) {
+    const container = document.getElementById('admin-tab-documentos');
+    if (!container) return;
+
+    const formHtml =
+      '<form id="admin-add-doc-form" class="bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
+        '<span class="font-title text-title-sm text-on-surface">Subir documento o certificación</span>' +
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-sm">' +
+          '<select id="doc-categoria" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+            '<option value="Certificación SEC / Ascensores">Certificación SEC / Ascensores</option>' +
+            '<option value="Reglamento de Copropiedad">Reglamento de Copropiedad</option>' +
+            '<option value="Contrato Proveedor">Contrato Proveedor</option>' +
+            '<option value="Póliza de Seguro">Póliza de Seguro</option>' +
+            '<option value="Acta / Legal">Acta / Legal</option>' +
+            '<option value="Otro">Otro</option>' +
+          '</select>' +
+          '<input id="doc-vencimiento" type="date" aria-label="Fecha de vencimiento (opcional)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '</div>' +
+        '<input id="doc-titulo" type="text" required placeholder="Título (ej. Certificado Sello Verde Gas SEC 2026)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '<input id="doc-notas" type="text" placeholder="Notas o proveedor (opcional)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-sm">' +
+          '<input id="doc-file" type="file" accept="application/pdf,image/*" class="text-label-sm text-on-surface-variant">' +
+          '<input id="doc-link" type="url" placeholder="O pega enlace Drive (opcional)" class="rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">' +
+        '</div>' +
+        '<button type="submit" id="btn-add-doc-submit" class="min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-md hover:bg-secondary transition-colors duration-state-change">Guardar en Repositorio</button>' +
+      '</form>';
+
+    const listHtml = (!docs || docs.length === 0)
+      ? '<p class="font-body text-body-sm text-on-surface-variant">Sin documentos registrados en esta comunidad.</p>'
+      : docs.map(function (d) {
+          const badgeCls = d.colorVencimiento === 'rojo'
+            ? 'bg-error-container text-on-error-container'
+            : (d.colorVencimiento === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
+          return (
+            '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-center justify-between gap-gutter-sm">' +
+              '<div class="flex flex-col gap-0.5 min-w-0">' +
+                '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(d.titulo) + '</span>' +
+                '<span class="font-label text-label-sm text-on-surface-variant truncate">' + escapeHtml(d.categoria) + (d.fechaVencimiento ? ' · Vence ' + escapeHtml(formatShortDate(d.fechaVencimiento)) : '') + '</span>' +
+              '</div>' +
+              '<div class="flex items-center gap-gutter-xs shrink-0">' +
+                (d.linkPdf ? '<a href="' + escapeHtml(d.linkPdf) + '" target="_blank" rel="noopener noreferrer" class="px-gutter-sm py-1 rounded-sm bg-primary-container text-on-primary-container font-label text-[11px]">PDF</a>' : '') +
+                '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-[11px]">' + escapeHtml(d.estadoVencimiento) + '</span>' +
+                (d.id.indexOf('DOC-DEMO') === -1
+                  ? '<button type="button" data-del-doc="' + escapeHtml(d.id) + '" aria-label="Eliminar documento" class="p-1 text-error hover:bg-error-container rounded-sm"><span class="material-symbols-outlined text-[16px]">delete</span></button>'
+                  : '') +
+              '</div>' +
+            '</article>'
+          );
+        }).join('');
+
+    container.innerHTML = formHtml + listHtml;
+
+    document.getElementById('admin-add-doc-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-add-doc-submit');
+      setLoadingBtn(btn, true, 'Subiendo...');
+
+      let archivoBase64 = '';
+      let archivoMime = '';
+      const fileInp = document.getElementById('doc-file');
+      if (fileInp && fileInp.files && fileInp.files[0]) {
+        const f = fileInp.files[0];
+        if (f.size > 6 * 1024 * 1024) {
+          setLoadingBtn(btn, false, 'Guardar en Repositorio');
+          showToast('El archivo supera los 6 MB permitidos', true);
+          return;
+        }
+        archivoBase64 = await readFileAsDataUrl(f);
+        archivoMime = f.type || 'application/pdf';
+      }
+
+      const res = await postApi({
+        action: 'addDocument',
+        token: state.session.token,
+        edificioId: state.edificioId,
+        categoria: document.getElementById('doc-categoria').value,
+        titulo: document.getElementById('doc-titulo').value.trim(),
+        fechaVencimiento: document.getElementById('doc-vencimiento').value,
+        notas: document.getElementById('doc-notas').value.trim(),
+        linkPdf: document.getElementById('doc-link').value.trim(),
+        archivoBase64: archivoBase64,
+        archivoMime: archivoMime,
+      });
+
+      setLoadingBtn(btn, false, 'Guardar en Repositorio');
+      if (!res.ok) {
+        showToast(res.error || 'No se pudo guardar el documento', true);
+        return;
+      }
+      showToast(res.message || 'Documento guardado');
+      loadData();
+      loadAdminPanelData();
+    });
+
+    container.querySelectorAll('[data-del-doc]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const res = await postApi({
+          action: 'deleteDocument',
+          token: state.session.token,
+          docId: btn.getAttribute('data-del-doc'),
+        });
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo eliminar', true);
+          return;
+        }
+        showToast('Documento eliminado');
+        loadData();
+        loadAdminPanelData();
+      });
+    });
   }
 
   function renderAdminComunidad(com) {

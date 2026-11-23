@@ -341,16 +341,20 @@
           </div>
         </div>
 
-        <div class="bg-surface-card rounded-md border border-outline p-gutter-xs grid grid-cols-3 gap-gutter-xs" role="tablist" aria-label="Vista del edificio">
-          <button type="button" data-dir-tab="equipos" class="dir-view-tab py-gutter-sm px-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs transition-colors duration-state-change">
+        <div class="bg-surface-card rounded-md border border-outline p-gutter-xs grid grid-cols-4 gap-gutter-xs" role="tablist" aria-label="Vista del edificio">
+          <button type="button" data-dir-tab="equipos" class="dir-view-tab py-gutter-sm px-gutter-xs rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm inline-flex items-center justify-center gap-1 transition-colors duration-state-change">
             <span class="material-symbols-outlined text-[16px]" aria-hidden="true">precision_manufacturing</span>
             <span>Equipos</span>
           </button>
-          <button type="button" data-dir-tab="calendario" class="dir-view-tab py-gutter-sm px-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs transition-colors duration-state-change">
+          <button type="button" data-dir-tab="calendario" class="dir-view-tab py-gutter-sm px-gutter-xs rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-[11px] md:text-label-sm inline-flex items-center justify-center gap-1 transition-colors duration-state-change">
             <span class="material-symbols-outlined text-[16px]" aria-hidden="true">calendar_month</span>
             <span>Calendario</span>
           </button>
-          <button type="button" data-dir-tab="comunidad" class="dir-view-tab py-gutter-sm px-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs transition-colors duration-state-change">
+          <button type="button" data-dir-tab="documentos" class="dir-view-tab py-gutter-sm px-gutter-xs rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-[11px] md:text-label-sm inline-flex items-center justify-center gap-1 transition-colors duration-state-change">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">folder_open</span>
+            <span>Docs</span>
+          </button>
+          <button type="button" data-dir-tab="comunidad" class="dir-view-tab py-gutter-sm px-gutter-xs rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-[11px] md:text-label-sm inline-flex items-center justify-center gap-1 transition-colors duration-state-change">
             <span class="material-symbols-outlined text-[16px]" aria-hidden="true">apartment</span>
             <span>Comunidad</span>
           </button>
@@ -367,6 +371,9 @@
         </div>
 
         <section id="dir-panel-calendario" class="hidden flex-col gap-gutter-md" aria-label="Calendario preventivo de mantenciones">
+        </section>
+
+        <section id="dir-panel-documentos" class="hidden flex-col gap-gutter-md" aria-label="Repositorio documental y certificaciones">
         </section>
 
         <section id="dir-panel-comunidad" class="hidden flex-col gap-gutter-md" aria-label="Ficha maestra de la comunidad">
@@ -728,12 +735,13 @@
         </select>
       </div>
 
-      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-4 md:grid-cols-7 gap-gutter-xs" role="tablist">
+      <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-4 md:grid-cols-8 gap-gutter-xs" role="tablist">
         <button type="button" data-admin-tab="tickets" class="admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm">Tickets</button>
         <button type="button" data-admin-tab="ordenes" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Órdenes</button>
         <button type="button" data-admin-tab="cotizaciones" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Cotiz.</button>
         <button type="button" data-admin-tab="equipos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Equipos</button>
         <button type="button" data-admin-tab="bodega" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Bodega</button>
+        <button type="button" data-admin-tab="documentos" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Docs</button>
         <button type="button" data-admin-tab="comunidad" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Ficha</button>
         <button type="button" data-admin-tab="usuarios" class="admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm">Usuarios</button>
       </div>
@@ -756,6 +764,10 @@
 
       <div id="admin-tab-bodega" class="hidden flex-col gap-gutter-md">
         <p class="font-body text-body-sm text-on-surface-variant">Cargando bodega...</p>
+      </div>
+
+      <div id="admin-tab-documentos" class="hidden flex-col gap-gutter-md">
+        <p class="font-body text-body-sm text-on-surface-variant">Cargando documentos...</p>
       </div>
 
       <div id="admin-tab-comunidad" class="hidden flex-col gap-gutter-md">
@@ -887,6 +899,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="./app.js?v=20261122c"></script>
+  <script src="./app.js?v=20261122d"></script>
 </body>
 </html>
