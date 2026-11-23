@@ -1,0 +1,28 @@
+{
+  "id": "/panel-gco/",
+  "name": "GCO Control — Gestión de Condominios",
+  "short_name": "GCO Control",
+  "description": "Panel privado de control de gastos comunes, morosidad, mapa 360° y conciliación bancaria — GCO Gestión de Condominios (Ley N° 21.442).",
+  "start_url": "/panel-gco/",
+  "scope": "/panel-gco/",
+  "display": "standalone",
+  "background_color": "#f8f9fd",
+  "theme_color": "#1b365d",
+  "orientation": "any",
+  "lang": "es-CL",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "/panel-gco/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/panel-gco/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
