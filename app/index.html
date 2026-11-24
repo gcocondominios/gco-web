@@ -11,99 +11,9 @@
   <link rel="icon" type="image/png" href="../img/icon-192.png">
   <link rel="apple-touch-icon" href="../img/icon-192.png">
 
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script id="tailwind-config">
-    globalThis.tailwind = globalThis.tailwind || {};
-    globalThis.tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            'primary': '#1D5B96',
-            'on-primary': '#FFFFFF',
-            'primary-container': '#EAF1FF',
-            'on-primary-container': '#00325A',
-            'secondary': '#0F2942',
-            'on-secondary': '#FFFFFF',
-            'surface': '#F4F6F9',
-            'on-surface': '#0F2942',
-            'surface-card': '#FFFFFF',
-            'on-surface-card': '#0F2942',
-            'surface-variant': '#EFF1F4',
-            'on-surface-variant': '#49607C',
-            'surface-subtle': '#F9FAFC',
-            'outline': '#DEE3ED',
-            'outline-subtle': '#E8ECF2',
-            'success': '#10B981',
-            'on-success': '#393939',
-            'success-container': '#D1FAE5',
-            'on-success-container': '#005236',
-            'warning': '#F59E0B',
-            'on-warning': '#2A1700',
-            'warning-container': '#FEF3C7',
-            'on-warning-container': '#653E00',
-            'error': '#EF4444',
-            'on-error': '#1C1C1C',
-            'error-container': '#FFEDEB',
-            'on-error-container': '#930013',
-          },
-          borderRadius: {
-            'sm': '6px',
-            'DEFAULT': '10px',
-            'md': '12px',
-            'lg': '16px',
-            'xl': '24px',
-            'full': '9999px',
-          },
-          spacing: {
-            'gutter-xs': '4px',
-            'gutter-sm': '8px',
-            'gutter-md': '12px',
-            'gutter-lg': '16px',
-            'gutter-xl': '20px',
-            'section': '24px',
-            'page-margin': '16px',
-          },
-          fontFamily: {
-            'display': ['"Plus Jakarta Sans"', 'sans-serif'],
-            'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
-            'title': ['"Plus Jakarta Sans"', 'sans-serif'],
-            'body': ['"Rubik"', 'sans-serif'],
-            'label': ['"Rubik"', 'sans-serif'],
-            'mono': ['"Red Hat Mono"', 'monospace'],
-          },
-          fontSize: {
-            'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
-            'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
-            'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
-            'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
-            'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
-            'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
-            'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
-            'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
-            'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
-            'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
-            'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
-            'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
-          },
-          transitionDuration: {
-            'state-change': '120ms',
-            'accordion-toggle': '200ms',
-            'sheet-enter': '240ms',
-          },
-          transitionTimingFunction: {
-            'state-change': 'ease-out',
-            'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
-            'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
-          },
-        },
-      },
-    };
-  </script>
-
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Red+Hat+Mono:wght@500&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=20261122">
+  <link rel="stylesheet" href="./style.css?v=20261124g">
 </head>
 <body class="bg-surface text-on-surface font-body antialiased">
 
@@ -132,10 +42,11 @@
         </div>
       </div>
 
-      <span id="header-building-pill" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant shrink-0 shadow-sm max-w-[190px]">
+      <button id="header-building-pill" type="button" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant shrink-0 shadow-sm max-w-[210px] hover:border-primary/40 transition-colors duration-state-change">
         <span class="material-symbols-outlined text-[14px] text-primary shrink-0" aria-hidden="true">apartment</span>
         <span id="header-building-name" class="font-label text-label-sm truncate">Cargando...</span>
-      </span>
+        <span id="header-building-chevron" class="hidden material-symbols-outlined text-[14px] text-primary shrink-0" aria-hidden="true">swap_horiz</span>
+      </button>
     </header>
 
     <!-- Banner de estado Offline / Cola de sincronización -->
@@ -385,7 +296,11 @@
         </div>
 
         <div id="dir-panel-equipos" class="flex flex-col gap-gutter-md">
-          <div class="flex items-center gap-gutter-sm" role="tablist" aria-label="Filtrar equipos por estado">
+          <div class="relative">
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true">search</span>
+            <input id="dir-search-input" type="search" placeholder="Buscar equipo o código (ej. Ascensor, BMB-01)..." class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm pl-9 pr-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <div class="flex items-center gap-gutter-sm flex-wrap" role="tablist" aria-label="Filtrar equipos por estado">
             <button type="button" data-filter="all" class="dir-filter-chip px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-md transition-colors duration-state-change">Todos</button>
             <button type="button" data-filter="ok" class="dir-filter-chip px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-label-md hover:bg-surface-subtle transition-colors duration-state-change">Operativos</button>
             <button type="button" data-filter="alert" class="dir-filter-chip px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-label-md hover:bg-surface-subtle transition-colors duration-state-change">Con alertas</button>
@@ -725,6 +640,11 @@
           <div id="maint-file-preview-wrap" class="hidden flex-wrap gap-gutter-sm bg-surface-subtle border border-outline rounded-md p-gutter-sm mt-gutter-xs"></div>
         </div>
 
+        <label id="maint-complete-orders-wrap" class="hidden items-center gap-gutter-sm bg-success-container/70 border border-success/30 rounded-md px-gutter-md py-gutter-sm cursor-pointer">
+          <input id="maint-complete-orders" type="checkbox" checked class="rounded-sm border-outline text-primary focus:ring-primary">
+          <span id="maint-complete-orders-label" class="font-label text-label-sm text-on-success-container">Marcar como Completada la Orden de Trabajo pendiente de este equipo</span>
+        </label>
+
         <label class="flex items-center gap-gutter-sm bg-warning-container/60 rounded-md px-gutter-md py-gutter-sm cursor-pointer">
           <input id="maint-create-ticket" type="checkbox" class="rounded-sm border-outline text-primary focus:ring-primary">
           <span class="font-label text-label-sm text-on-surface">Crear también Ticket de seguimiento con esta observación</span>
@@ -875,7 +795,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-sm">
         <button id="btn-print-committee" type="button" class="w-full min-h-[44px] inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
           <span class="material-symbols-outlined text-[20px]" aria-hidden="true">picture_as_pdf</span>
-          <span class="font-label text-label-lg">Generar Acta / Informe PDF</span>
+          <span id="committee-pdf-btn-label" class="font-label text-label-lg">Guardar y Descargar Acta PDF</span>
         </button>
         <button id="btn-committee-ai" type="button" class="w-full min-h-[44px] inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary-container text-on-primary-container border border-primary/20 hover:bg-outline transition-colors duration-state-change">
           <span class="material-symbols-outlined text-[20px]" aria-hidden="true">auto_awesome</span>
@@ -1231,6 +1151,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="./app.js?v=20261124f"></script>
+  <script src="./app.js?v=20261124g"></script>
 </body>
 </html>

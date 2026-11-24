@@ -523,7 +523,7 @@
     container.querySelectorAll('[data-receipt-idx]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         const m = items[Number(btn.getAttribute('data-receipt-idx'))];
-        if (m) printMaintenanceReceipt(m);
+        if (m) printMaintenanceReceipt(m, btn);
       });
     });
 
@@ -654,6 +654,13 @@
       });
     });
 
+    const searchEl = document.getElementById('dir-search-input');
+    if (searchEl && searchEl.getAttribute('data-edif') !== String(data.edificio.id || '')) {
+      searchEl.value = '';
+      searchEl.setAttribute('data-edif', String(data.edificio.id || ''));
+    }
+    applyDirectoryFilters();
+
     renderDirectoryNotices(data.avisos || []);
     renderDirectoryCalendar(data);
     renderDirectoryDocuments(data);
@@ -709,10 +716,11 @@
 
   function switchDirectoryTab(target) {
     document.querySelectorAll('.dir-view-tab').forEach(function (t) {
+      const wasHidden = t.classList.contains('hidden');
       const isAct = t.getAttribute('data-dir-tab') === target;
-      t.className = isAct
+      t.className = (isAct
         ? 'dir-view-tab py-gutter-sm px-gutter-xs rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm inline-flex items-center justify-center gap-1 transition-colors duration-state-change'
-        : 'dir-view-tab py-gutter-sm px-gutter-xs rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-[11px] md:text-label-sm inline-flex items-center justify-center gap-1 transition-colors duration-state-change';
+        : 'dir-view-tab py-gutter-sm px-gutter-xs rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-[11px] md:text-label-sm inline-flex items-center justify-center gap-1 transition-colors duration-state-change') + (wasHidden ? ' hidden' : '');
     });
     ['equipos', 'calendario', 'documentos', 'comunidad'].forEach(function (name) {
       const panel = document.getElementById('dir-panel-' + name);
@@ -1093,6 +1101,20 @@
         ? 'Panel de Operaciones (Tickets, Órdenes, Equipos y Bodega)'
         : 'Panel de Administración (Tickets, Equipos y Usuarios)';
     }
+    const headerChev = document.getElementById('header-building-chevron');
+    if (headerChev) {
+      headerChev.classList.toggle('hidden', !isAdminPanel);
+    }
+    const dirDocsTab = document.querySelector('.dir-view-tab[data-dir-tab="documentos"]');
+    if (dirDocsTab) {
+      dirDocsTab.classList.toggle('hidden', isOpsOnly);
+      const tabBar = dirDocsTab.parentElement;
+      if (tabBar) {
+        tabBar.classList.toggle('grid-cols-4', !isOpsOnly);
+        tabBar.classList.toggle('grid-cols-3', isOpsOnly);
+      }
+    }
+
     const adminTabsAllowedOps = ['tickets', 'ordenes', 'equipos', 'bodega'];
     document.querySelectorAll('.admin-panel-tab').forEach(function (tabBtn) {
       const tName = tabBtn.getAttribute('data-admin-tab');
@@ -1114,10 +1136,46 @@
     }
   }
 
+  function applyDirectoryFilters() {
+    const activeChip = document.querySelector('.dir-filter-chip.bg-primary');
+    const filter = activeChip ? activeChip.getAttribute('data-filter') : 'all';
+    const searchEl = document.getElementById('dir-search-input');
+    const query = searchEl ? searchEl.value.trim().toLowerCase() : '';
+
+    document.querySelectorAll('.dir-asset-item').forEach(function (item) {
+      const st = item.getAttribute('data-state');
+      const matchState = filter === 'all' || filter === st;
+      const matchText = !query || (item.textContent || '').toLowerCase().indexOf(query) !== -1;
+      const show = matchState && matchText;
+      item.classList.toggle('hidden', !show);
+      item.classList.toggle('flex', show);
+    });
+  }
+
   function bindEvents() {
     document.getElementById('btn-retry-load').addEventListener('click', loadData);
     bindRondaEvents();
     bindAdminEditModals();
+
+    const headerPill = document.getElementById('header-building-pill');
+    if (headerPill) {
+      headerPill.addEventListener('click', function () {
+        const user = state.session && state.session.user ? state.session.user : null;
+        if (!user) return;
+        if (user.rol === 'operaciones') {
+          state.edificioId = '';
+          state.equipoId = '';
+          const url = new URL(window.location.href);
+          url.searchParams.delete('edificio');
+          url.searchParams.delete('equipo');
+          window.history.pushState({}, '', url.toString());
+          loadOpsHomeView();
+        } else if (user.rol === 'admin') {
+          openModal('modal-admin');
+          loadAdminPanelData();
+        }
+      });
+    }
 
     document.getElementById('btn-back-directory').addEventListener('click', function () {
       navigateToEquipo('');
@@ -1145,20 +1203,18 @@
       });
     }
 
+    const searchEl = document.getElementById('dir-search-input');
+    if (searchEl) {
+      searchEl.addEventListener('input', applyDirectoryFilters);
+    }
+
     document.querySelectorAll('.dir-filter-chip').forEach(function (chip) {
       chip.addEventListener('click', function () {
-        const filter = chip.getAttribute('data-filter');
         document.querySelectorAll('.dir-filter-chip').forEach(function (c) {
           c.className = 'dir-filter-chip px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-label-md hover:bg-surface-subtle transition-colors duration-state-change';
         });
         chip.className = 'dir-filter-chip px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-md transition-colors duration-state-change';
-
-        document.querySelectorAll('.dir-asset-item').forEach(function (item) {
-          const st = item.getAttribute('data-state');
-          const show = filter === 'all' || filter === st;
-          item.classList.toggle('hidden', !show);
-          item.classList.toggle('flex', show);
-        });
+        applyDirectoryFilters();
       });
     });
 
@@ -1244,8 +1300,14 @@
     });
 
     document.getElementById('btn-logout').addEventListener('click', function () {
+      try {
+        Object.keys(localStorage).forEach(function (k) {
+          if (k.indexOf('gco_cache_v1_') === 0) localStorage.removeItem(k);
+        });
+      } catch (e) {}
       saveSession(null);
       showToast('Sesión cerrada');
+      if (state.equipoId) loadData();
     });
 
     document.querySelectorAll('.auth-tab').forEach(function (tab) {
@@ -1429,6 +1491,27 @@
         }
       }
 
+      const ordWrap = document.getElementById('maint-complete-orders-wrap');
+      const ordChk = document.getElementById('maint-complete-orders');
+      const ordLbl = document.getElementById('maint-complete-orders-label');
+      if (ordWrap && ordChk) {
+        const pendingOrders = (state.equipoId && state.data && Array.isArray(state.data.ordenesPendientes)) ? state.data.ordenesPendientes : [];
+        if (pendingOrders.length > 0) {
+          ordChk.checked = true;
+          if (ordLbl) {
+            ordLbl.textContent = pendingOrders.length === 1
+              ? 'Marcar como Completada la Orden pendiente (' + pendingOrders[0].titulo + ')'
+              : 'Marcar como Completadas las ' + pendingOrders.length + ' Órdenes pendientes de este equipo';
+          }
+          ordWrap.classList.remove('hidden');
+          ordWrap.classList.add('flex');
+        } else {
+          ordChk.checked = false;
+          ordWrap.classList.add('hidden');
+          ordWrap.classList.remove('flex');
+        }
+      }
+
       openModal('modal-maintenance');
     });
 
@@ -1537,6 +1620,9 @@
 
       const areaSel = document.getElementById('maint-area-select');
       const targetEquipoId = state.equipoId || (areaSel ? areaSel.value : '');
+      const ordChk = document.getElementById('maint-complete-orders');
+      const ordWrap = document.getElementById('maint-complete-orders-wrap');
+      const completarOrdenes = Boolean(ordChk && ordWrap && !ordWrap.classList.contains('hidden') && ordChk.checked);
 
       const res = await postApi({
         action: 'addMaintenance',
@@ -1549,6 +1635,7 @@
         observaciones: observaciones,
         costoClp: Number(document.getElementById('maint-cost').value || 0),
         archivos: archivosPayload,
+        completarOrdenes: completarOrdenes,
       });
 
       const createTicketChk = document.getElementById('maint-create-ticket');
@@ -1609,10 +1696,16 @@
     document.querySelectorAll('.admin-panel-tab').forEach(function (tab) {
       tab.addEventListener('click', function () {
         const target = tab.getAttribute('data-admin-tab');
+        const isOps = Boolean(state.session && state.session.user && state.session.user.rol === 'operaciones');
+        const opsAllowed = ['tickets', 'ordenes', 'equipos', 'bodega'];
+        if (isOps && opsAllowed.indexOf(target) === -1) return;
+
         document.querySelectorAll('.admin-panel-tab').forEach(function (t) {
-          t.className = t === tab
+          const tName = t.getAttribute('data-admin-tab');
+          const shouldHide = isOps && opsAllowed.indexOf(tName) === -1;
+          t.className = (t === tab
             ? 'admin-panel-tab py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-[11px] md:text-label-sm'
-            : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm';
+            : 'admin-panel-tab py-gutter-sm rounded-sm text-on-surface-variant font-label text-[11px] md:text-label-sm') + (shouldHide ? ' hidden' : '');
         });
         ['control', 'tickets', 'ordenes', 'cotizaciones', 'equipos', 'bodega', 'documentos', 'avisos', 'comunidad', 'auditoria', 'usuarios'].forEach(function (name) {
           const panel = document.getElementById('admin-tab-' + name);
@@ -3192,144 +3285,109 @@
     return canvas ? canvas.toDataURL('image/png') : '';
   }
 
-  function printMaintenanceReceipt(m) {
-    const qrSheet = document.getElementById('print-qr-sheet');
-    const commSheet = document.getElementById('print-committee-sheet');
-    if (qrSheet) qrSheet.classList.remove('print-active');
-    if (commSheet) commSheet.classList.remove('print-active');
-
-    const sheet = document.getElementById('print-receipt-sheet');
-    if (!sheet || !state.data) return;
-    sheet.classList.add('print-active');
-
-    const eq = state.data.equipo;
-    const edif = state.data.edificio;
-    const qrUrl = window.location.origin + window.location.pathname + '?edificio=' + encodeURIComponent(edif.id) + '&equipo=' + encodeURIComponent(eq.id);
-
-    sheet.innerHTML =
-      '<div style="font-family: \'Plus Jakarta Sans\', \'Rubik\', sans-serif; color: #0F2942; max-width: 720px; margin: 0 auto; border: 1px solid #DEE3ED; border-radius: 12px; padding: 24px;">' +
-        '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #1D5B96; padding-bottom: 12px; margin-bottom: 16px;">' +
-          '<div>' +
-            '<h1 style="font-size: 19px; font-weight: 700; margin: 0;">Comprobante de Visita / Mantención</h1>' +
-            '<p style="font-size: 13px; color: #49607C; margin: 4px 0 0 0;">' + escapeHtml(edif.nombre) + ' · ' + escapeHtml(eq.nombre) + ' (#' + escapeHtml(eq.id) + ')</p>' +
-          '</div>' +
-          '<div id="receipt-qr-box" style="padding: 4px; background: #fff;"></div>' +
-        '</div>' +
-        '<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; margin-bottom: 16px;">' +
-          '<div><strong>Folio:</strong> ' + escapeHtml(m.id) + '</div>' +
-          '<div><strong>Fecha:</strong> ' + escapeHtml(formatShortDate(m.fecha)) + '</div>' +
-          '<div><strong>Tipo:</strong> ' + escapeHtml(m.tipo) + '</div>' +
-          '<div><strong>Estado resultante:</strong> ' + escapeHtml(m.estadoResultante) + '</div>' +
-          '<div><strong>Responsable:</strong> ' + escapeHtml(m.tecnico || eq.empresa) + '</div>' +
-          (m.costoClp > 0 ? '<div><strong>Costo:</strong> $' + Number(m.costoClp).toLocaleString('es-CL') + ' CLP</div>' : '') +
-        '</div>' +
-        '<div style="background: #F4F6F9; border-radius: 8px; padding: 14px; font-size: 13px; margin-bottom: 24px;">' +
-          '<strong>Observaciones / Verificación:</strong><br>' + escapeHtml(m.observaciones) +
-        '</div>' +
-        '<div style="font-size: 11px; color: #49607C; text-align: center; border-top: 1px solid #E8ECF2; padding-top: 10px;">' +
-          'GCO Gestión de Condominios · Escanea el código QR superior para verificar en línea (' + escapeHtml(qrUrl) + ')' +
-        '</div>' +
-      '</div>';
-
-    if (typeof QRCode !== 'undefined') {
-      new QRCode(document.getElementById('receipt-qr-box'), {
-        text: qrUrl,
-        width: 84,
-        height: 84,
-        colorDark: '#0F2942',
-        colorLight: '#FFFFFF',
-        correctLevel: QRCode.CorrectLevel.M,
-      });
+  async function deliverGeneratedPdf(res, fallbackName, shareTitle) {
+    const fileName = (res && res.fileName) || fallbackName || 'Documento_GCO.pdf';
+    if (res && res.pdfBase64) {
+      try {
+        const blob = base64ToPdfBlob(res.pdfBase64);
+        const isTouchMobile = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        if (isTouchMobile && navigator.share && typeof File !== 'undefined') {
+          try {
+            const file = new File([blob], fileName, { type: 'application/pdf' });
+            if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: shareTitle || fileName,
+                text: (shareTitle || 'Documento GCO') + (res.linkPdf ? '\nRespaldo Drive: ' + res.linkPdf : ''),
+                files: [file],
+              });
+              return true;
+            }
+          } catch (shErr) {
+            if (shErr && shErr.name === 'AbortError') return true;
+          }
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+        return true;
+      } catch (e) {}
     }
-
-    setTimeout(function () {
-      window.print();
-    }, 200);
+    const target = res && (res.downloadUrl || res.linkPdf);
+    if (target) {
+      window.open(target, '_blank', 'noopener,noreferrer');
+      return true;
+    }
+    return false;
   }
 
-  function printCommitteeReport(data) {
-    const qrSheet = document.getElementById('print-qr-sheet');
-    if (qrSheet) qrSheet.classList.remove('print-active');
-    const sheet = document.getElementById('print-committee-sheet');
-    sheet.classList.add('print-active');
+  async function printMaintenanceReceipt(m, triggerBtn) {
+    if (!state.data || !m) return;
+    const eq = state.data.equipo;
+    const edif = state.data.edificio;
+    const prevHtml = triggerBtn ? triggerBtn.innerHTML : '';
+    if (triggerBtn) {
+      triggerBtn.disabled = true;
+      triggerBtn.innerHTML = '<span class="material-symbols-outlined text-[15px]">hourglass_top</span>Generando PDF...';
+    }
+    try {
+      const res = await postApi({
+        action: 'saveReceiptPdf',
+        edificioId: edif.id,
+        equipoId: eq.id,
+        maintId: m.id,
+        edificioNombre: edif.nombre,
+        equipoNombre: eq.nombre,
+        fecha: formatShortDate(m.fecha),
+        tipo: m.tipo,
+        estadoResultante: m.estadoResultante,
+        tecnico: m.tecnico || eq.empresa,
+        observaciones: m.observaciones,
+      });
+      if (!res.ok) throw new Error(res.error || 'No se pudo generar el comprobante PDF.');
+      await deliverGeneratedPdf(res, 'Comprobante_' + eq.id + '.pdf', 'Comprobante de Mantención · ' + eq.nombre);
+      showToast('Comprobante PDF descargado.', false);
+    } catch (err) {
+      showToast(err.message || 'Error al generar comprobante PDF.', true);
+    } finally {
+      if (triggerBtn) {
+        triggerBtn.disabled = false;
+        triggerBtn.innerHTML = prevHtml;
+      }
+    }
+  }
 
-    const userName = state.session && state.session.user ? state.session.user.nombre : 'Comité de Administración';
-    const r = data.resumen;
+  async function printCommitteeReport(data) {
+    if (!state.session || !state.session.token) {
+      showToast('Inicia sesión como Comité o Administrador para emitir el acta.', true);
+      return;
+    }
+    const btn = document.getElementById('btn-print-committee');
+    const lbl = document.getElementById('committee-pdf-btn-label');
+    const prevLabel = lbl ? lbl.textContent : '';
+    if (btn) btn.disabled = true;
+    if (lbl) lbl.textContent = 'Generando Acta PDF...';
 
-    const eqRows = data.equipos.map(function (eq) {
-      const sem = eq.semaforo;
-      return (
-        '<tr>' +
-          '<td style="border:1px solid #DEE3ED; padding:8px;"><strong>' + escapeHtml(eq.nombre) + '</strong><br><span style="font-size:11px; color:#49607C;">#' + escapeHtml(eq.id) + '</span></td>' +
-          '<td style="border:1px solid #DEE3ED; padding:8px;">' + escapeHtml(eq.empresa) + '</td>' +
-          '<td style="border:1px solid #DEE3ED; padding:8px;">' + escapeHtml(formatShortDate(sem.ultimaVisita)) + '</td>' +
-          '<td style="border:1px solid #DEE3ED; padding:8px;">' + escapeHtml(formatShortDate(sem.proximaVisita)) + '</td>' +
-          '<td style="border:1px solid #DEE3ED; padding:8px;"><strong>' + escapeHtml(sem.etiquetaCorta) + '</strong></td>' +
-          '<td style="border:1px solid #DEE3ED; padding:8px; font-size:12px;">' + escapeHtml(eq.ultimaObservacion) + '</td>' +
-        '</tr>'
-      );
-    }).join('');
-
-    const ticketRows = (data.tickets || []).slice(0, 15).map(function (t) {
-      return (
-        '<tr>' +
-          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">' + escapeHtml(t.id) + '</td>' +
-          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">' + escapeHtml(formatShortDate(t.fecha)) + '</td>' +
-          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">#' + escapeHtml(t.equipoId) + ' (' + escapeHtml(t.depto) + ')</td>' +
-          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">' + escapeHtml(t.estado) + '</td>' +
-          '<td style="border:1px solid #DEE3ED; padding:6px; font-size:12px;">' + escapeHtml(t.descripcion) + (t.solucion ? '<br><em>Solución: ' + escapeHtml(t.solucion) + '</em>' : '') + '</td>' +
-        '</tr>'
-      );
-    }).join('');
-
-    const costSummaryHtml = r.costoTotalGeneral > 0
-      ? '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px; margin-bottom:18px; font-size:12px; background:#F9FAFC;">' +
-          '<strong>Inversión registrada en mantenciones:</strong> ' +
-          'Total $' + Number(r.costoTotalGeneral).toLocaleString('es-CL') + ' CLP ' +
-          '(Preventivas: $' + Number(r.costoTotalPreventivo || 0).toLocaleString('es-CL') +
-          ' · Correctivas/Otros: $' + Number(r.costoTotalCorrectivo || 0).toLocaleString('es-CL') + ')' +
-        '</div>'
-      : '';
-
-    sheet.innerHTML =
-      '<div style="font-family: \'Plus Jakarta Sans\', \'Rubik\', sans-serif; color: #0F2942; max-width: 900px; margin: 0 auto;">' +
-        '<div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 2px solid #1D5B96; padding-bottom: 12px; margin-bottom: 16px;">' +
-          '<div>' +
-            '<h1 style="font-size: 20px; font-weight: 700; margin: 0;">Acta de Revisión de Equipos y Mantenciones</h1>' +
-            '<p style="font-size: 13px; color: #49607C; margin: 4px 0 0 0;">Comunidad: <strong>' + escapeHtml(data.edificio.nombre) + '</strong> (' + escapeHtml(data.edificio.id) + ')</p>' +
-          '</div>' +
-          '<div style="text-align:right; font-size: 12px; color: #49607C;">' +
-            '<div>GCO Gestión de Condominios</div>' +
-            '<div>Fecha: ' + escapeHtml(data.generadoEn) + '</div>' +
-            '<div>Emitido por: ' + escapeHtml(userName) + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">' +
-          '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">Operativos</div><div style="font-size:18px; font-weight:700; color:#005236;">' + r.operativos + ' / ' + r.totalEquipos + '</div></div>' +
-          '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">En Observación</div><div style="font-size:18px; font-weight:700; color:#653E00;">' + r.observacion + '</div></div>' +
-          '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">Fuera de Servicio</div><div style="font-size:18px; font-weight:700; color:#930013;">' + r.fueraServicio + '</div></div>' +
-          '<div style="border:1px solid #DEE3ED; border-radius:8px; padding:10px;"><div style="font-size:11px; color:#49607C;">Tickets Activos / Resueltos</div><div style="font-size:18px; font-weight:700;">' + (r.ticketsAbiertos + r.ticketsEnProceso) + ' / ' + r.ticketsResueltos + '</div></div>' +
-        '</div>' +
-        costSummaryHtml +
-        '<h2 style="font-size: 15px; font-weight: 700; margin: 16px 0 8px 0;">1. Estado de Equipos e Instalaciones</h2>' +
-        '<table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px;">' +
-          '<thead><tr style="background:#F4F6F9; text-align:left;"><th style="border:1px solid #DEE3ED; padding:8px;">Equipo</th><th style="border:1px solid #DEE3ED; padding:8px;">Empresa</th><th style="border:1px solid #DEE3ED; padding:8px;">Última Visita</th><th style="border:1px solid #DEE3ED; padding:8px;">Próx. Visita</th><th style="border:1px solid #DEE3ED; padding:8px;">Estado</th><th style="border:1px solid #DEE3ED; padding:8px;">Última Observación</th></tr></thead>' +
-          '<tbody>' + eqRows + '</tbody>' +
-        '</table>' +
-        '<h2 style="font-size: 15px; font-weight: 700; margin: 16px 0 8px 0;">2. Registro Reciente de Incidencias (Tickets)</h2>' +
-        '<table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:28px;">' +
-          '<thead><tr style="background:#F4F6F9; text-align:left;"><th style="border:1px solid #DEE3ED; padding:6px;">ID</th><th style="border:1px solid #DEE3ED; padding:6px;">Fecha</th><th style="border:1px solid #DEE3ED; padding:6px;">Equipo / Depto</th><th style="border:1px solid #DEE3ED; padding:6px;">Estado</th><th style="border:1px solid #DEE3ED; padding:6px;">Detalle y Solución</th></tr></thead>' +
-          '<tbody>' + (ticketRows || '<tr><td colspan="5" style="border:1px solid #DEE3ED; padding:8px;">Sin tickets registrados.</td></tr>') + '</tbody>' +
-        '</table>' +
-        '<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 36px; page-break-inside: avoid;">' +
-          '<div style="border-top: 1px solid #0F2942; padding-top: 8px; font-size: 12px; text-align: center;">Toma de Conocimiento · Comité de Administración</div>' +
-          '<div style="border-top: 1px solid #0F2942; padding-top: 8px; font-size: 12px; text-align: center;">GCO Gestión de Condominios · Respaldo Ley 21.442</div>' +
-        '</div>' +
-      '</div>';
-
-    setTimeout(function () {
-      window.print();
-    }, 200);
+    try {
+      const edificioId = (data && data.edificio && data.edificio.id) || state.edificioId;
+      const res = await postApi({
+        action: 'saveCommitteePdf',
+        token: state.session.token,
+        edificioId: edificioId,
+      });
+      if (!res.ok) throw new Error(res.error || 'No se pudo generar el Acta PDF.');
+      await deliverGeneratedPdf(res, 'Acta_Comite_' + edificioId + '.pdf', 'Acta Ejecutiva Comité · ' + ((data && data.edificio && data.edificio.nombre) || edificioId));
+      showToast('Acta PDF generada y respaldada en Drive y Documentos.', false);
+    } catch (err) {
+      showToast(err.message || 'Error al generar Acta PDF.', true);
+    } finally {
+      if (btn) btn.disabled = false;
+      if (lbl) lbl.textContent = prevLabel || 'Guardar y Descargar Acta PDF';
+    }
   }
 
   function renderAdminUsers(usuarios) {

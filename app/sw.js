@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gco-app-v21';
+const CACHE_NAME = 'gco-app-v22';
 const SHELL_ASSETS = [
   './',
   './index.html',
