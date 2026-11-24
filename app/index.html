@@ -998,10 +998,20 @@
         <div id="ronda-items-list" class="flex flex-col gap-gutter-sm"></div>
       </div>
 
-      <div id="ronda-backup-banner" class="hidden flex-col gap-1 rounded-md bg-success-container text-on-success-container border border-success/30 px-gutter-md py-gutter-sm">
-        <div class="flex items-center gap-gutter-xs font-label text-label-sm">
-          <span class="material-symbols-outlined text-[16px]">cloud_done</span>
-          <span>Informe PDF y fotos respaldados en Google Drive</span>
+      <div id="ronda-backup-banner" class="hidden flex-col gap-gutter-sm rounded-lg bg-success-container text-on-success-container border border-success/30 p-gutter-md">
+        <div class="flex items-center gap-gutter-xs font-label text-label-md">
+          <span class="material-symbols-outlined text-[18px]">cloud_done</span>
+          <span>Ronda registrada y PDF guardado en Drive</span>
+        </div>
+        <div class="grid grid-cols-2 gap-gutter-xs">
+          <button id="btn-ronda-download-pdf" type="button" class="min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-sm inline-flex items-center justify-center gap-1 px-gutter-sm">
+            <span class="material-symbols-outlined text-[16px]">download</span>
+            <span>Guardar PDF</span>
+          </button>
+          <button id="btn-ronda-share-pdf" type="button" class="min-h-[40px] rounded-md bg-secondary text-on-secondary font-label text-label-sm inline-flex items-center justify-center gap-1 px-gutter-sm">
+            <span class="material-symbols-outlined text-[16px]">share</span>
+            <span>Enviar PDF</span>
+          </button>
         </div>
         <div class="flex items-center gap-gutter-md flex-wrap text-[12px]">
           <a id="ronda-backup-pdf-link" href="#" target="_blank" rel="noopener noreferrer" class="underline font-label text-primary">Abrir PDF en Drive</a>
@@ -1011,7 +1021,7 @@
 
       <button id="btn-ronda-print-pdf" type="button" disabled class="w-full min-h-[46px] inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change disabled:opacity-40 disabled:cursor-not-allowed">
         <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-        <span id="ronda-pdf-btn-label" class="font-label text-label-lg">Respaldar en Drive y Generar PDF Comité</span>
+        <span id="ronda-pdf-btn-label" class="font-label text-label-lg">Guardar y Generar Informe PDF</span>
       </button>
     </div>
   </div>
@@ -1177,6 +1187,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="./app.js?v=20261124c"></script>
+  <script src="./app.js?v=20261124d"></script>
 </body>
 </html>

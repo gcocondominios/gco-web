@@ -3291,7 +3291,16 @@
 
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(function () {});
+      let swReloading = false;
+      const hadController = Boolean(navigator.serviceWorker.controller);
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (!hadController || swReloading) return;
+        swReloading = true;
+        window.location.reload();
+      });
+      navigator.serviceWorker.register('./sw.js').then(function (reg) {
+        if (reg && reg.update) reg.update().catch(function () {});
+      }).catch(function () {});
     }
     setupInstallPrompt();
   }
@@ -3969,6 +3978,7 @@
     if (btnClear) {
       btnClear.addEventListener('click', function () {
         state.rondaItems = [];
+        state.lastRondaPdf = null;
         saveRondaDraft();
         renderRondaItemsList();
         const banner = document.getElementById('ronda-backup-banner');
@@ -3983,6 +3993,16 @@
     const btnPrint = document.getElementById('btn-ronda-print-pdf');
     if (btnPrint) {
       btnPrint.addEventListener('click', printRondaPdf);
+    }
+
+    const btnDl = document.getElementById('btn-ronda-download-pdf');
+    if (btnDl) {
+      btnDl.addEventListener('click', downloadLastRondaPdf);
+    }
+
+    const btnShare = document.getElementById('btn-ronda-share-pdf');
+    if (btnShare) {
+      btnShare.addEventListener('click', shareLastRondaPdf);
     }
   }
 
@@ -4077,22 +4097,84 @@
     });
   }
 
+  function base64ToPdfBlob(b64) {
+    const bin = atob(b64);
+    const len = bin.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = bin.charCodeAt(i);
+    }
+    return new Blob([bytes], { type: 'application/pdf' });
+  }
+
+  function downloadLastRondaPdf() {
+    const pdf = state.lastRondaPdf;
+    if (!pdf) return;
+    if (pdf.pdfBase64) {
+      try {
+        const blob = base64ToPdfBlob(pdf.pdfBase64);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = pdf.fileName || 'Informe_Ronda.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+        return;
+      } catch (e) {}
+    }
+    const target = pdf.downloadUrl || pdf.linkPdf;
+    if (target) window.open(target, '_blank', 'noopener,noreferrer');
+  }
+
+  async function shareLastRondaPdf() {
+    const pdf = state.lastRondaPdf;
+    if (!pdf) return;
+    const title = 'Informe de Ronda — ' + (pdf.edifName || state.edificioId || 'Comunidad');
+    if (pdf.pdfBase64 && navigator.share && typeof File !== 'undefined') {
+      try {
+        const blob = base64ToPdfBlob(pdf.pdfBase64);
+        const file = new File([blob], pdf.fileName || 'Informe_Ronda.pdf', { type: 'application/pdf' });
+        if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: title,
+            text: title + (pdf.linkPdf ? '\nRespaldo Drive: ' + pdf.linkPdf : ''),
+            files: [file],
+          });
+          return;
+        }
+      } catch (shErr) {
+        if (shErr && shErr.name === 'AbortError') return;
+      }
+    }
+    if (navigator.share && pdf.linkPdf) {
+      try {
+        await navigator.share({ title: title, text: title, url: pdf.linkPdf });
+        return;
+      } catch (shErr2) {
+        if (shErr2 && shErr2.name === 'AbortError') return;
+      }
+    }
+    if (pdf.linkPdf) {
+      const wa = 'https://wa.me/?text=' + encodeURIComponent(title + ': ' + pdf.linkPdf);
+      window.open(wa, '_blank', 'noopener,noreferrer');
+    }
+  }
+
   async function printRondaPdf() {
     if (!state.rondaItems || state.rondaItems.length === 0) return;
-    const sheet = document.getElementById('print-ronda-sheet');
-    if (!sheet) return;
 
     const btnPrint = document.getElementById('btn-ronda-print-pdf');
     const btnLbl = document.getElementById('ronda-pdf-btn-label');
-    const origLbl = btnLbl ? btnLbl.textContent : 'Respaldar en Drive y Generar PDF Comité';
+    const origLbl = btnLbl ? btnLbl.textContent : 'Guardar y Generar Informe PDF';
     if (btnPrint) btnPrint.disabled = true;
-    if (btnLbl) btnLbl.textContent = 'Respaldando fotos e informe en Drive...';
+    if (btnLbl) btnLbl.textContent = 'Guardando ronda y creando PDF...';
 
     const edifName = (state.data && state.data.edificio && state.data.edificio.nombre) ? state.data.edificio.nombre : (state.edificioId || 'Comunidad');
-    const supName = (state.session && state.session.user && state.session.user.nombre) ? state.session.user.nombre : 'Supervisión Operaciones GCO';
     const fechaCarpeta = (state.rondaItems[0] && state.rondaItems[0].fechaCarpeta) ? state.rondaItems[0].fechaCarpeta : getTodayIsoLocal();
 
-    // 1. Subir a Drive cualquier foto pendiente antes de armar el PDF en Drive
+    // 1. Subir a Drive cualquier foto pendiente antes de generar el PDF en Drive
     if (navigator.onLine && state.session && state.session.token) {
       for (let i = 0; i < state.rondaItems.length; i++) {
         const it = state.rondaItems[i];
@@ -4102,131 +4184,67 @@
       }
     }
 
-    // 2. Respaldar el PDF definitivo del Informe de Ronda en Google Drive (y en Documentos)
-    if (state.session && state.session.token && state.edificioId) {
-      try {
-        const itemsPayload = state.rondaItems.map(function (it) {
-          const hasIds = it.fotoFileIds && it.fotoFileIds.length > 0;
-          return {
-            espacio: it.espacio,
-            estado: it.estado,
-            checks: it.checks || [],
-            notas: it.notas || '',
-            hora: it.hora || '',
-            fotoFileIds: hasIds ? it.fotoFileIds : [],
-            fotos: hasIds ? [] : (it.fotos || []),
-          };
-        });
-        const backupRes = await postApi({
-          action: 'saveRondaReport',
-          token: state.session.token,
-          edificioId: state.edificioId,
-          edificioNombre: edifName,
-          fechaCarpeta: fechaCarpeta,
-          items: itemsPayload,
-        });
-        if (backupRes && backupRes.ok && backupRes.linkPdf) {
-          const banner = document.getElementById('ronda-backup-banner');
-          const pdfLink = document.getElementById('ronda-backup-pdf-link');
-          const folderLink = document.getElementById('ronda-backup-folder-link');
-          if (pdfLink) pdfLink.href = backupRes.linkPdf;
-          if (folderLink && backupRes.folderUrl) folderLink.href = backupRes.folderUrl;
-          if (banner) {
-            banner.classList.remove('hidden');
-            banner.classList.add('flex');
-          }
-          showToast('Informe PDF y fotos respaldados en Google Drive');
-        } else if (backupRes && backupRes.queued) {
-          showToast('Sin señal: PDF local listo y respaldo en Drive en cola');
-        } else if (backupRes && backupRes.error) {
-          showToast('PDF local listo · Aviso Drive: ' + backupRes.error, true);
+    // 2. Guardar la ronda en Sheets (Rondas + Documentos) y generar el archivo PDF real en Drive (sin diálogo de impresora)
+    if (!state.session || !state.session.token || !state.edificioId) {
+      if (btnPrint) btnPrint.disabled = false;
+      if (btnLbl) btnLbl.textContent = origLbl;
+      showToast('Inicia sesión y selecciona una comunidad para guardar el informe.', true);
+      return;
+    }
+
+    try {
+      const itemsPayload = state.rondaItems.map(function (it) {
+        const hasIds = it.fotoFileIds && it.fotoFileIds.length > 0;
+        return {
+          espacio: it.espacio,
+          estado: it.estado,
+          checks: it.checks || [],
+          notas: it.notas || '',
+          hora: it.hora || '',
+          fotoFileIds: hasIds ? it.fotoFileIds : [],
+          fotos: hasIds ? [] : (it.fotos || []),
+        };
+      });
+      const backupRes = await postApi({
+        action: 'saveRondaReport',
+        token: state.session.token,
+        edificioId: state.edificioId,
+        edificioNombre: edifName,
+        fechaCarpeta: fechaCarpeta,
+        items: itemsPayload,
+      });
+
+      if (backupRes && backupRes.ok && backupRes.linkPdf) {
+        state.lastRondaPdf = {
+          edifName: edifName,
+          fileName: backupRes.fileName || 'Informe_Ronda.pdf',
+          linkPdf: backupRes.linkPdf,
+          downloadUrl: backupRes.downloadUrl || backupRes.linkPdf,
+          folderUrl: backupRes.folderUrl || '',
+          pdfBase64: backupRes.pdfBase64 || '',
+        };
+        const banner = document.getElementById('ronda-backup-banner');
+        const pdfLink = document.getElementById('ronda-backup-pdf-link');
+        const folderLink = document.getElementById('ronda-backup-folder-link');
+        if (pdfLink) pdfLink.href = backupRes.linkPdf;
+        if (folderLink && backupRes.folderUrl) folderLink.href = backupRes.folderUrl;
+        if (banner) {
+          banner.classList.remove('hidden');
+          banner.classList.add('flex');
+          banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-      } catch (bkErr) {
-        showToast('No se pudo respaldar en Drive ahora, abriendo PDF local...', true);
+        showToast('Ronda registrada y PDF guardado en Drive');
+      } else if (backupRes && backupRes.queued) {
+        showToast('Sin señal: la ronda quedó en cola y se respaldará al reconectar.');
+      } else {
+        showToast((backupRes && backupRes.error) ? backupRes.error : 'No se pudo generar el PDF en Drive.', true);
       }
+    } catch (bkErr) {
+      showToast('Error al guardar el informe de ronda. Revisa tu conexión e intenta nuevamente.', true);
     }
 
     if (btnPrint) btnPrint.disabled = false;
     if (btnLbl) btnLbl.textContent = origLbl;
-
-    const fechaHoy = new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' });
-    const horaHoy = new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-
-    let okCount = 0;
-    let obsCount = 0;
-    let urgCount = 0;
-    state.rondaItems.forEach(function (it) {
-      if (it.estado === 'Acción urgente') urgCount++;
-      else if (it.estado === 'Con observación') obsCount++;
-      else okCount++;
-    });
-
-    const itemsHtml = state.rondaItems.map(function (it, idx) {
-      const stColor = it.estado === 'Acción urgente'
-        ? 'background:#FFEDEB;color:#930013;'
-        : (it.estado === 'Con observación' ? 'background:#FEF3C7;color:#653E00;' : 'background:#D1FAE5;color:#005236;');
-      const checksHtml = (it.checks && it.checks.length > 0)
-        ? '<p style="font-size:12px;color:#1D5B96;margin:6px 0 4px 0;"><strong>Verificaciones:</strong> ' + escapeHtml(it.checks.join(' • ')) + '</p>'
-        : '';
-      const notesHtml = it.notas
-        ? '<p style="font-size:13px;color:#0F2942;line-height:1.5;margin:4px 0 8px 0;">' + escapeHtml(it.notas) + '</p>'
-        : '';
-      const photosHtml = (it.fotos && it.fotos.length > 0)
-        ? '<div style="display:grid;grid-template-columns:repeat(' + (it.fotos.length === 1 ? 1 : (it.fotos.length === 2 ? 2 : 3)) + ',1fr);gap:8px;margin-top:8px;">' +
-            it.fotos.map(function (src) {
-              return '<img src="' + src + '" style="width:100%;height:' + (it.fotos.length === 1 ? '210px' : '135px') + ';object-fit:cover;border-radius:6px;border:1px solid #DEE3ED;">';
-            }).join('') +
-          '</div>'
-        : '';
-
-      return (
-        '<div style="border:1px solid #DEE3ED;border-radius:10px;padding:14px;margin-bottom:14px;page-break-inside:avoid;break-inside:avoid;">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #E8ECF2;padding-bottom:6px;margin-bottom:6px;">' +
-            '<div style="font-weight:700;font-size:15px;color:#0F2942;">' + (idx + 1) + '. ' + escapeHtml(it.espacio) + ' <span style="font-weight:400;font-size:11px;color:#49607C;">(' + escapeHtml(it.hora || '') + ')</span></div>' +
-            '<span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;' + stColor + '">' + escapeHtml(it.estado) + '</span>' +
-          '</div>' +
-          checksHtml +
-          notesHtml +
-          photosHtml +
-        '</div>'
-      );
-    }).join('');
-
-    sheet.innerHTML =
-      '<div style="max-width:760px;margin:0 auto;font-family:Rubik,sans-serif;color:#0F2942;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1D5B96;padding-bottom:12px;margin-bottom:16px;">' +
-          '<div style="display:flex;align-items:center;gap:12px;">' +
-            '<img src="../img/logo.png" alt="GCO" style="width:48px;height:48px;object-fit:contain;">' +
-            '<div>' +
-              '<div style="font-size:18px;font-weight:700;color:#0F2942;">INFORME DE RONDA OPERATIVA</div>' +
-              '<div style="font-size:13px;color:#1D5B96;font-weight:600;">' + escapeHtml(edifName) + ' · GCO Gestión de Condominios</div>' +
-            '</div>' +
-          '</div>' +
-          '<div style="text-align:right;font-size:12px;color:#49607C;">' +
-            '<div><strong>Fecha:</strong> ' + escapeHtml(fechaHoy) + ' (' + escapeHtml(horaHoy) + ')</div>' +
-            '<div><strong>Supervisor:</strong> ' + escapeHtml(supName) + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">' +
-          '<div style="background:#F4F6F9;border:1px solid #DEE3ED;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#49607C;">Revisados</div><div style="font-size:20px;font-weight:700;">' + state.rondaItems.length + '</div></div>' +
-          '<div style="background:#D1FAE5;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#005236;">Conformes</div><div style="font-size:20px;font-weight:700;color:#005236;">' + okCount + '</div></div>' +
-          '<div style="background:#FEF3C7;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#653E00;">Observación</div><div style="font-size:20px;font-weight:700;color:#653E00;">' + obsCount + '</div></div>' +
-          '<div style="background:#FFEDEB;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#930013;">Urgente</div><div style="font-size:20px;font-weight:700;color:#930013;">' + urgCount + '</div></div>' +
-        '</div>' +
-        itemsHtml +
-        '<div style="margin-top:24px;padding-top:12px;border-top:1px solid #DEE3ED;display:flex;justify-content:space-between;font-size:11px;color:#49607C;">' +
-          '<span>Informe emitido por ' + escapeHtml(supName) + ' — GCO Gestión de Condominios</span>' +
-          '<span>gcoadmin.cl</span>' +
-        '</div>' +
-      '</div>';
-
-    sheet.classList.remove('hidden');
-    sheet.classList.add('print-active');
-    setTimeout(function () {
-      window.print();
-      sheet.classList.remove('print-active');
-      sheet.classList.add('hidden');
-    }, 250);
   }
 
   function openEditEquipmentModal(eq) {

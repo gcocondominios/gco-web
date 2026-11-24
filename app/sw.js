@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gco-app-v18';
+const CACHE_NAME = 'gco-app-v19';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -38,7 +38,7 @@ self.addEventListener('fetch', function (event) {
   // Never intercept cross-origin Apps Script redirects (localStorage handles offline data cache)
   if (url.indexOf(self.location.origin) === 0) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: 'no-cache' })
         .then(function (response) {
           if (response && response.ok) {
             const clone = response.clone();
