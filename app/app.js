@@ -3544,7 +3544,22 @@
     try {
       localStorage.setItem(getRondaDraftKey(), JSON.stringify(state.rondaItems));
     } catch (e) {
-      showToast('Espacio local lleno; genera el PDF antes de agregar más fotos.', true);
+      // Si las fotos superan los ~5 MB de localStorage, seguimos en memoria sin perder fotos
+      // y guardamos al menos los textos/espacios como respaldo.
+      try {
+        const light = state.rondaItems.map(function (it) {
+          return {
+            id: it.id,
+            espacio: it.espacio,
+            estado: it.estado,
+            checks: it.checks,
+            notas: it.notas,
+            fotos: [],
+            hora: it.hora,
+          };
+        });
+        localStorage.setItem(getRondaDraftKey(), JSON.stringify(light));
+      } catch (e2) {}
     }
   }
 
@@ -3716,11 +3731,11 @@
       photoInput.addEventListener('change', async function (e) {
         const files = Array.from(e.target.files || []);
         for (let i = 0; i < files.length; i++) {
-          if (state.rondaPhotos.length >= 3) {
-            showToast('Máximo 3 fotos por espacio en el informe');
+          if (state.rondaPhotos.length >= 10) {
+            showToast('Máximo 10 fotos por espacio en el informe');
             break;
           }
-          const comp = await compressImage(files[i], 960, 0.78);
+          const comp = await compressImage(files[i], 760, 0.7);
           state.rondaPhotos.push(comp.dataUrl);
         }
         renderRondaPhotosPreview();
@@ -3783,7 +3798,7 @@
     const lbl = document.getElementById('ronda-photo-label');
     if (!wrap || !lbl) return;
     if (state.rondaPhotos.length === 0) {
-      lbl.textContent = 'Adjuntar fotos de este espacio (hasta 3)';
+      lbl.textContent = 'Adjuntar fotos de este espacio (hasta 10)';
       wrap.classList.add('hidden');
       wrap.classList.remove('flex');
       wrap.innerHTML = '';
@@ -3886,9 +3901,9 @@
         ? '<p style="font-size:13px;color:#0F2942;line-height:1.5;margin:4px 0 8px 0;">' + escapeHtml(it.notas) + '</p>'
         : '';
       const photosHtml = (it.fotos && it.fotos.length > 0)
-        ? '<div style="display:grid;grid-template-columns:repeat(' + Math.min(it.fotos.length, 3) + ',1fr);gap:8px;margin-top:8px;">' +
+        ? '<div style="display:grid;grid-template-columns:repeat(' + (it.fotos.length === 1 ? 1 : (it.fotos.length === 2 ? 2 : 3)) + ',1fr);gap:8px;margin-top:8px;">' +
             it.fotos.map(function (src) {
-              return '<img src="' + src + '" style="width:100%;height:150px;object-fit:cover;border-radius:6px;border:1px solid #DEE3ED;">';
+              return '<img src="' + src + '" style="width:100%;height:' + (it.fotos.length === 1 ? '210px' : '135px') + ';object-fit:cover;border-radius:6px;border:1px solid #DEE3ED;">';
             }).join('') +
           '</div>'
         : '';
