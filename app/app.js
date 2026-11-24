@@ -25,6 +25,10 @@
     maintType: 'Preventiva',
     maintState: 'Operativo',
     maintFiles: [],
+    rondaState: 'Conforme',
+    rondaChecks: [],
+    rondaPhotos: [],
+    rondaItems: [],
   };
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -846,6 +850,11 @@
       roleBar.classList.remove('flex');
       btnMaint.classList.add('hidden');
       btnMaint.classList.remove('inline-flex');
+      const btnRondaOut = document.getElementById('btn-open-ronda');
+      if (btnRondaOut) {
+        btnRondaOut.classList.add('hidden');
+        btnRondaOut.classList.remove('inline-flex');
+      }
       btnAdmin.classList.add('hidden');
       btnAdmin.classList.remove('inline-flex');
       if (btnCommittee) {
@@ -876,6 +885,11 @@
 
     btnMaint.classList.toggle('hidden', !canMaint);
     btnMaint.classList.toggle('inline-flex', canMaint);
+    const btnRonda = document.getElementById('btn-open-ronda');
+    if (btnRonda) {
+      btnRonda.classList.toggle('hidden', !canMaint);
+      btnRonda.classList.toggle('inline-flex', canMaint);
+    }
     btnAdmin.classList.toggle('hidden', !isAdminPanel);
     btnAdmin.classList.toggle('inline-flex', isAdminPanel);
     const adminLbl = btnAdmin.querySelector('.font-label');
@@ -907,6 +921,7 @@
 
   function bindEvents() {
     document.getElementById('btn-retry-load').addEventListener('click', loadData);
+    bindRondaEvents();
 
     document.getElementById('btn-back-directory').addEventListener('click', function () {
       navigateToEquipo('');
@@ -3506,5 +3521,425 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  /* ==========================================================================
+     INFORME DE RONDA DE JORNADA (CHECKLIST + VOZ + IA + FOTOS + PDF COMITÉ)
+     ========================================================================== */
+
+  function getRondaDraftKey() {
+    return 'gco_ronda_draft_v1_' + (state.edificioId || 'DEMO');
+  }
+
+  function loadRondaDraft() {
+    try {
+      const raw = localStorage.getItem(getRondaDraftKey());
+      state.rondaItems = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      state.rondaItems = [];
+    }
+  }
+
+  function saveRondaDraft() {
+    try {
+      localStorage.setItem(getRondaDraftKey(), JSON.stringify(state.rondaItems));
+    } catch (e) {
+      showToast('Espacio local lleno; genera el PDF antes de agregar más fotos.', true);
+    }
+  }
+
+  function populateRondaAreas() {
+    const sel = document.getElementById('ronda-area-select');
+    if (!sel) return;
+    const opts = [];
+    const seen = {};
+
+    if (state.data && state.data.equipos && state.data.equipos.length > 0) {
+      state.data.equipos.forEach(function (eq) {
+        const lbl = eq.nombre + ' (#' + eq.id + ')';
+        seen[lbl.toLowerCase()] = true;
+        opts.push(lbl);
+      });
+    } else if (state.data && state.data.equipo) {
+      const lbl = state.data.equipo.nombre + ' (#' + state.data.equipo.id + ')';
+      seen[lbl.toLowerCase()] = true;
+      opts.push(lbl);
+    }
+
+    [
+      'Hall de Acceso y Conserjería',
+      'Pasillos y Escaleras',
+      'Sala de Bombas / Estanques',
+      'Ascensores',
+      'Estacionamientos y Portón',
+      'Sala de Basura',
+      'Quincho / Áreas Comunes',
+      'Jardines y Perímetro',
+    ].forEach(function (gen) {
+      if (!seen[gen.toLowerCase()]) opts.push(gen);
+    });
+
+    sel.innerHTML = opts.map(function (o) {
+      return '<option value="' + escapeHtml(o) + '">' + escapeHtml(o) + '</option>';
+    }).join('');
+  }
+
+  function bindRondaEvents() {
+    const btnOpen = document.getElementById('btn-open-ronda');
+    if (btnOpen) {
+      btnOpen.addEventListener('click', function () {
+        const sub = document.getElementById('ronda-building-subtitle');
+        if (sub && state.data && state.data.edificio) {
+          sub.textContent = state.data.edificio.nombre + ' · Agrega espacios revisados y genera PDF';
+        }
+        populateRondaAreas();
+        loadRondaDraft();
+        renderRondaItemsList();
+        openModal('modal-ronda');
+      });
+    }
+
+    document.querySelectorAll('.ronda-state-chip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.rondaState = btn.getAttribute('data-ronda-state') || 'Conforme';
+        document.querySelectorAll('.ronda-state-chip').forEach(function (b) {
+          const val = b.getAttribute('data-ronda-state');
+          const act = val === state.rondaState;
+          let cls = 'bg-surface-card text-on-surface-variant border border-outline';
+          if (act) {
+            if (val === 'Acción urgente') cls = 'bg-error-container text-on-error-container border border-error';
+            else if (val === 'Con observación') cls = 'bg-warning-container text-on-warning-container border border-warning';
+            else cls = 'bg-success-container text-on-success-container border border-success';
+          }
+          b.className = 'ronda-state-chip py-gutter-xs px-gutter-sm rounded-md font-label text-label-sm ' + cls;
+        });
+      });
+    });
+
+    document.querySelectorAll('.ronda-check-chip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const val = btn.getAttribute('data-rcheck');
+        const idx = state.rondaChecks.indexOf(val);
+        if (idx === -1) {
+          state.rondaChecks.push(val);
+          btn.className = 'ronda-check-chip px-gutter-sm py-1 rounded-full bg-primary text-on-primary border border-primary font-label text-[11px]';
+        } else {
+          state.rondaChecks.splice(idx, 1);
+          btn.className = 'ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]';
+        }
+      });
+    });
+
+    // Dictado por voz nativo (Web Speech API)
+    const btnVoice = document.getElementById('btn-ronda-voice');
+    let activeRec = null;
+    if (btnVoice) {
+      btnVoice.addEventListener('click', function () {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+          showToast('Tu navegador no soporta dictado directo; usa el micrófono del teclado.', true);
+          return;
+        }
+        const lbl = document.getElementById('ronda-voice-label');
+        if (activeRec) {
+          activeRec.stop();
+          activeRec = null;
+          if (lbl) lbl.textContent = 'Dictar';
+          return;
+        }
+        const rec = new SR();
+        rec.lang = 'es-CL';
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+        activeRec = rec;
+        if (lbl) lbl.textContent = 'Escuchando...';
+        rec.onresult = function (ev) {
+          const transcript = ev.results && ev.results[0] && ev.results[0][0] ? ev.results[0][0].transcript : '';
+          const notes = document.getElementById('ronda-notes');
+          if (notes && transcript) {
+            notes.value = (notes.value ? notes.value.trim() + ' ' : '') + transcript.trim();
+          }
+        };
+        rec.onerror = function () {
+          showToast('No se pudo capturar el audio. Intenta nuevamente.', true);
+        };
+        rec.onend = function () {
+          activeRec = null;
+          if (lbl) lbl.textContent = 'Dictar';
+        };
+        rec.start();
+      });
+    }
+
+    // Asistente IA para pulir redacción para el Comité
+    const btnPolish = document.getElementById('btn-ronda-ai-polish');
+    if (btnPolish) {
+      btnPolish.addEventListener('click', async function () {
+        if (!state.session) return;
+        const notesEl = document.getElementById('ronda-notes');
+        const areaEl = document.getElementById('ronda-area-select');
+        const rawText = notesEl ? notesEl.value.trim() : '';
+        if (!rawText && state.rondaChecks.length === 0) {
+          showToast('Escribe, dicta o marca algún detalle primero.', true);
+          return;
+        }
+        const origHtml = btnPolish.innerHTML;
+        btnPolish.disabled = true;
+        btnPolish.textContent = 'Mejorando...';
+        const res = await postApi({
+          action: 'polishReportAi',
+          token: state.session.token,
+          espacio: areaEl ? areaEl.value : '',
+          estado: state.rondaState,
+          checks: state.rondaChecks,
+          texto: rawText,
+        });
+        btnPolish.disabled = false;
+        btnPolish.innerHTML = origHtml;
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo mejorar el texto', true);
+          return;
+        }
+        if (notesEl && res.polished) {
+          notesEl.value = res.polished;
+          showToast('Redacción mejorada para el Comité');
+        }
+      });
+    }
+
+    const btnPhotos = document.getElementById('btn-ronda-photos');
+    const photoInput = document.getElementById('ronda-photo-input');
+    if (btnPhotos && photoInput) {
+      btnPhotos.addEventListener('click', function () {
+        photoInput.click();
+      });
+      photoInput.addEventListener('change', async function (e) {
+        const files = Array.from(e.target.files || []);
+        for (let i = 0; i < files.length; i++) {
+          if (state.rondaPhotos.length >= 3) {
+            showToast('Máximo 3 fotos por espacio en el informe');
+            break;
+          }
+          const comp = await compressImage(files[i], 960, 0.78);
+          state.rondaPhotos.push(comp.dataUrl);
+        }
+        renderRondaPhotosPreview();
+        e.target.value = '';
+      });
+    }
+
+    const form = document.getElementById('ronda-item-form');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const area = document.getElementById('ronda-area-select').value;
+        const notes = document.getElementById('ronda-notes').value.trim();
+        if (!notes && state.rondaChecks.length === 0 && state.rondaPhotos.length === 0) {
+          showToast('Marca al menos una opción, escribe un comentario o sube una foto.', true);
+          return;
+        }
+        state.rondaItems.push({
+          id: 'R-' + Date.now(),
+          espacio: area,
+          estado: state.rondaState,
+          checks: state.rondaChecks.slice(),
+          notas: notes,
+          fotos: state.rondaPhotos.slice(),
+          hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+        });
+        saveRondaDraft();
+        renderRondaItemsList();
+
+        // Reset form for next space
+        document.getElementById('ronda-notes').value = '';
+        state.rondaChecks = [];
+        state.rondaPhotos = [];
+        document.querySelectorAll('.ronda-check-chip').forEach(function (b) {
+          b.className = 'ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]';
+        });
+        renderRondaPhotosPreview();
+        showToast('Espacio agregado al informe de ronda');
+      });
+    }
+
+    const btnClear = document.getElementById('btn-ronda-clear');
+    if (btnClear) {
+      btnClear.addEventListener('click', function () {
+        state.rondaItems = [];
+        saveRondaDraft();
+        renderRondaItemsList();
+        showToast('Borrador de ronda limpiado');
+      });
+    }
+
+    const btnPrint = document.getElementById('btn-ronda-print-pdf');
+    if (btnPrint) {
+      btnPrint.addEventListener('click', printRondaPdf);
+    }
+  }
+
+  function renderRondaPhotosPreview() {
+    const wrap = document.getElementById('ronda-photo-preview');
+    const lbl = document.getElementById('ronda-photo-label');
+    if (!wrap || !lbl) return;
+    if (state.rondaPhotos.length === 0) {
+      lbl.textContent = 'Adjuntar fotos de este espacio (hasta 3)';
+      wrap.classList.add('hidden');
+      wrap.classList.remove('flex');
+      wrap.innerHTML = '';
+      return;
+    }
+    lbl.textContent = state.rondaPhotos.length + (state.rondaPhotos.length === 1 ? ' foto lista' : ' fotos listas');
+    wrap.classList.remove('hidden');
+    wrap.classList.add('flex');
+    wrap.innerHTML = state.rondaPhotos.map(function (src, idx) {
+      return (
+        '<div class="relative w-16 h-16 shrink-0">' +
+          '<img src="' + src + '" alt="Foto ronda ' + (idx + 1) + '" class="w-16 h-16 object-cover rounded-sm border border-outline">' +
+          '<button type="button" data-rm-ronda-photo="' + idx + '" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-error text-on-secondary text-[12px] flex items-center justify-center shadow">×</button>' +
+        '</div>'
+      );
+    }).join('');
+    wrap.querySelectorAll('[data-rm-ronda-photo]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.rondaPhotos.splice(Number(btn.getAttribute('data-rm-ronda-photo')), 1);
+        renderRondaPhotosPreview();
+      });
+    });
+  }
+
+  function renderRondaItemsList() {
+    const list = document.getElementById('ronda-items-list');
+    const title = document.getElementById('ronda-list-title');
+    const btnPrint = document.getElementById('btn-ronda-print-pdf');
+    if (!list || !title) return;
+
+    title.textContent = 'Espacios en esta ronda (' + state.rondaItems.length + ')';
+    if (btnPrint) btnPrint.disabled = state.rondaItems.length === 0;
+
+    if (state.rondaItems.length === 0) {
+      list.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">Aún no agregas espacios. Completa el formulario arriba y toca "Agregar espacio al informe".</p>';
+      return;
+    }
+
+    list.innerHTML = state.rondaItems.map(function (item, idx) {
+      const badgeCls = item.estado === 'Acción urgente'
+        ? 'bg-error-container text-on-error-container'
+        : (item.estado === 'Con observación' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
+      const thumbs = (item.fotos || []).length > 0
+        ? '<div class="flex gap-1 mt-1">' + item.fotos.map(function (f) {
+            return '<img src="' + f + '" class="w-10 h-10 object-cover rounded-sm border border-outline">';
+          }).join('') + '</div>'
+        : '';
+      return (
+        '<article class="bg-surface-subtle rounded-lg border border-outline p-gutter-sm flex items-start justify-between gap-gutter-sm">' +
+          '<div class="flex flex-col gap-0.5 min-w-0">' +
+            '<div class="flex items-center gap-gutter-xs flex-wrap">' +
+              '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(item.espacio) + '</span>' +
+              '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-[11px]">' + escapeHtml(item.estado) + '</span>' +
+            '</div>' +
+            (item.checks && item.checks.length > 0 ? '<span class="font-label text-[11px] text-primary">✓ ' + escapeHtml(item.checks.join(' · ')) + '</span>' : '') +
+            (item.notas ? '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(item.notas) + '</p>' : '') +
+            thumbs +
+          '</div>' +
+          '<button type="button" data-rm-ronda-item="' + idx + '" aria-label="Quitar espacio" class="p-1 text-error hover:bg-error-container rounded-sm shrink-0"><span class="material-symbols-outlined text-[18px]">delete</span></button>' +
+        '</article>'
+      );
+    }).join('');
+
+    list.querySelectorAll('[data-rm-ronda-item]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.rondaItems.splice(Number(btn.getAttribute('data-rm-ronda-item')), 1);
+        saveRondaDraft();
+        renderRondaItemsList();
+      });
+    });
+  }
+
+  function printRondaPdf() {
+    if (!state.rondaItems || state.rondaItems.length === 0) return;
+    const sheet = document.getElementById('print-ronda-sheet');
+    if (!sheet) return;
+
+    const edifName = (state.data && state.data.edificio && state.data.edificio.nombre) ? state.data.edificio.nombre : (state.edificioId || 'Comunidad');
+    const supName = (state.session && state.session.user && state.session.user.nombre) ? state.session.user.nombre : 'Supervisión Operaciones GCO';
+    const fechaHoy = new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' });
+    const horaHoy = new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+
+    let okCount = 0;
+    let obsCount = 0;
+    let urgCount = 0;
+    state.rondaItems.forEach(function (it) {
+      if (it.estado === 'Acción urgente') urgCount++;
+      else if (it.estado === 'Con observación') obsCount++;
+      else okCount++;
+    });
+
+    const itemsHtml = state.rondaItems.map(function (it, idx) {
+      const stColor = it.estado === 'Acción urgente'
+        ? 'background:#FFEDEB;color:#930013;'
+        : (it.estado === 'Con observación' ? 'background:#FEF3C7;color:#653E00;' : 'background:#D1FAE5;color:#005236;');
+      const checksHtml = (it.checks && it.checks.length > 0)
+        ? '<p style="font-size:12px;color:#1D5B96;margin:6px 0 4px 0;"><strong>Verificaciones:</strong> ' + escapeHtml(it.checks.join(' • ')) + '</p>'
+        : '';
+      const notesHtml = it.notas
+        ? '<p style="font-size:13px;color:#0F2942;line-height:1.5;margin:4px 0 8px 0;">' + escapeHtml(it.notas) + '</p>'
+        : '';
+      const photosHtml = (it.fotos && it.fotos.length > 0)
+        ? '<div style="display:grid;grid-template-columns:repeat(' + Math.min(it.fotos.length, 3) + ',1fr);gap:8px;margin-top:8px;">' +
+            it.fotos.map(function (src) {
+              return '<img src="' + src + '" style="width:100%;height:150px;object-fit:cover;border-radius:6px;border:1px solid #DEE3ED;">';
+            }).join('') +
+          '</div>'
+        : '';
+
+      return (
+        '<div style="border:1px solid #DEE3ED;border-radius:10px;padding:14px;margin-bottom:14px;page-break-inside:avoid;break-inside:avoid;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #E8ECF2;padding-bottom:6px;margin-bottom:6px;">' +
+            '<div style="font-weight:700;font-size:15px;color:#0F2942;">' + (idx + 1) + '. ' + escapeHtml(it.espacio) + ' <span style="font-weight:400;font-size:11px;color:#49607C;">(' + escapeHtml(it.hora || '') + ')</span></div>' +
+            '<span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;' + stColor + '">' + escapeHtml(it.estado) + '</span>' +
+          '</div>' +
+          checksHtml +
+          notesHtml +
+          photosHtml +
+        '</div>'
+      );
+    }).join('');
+
+    sheet.innerHTML =
+      '<div style="max-width:760px;margin:0 auto;font-family:Rubik,sans-serif;color:#0F2942;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1D5B96;padding-bottom:12px;margin-bottom:16px;">' +
+          '<div style="display:flex;align-items:center;gap:12px;">' +
+            '<img src="../img/logo.png" alt="GCO" style="width:48px;height:48px;object-fit:contain;">' +
+            '<div>' +
+              '<div style="font-size:18px;font-weight:700;color:#0F2942;">INFORME DE RONDA OPERATIVA</div>' +
+              '<div style="font-size:13px;color:#1D5B96;font-weight:600;">' + escapeHtml(edifName) + ' · GCO Gestión de Condominios</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="text-align:right;font-size:12px;color:#49607C;">' +
+            '<div><strong>Fecha:</strong> ' + escapeHtml(fechaHoy) + ' (' + escapeHtml(horaHoy) + ')</div>' +
+            '<div><strong>Supervisor:</strong> ' + escapeHtml(supName) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">' +
+          '<div style="background:#F4F6F9;border:1px solid #DEE3ED;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#49607C;">Revisados</div><div style="font-size:20px;font-weight:700;">' + state.rondaItems.length + '</div></div>' +
+          '<div style="background:#D1FAE5;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#005236;">Conformes</div><div style="font-size:20px;font-weight:700;color:#005236;">' + okCount + '</div></div>' +
+          '<div style="background:#FEF3C7;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#653E00;">Observación</div><div style="font-size:20px;font-weight:700;color:#653E00;">' + obsCount + '</div></div>' +
+          '<div style="background:#FFEDEB;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#930013;">Urgente</div><div style="font-size:20px;font-weight:700;color:#930013;">' + urgCount + '</div></div>' +
+        '</div>' +
+        itemsHtml +
+        '<div style="margin-top:24px;padding-top:12px;border-top:1px solid #DEE3ED;display:flex;justify-content:space-between;font-size:11px;color:#49607C;">' +
+          '<span>Informe emitido por ' + escapeHtml(supName) + ' — GCO Gestión de Condominios</span>' +
+          '<span>gcoadmin.cl</span>' +
+        '</div>' +
+      '</div>';
+
+    sheet.classList.remove('hidden');
+    sheet.classList.add('print-active');
+    setTimeout(function () {
+      window.print();
+      sheet.classList.remove('print-active');
+      sheet.classList.add('hidden');
+    }, 250);
   }
 })();

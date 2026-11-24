@@ -159,6 +159,10 @@
           <span class="material-symbols-outlined text-[20px]" aria-hidden="true">build</span>
           <span class="font-label text-label-lg">Registrar Nueva Mantención</span>
         </button>
+        <button id="btn-open-ronda" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">fact_check</span>
+          <span class="font-label text-label-lg">Informe de Ronda · PDF Comité</span>
+        </button>
         <button id="btn-open-admin" type="button" class="hidden w-full items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-primary-container text-on-primary-container border border-primary/20 hover:bg-outline transition-colors duration-state-change">
           <span class="material-symbols-outlined text-[20px]" aria-hidden="true">admin_panel_settings</span>
           <span class="font-label text-label-lg">Panel de Administración (Tickets, Equipos y Usuarios)</span>
@@ -905,6 +909,98 @@
   <!-- COMPROBANTE PDF DE VISITA / RONDA CON QR -->
   <div id="print-receipt-sheet" class="hidden p-8 bg-white text-on-surface"></div>
 
+  <!-- INFORME PDF DE RONDA DE JORNADA PARA COMITÉ -->
+  <div id="print-ronda-sheet" class="hidden p-8 bg-white text-on-surface"></div>
+
+  <!-- BOTTOM SHEET 8: INFORME DE RONDA DE JORNADA (PDF COMITÉ CON VOZ E IA) -->
+  <div id="modal-ronda" class="fixed inset-0 z-50 hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-ronda-title">
+    <div class="sheet-panel w-full max-w-md md:max-w-2xl bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
+
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs min-w-0">
+          <h2 id="sheet-ronda-title" class="font-headline text-headline-md text-on-surface">Informe de Ronda de Jornada</h2>
+          <p id="ronda-building-subtitle" class="font-body text-body-sm text-on-surface-variant truncate">Agrega los espacios revisados y genera el PDF para el Comité</p>
+        </div>
+        <button type="button" data-close-modal="modal-ronda" aria-label="Cerrar informe de ronda" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <form id="ronda-item-form" class="bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="ronda-area-select" class="font-label text-label-sm text-on-surface">1. Espacio o equipo revisado</label>
+          <select id="ronda-area-select" required class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></select>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-sm text-on-surface">2. Estado general</span>
+          <div class="grid grid-cols-3 gap-gutter-xs">
+            <button type="button" data-ronda-state="Conforme" class="ronda-state-chip py-gutter-xs px-gutter-sm rounded-md bg-success-container text-on-success-container border border-success font-label text-label-sm">Conforme</button>
+            <button type="button" data-ronda-state="Con observación" class="ronda-state-chip py-gutter-xs px-gutter-sm rounded-md bg-surface-card text-on-surface-variant border border-outline font-label text-label-sm">Observación</button>
+            <button type="button" data-ronda-state="Acción urgente" class="ronda-state-chip py-gutter-xs px-gutter-sm rounded-md bg-surface-card text-on-surface-variant border border-outline font-label text-label-sm">Urgente</button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-sm text-on-surface">3. Detalles observados (toca para marcar)</span>
+          <div id="ronda-checks-grid" class="flex flex-wrap gap-gutter-xs">
+            <button type="button" data-rcheck="Funcionamiento normal / sin ruidos" class="ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]">Funcionamiento normal</button>
+            <button type="button" data-rcheck="Aseo y orden conforme" class="ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]">Aseo y orden OK</button>
+            <button type="button" data-rcheck="Iluminación y señalética operativas" class="ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]">Iluminación / señalética OK</button>
+            <button type="button" data-rcheck="Filtración, fuga o desgaste visible" class="ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]">Fuga / desgaste</button>
+            <button type="button" data-rcheck="Requiere mantención o repuesto" class="ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]">Requiere repuesto</button>
+            <button type="button" data-rcheck="Acceso / cerradura / seguridad revisada" class="ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]">Acceso / seguridad</button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <div class="flex items-center justify-between gap-gutter-xs flex-wrap">
+            <label for="ronda-notes" class="font-label text-label-sm text-on-surface">4. Comentario para el Comité</label>
+            <div class="flex items-center gap-gutter-xs">
+              <button type="button" id="btn-ronda-voice" class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface font-label text-[11px] hover:bg-surface-variant">
+                <span class="material-symbols-outlined text-[14px] text-error">mic</span>
+                <span id="ronda-voice-label">Dictar</span>
+              </button>
+              <button type="button" id="btn-ronda-ai-polish" class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-full bg-primary-container text-on-primary-container border border-primary/20 font-label text-[11px] hover:bg-outline">
+                <span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+                <span>Mejorar con IA</span>
+              </button>
+            </div>
+          </div>
+          <textarea id="ronda-notes" rows="3" placeholder="Escribe o dicta lo observado en terreno (ej. se revisó tablero y bomba 2, suena un poco el rodamiento, pedir visita)..." class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <input id="ronda-photo-input" type="file" accept="image/*" multiple class="hidden">
+          <button id="btn-ronda-photos" type="button" class="w-full flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md border border-dashed border-primary bg-primary-container/60 text-on-primary-container font-label text-label-sm hover:bg-outline">
+            <span class="material-symbols-outlined text-[18px]">add_a_photo</span>
+            <span id="ronda-photo-label">Adjuntar fotos de este espacio (hasta 3)</span>
+          </button>
+          <div id="ronda-photo-preview" class="hidden flex-wrap gap-gutter-xs mt-gutter-xs"></div>
+        </div>
+
+        <button type="submit" class="w-full min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-lg py-gutter-sm rounded-md bg-secondary text-on-secondary font-label text-label-md hover:bg-primary transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[18px]">add_circle</span>
+          <span>Agregar espacio al informe</span>
+        </button>
+      </form>
+
+      <div class="flex flex-col gap-gutter-sm">
+        <div class="flex items-center justify-between gap-gutter-sm">
+          <h3 id="ronda-list-title" class="font-headline text-title-sm text-on-surface">Espacios en esta ronda (0)</h3>
+          <button type="button" id="btn-ronda-clear" class="font-label text-label-sm text-error hover:underline">Limpiar ronda</button>
+        </div>
+        <div id="ronda-items-list" class="flex flex-col gap-gutter-sm"></div>
+      </div>
+
+      <button id="btn-ronda-print-pdf" type="button" disabled class="w-full min-h-[46px] inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change disabled:opacity-40 disabled:cursor-not-allowed">
+        <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+        <span class="font-label text-label-lg">Generar Informe PDF de Ronda para Comité</span>
+      </button>
+    </div>
+  </div>
+
   <!-- BOTTOM SHEET 7: ANALIZADOR GEMINI IA -->
   <div id="modal-ai" class="fixed inset-0 z-[58] hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-ai-title">
     <div class="sheet-panel w-full max-w-md md:max-w-2xl bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
@@ -943,6 +1039,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="./app.js?v=20261123a"></script>
+  <script src="./app.js?v=20261123b"></script>
 </body>
 </html>
