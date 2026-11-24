@@ -1590,8 +1590,17 @@
       );
     }).join('');
 
+    const isAdmin = Boolean(state.session && state.session.user && state.session.user.rol === 'admin');
+    const panelGcoBtn = isAdmin
+      ? '<a href="https://gcoadmin.cl/panel-gco/" target="_blank" rel="noopener noreferrer" class="w-full min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-secondary text-on-secondary font-label text-label-md hover:bg-primary transition-colors duration-state-change">' +
+          '<span class="material-symbols-outlined text-[18px]" aria-hidden="true">account_balance</span>' +
+          '<span>Abrir Conciliación Financiera (panel-gco)</span>' +
+        '</a>'
+      : '';
+
     container.innerHTML =
       '<div class="flex flex-col gap-gutter-md">' +
+        panelGcoBtn +
         kpisHtml +
         '<div class="flex flex-col gap-gutter-sm">' +
           '<span class="font-title text-title-sm text-on-surface">Estado por comunidad (priorizado por urgencia)</span>' +
@@ -2400,6 +2409,35 @@
           edificioId: data.edificio.id,
         });
       };
+    }
+
+    const finBoxId = 'committee-finanzas-bridge';
+    let finBox = document.getElementById(finBoxId);
+    if (!finBox && data.finanzas) {
+      finBox = document.createElement('div');
+      finBox.id = finBoxId;
+      const summaryEl = document.getElementById('committee-summary-cards');
+      if (summaryEl && summaryEl.parentNode) {
+        summaryEl.parentNode.insertBefore(finBox, summaryEl.nextSibling);
+      }
+    }
+    if (finBox) {
+      if (!data.finanzas) {
+        finBox.className = 'hidden';
+        finBox.innerHTML = '';
+      } else {
+        const f = data.finanzas;
+        finBox.className = 'bg-primary-container/50 border border-primary/20 rounded-lg p-gutter-md flex flex-col gap-1';
+        finBox.innerHTML =
+          '<div class="flex items-center justify-between gap-gutter-sm">' +
+            '<span class="font-title text-title-sm text-on-primary-container inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">account_balance</span>Resumen Financiero (' + escapeHtml(f.fuente || 'panel-gco') + ')</span>' +
+            (f.actualizadoEn ? '<span class="font-label text-[11px] text-on-surface-variant">' + escapeHtml(formatShortDate(f.actualizadoEn)) + '</span>' : '') +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-gutter-xs font-label text-label-sm text-on-surface">' +
+            (f.recaudacion !== null ? '<span>Recaudación: <strong>$' + Number(f.recaudacion).toLocaleString('es-CL') + '</strong></span>' : '') +
+            (f.morosidad !== null ? '<span>Morosidad: <strong>$' + Number(f.morosidad).toLocaleString('es-CL') + '</strong></span>' : '') +
+          '</div>';
+      }
     }
 
     renderCommitteeAgreements(data);
