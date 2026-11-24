@@ -215,6 +215,20 @@
       </article>
     </main>
 
+    <!-- INICIO DIRECTO OPERACIONES: SELECTOR DE COMUNIDAD -->
+    <main id="view-ops-home" class="hidden flex-col gap-section flex-1">
+      <section class="w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-gco flex flex-col gap-gutter-md">
+        <header class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-sm text-primary uppercase tracking-wide">Operaciones en Terreno</span>
+          <h1 id="ops-home-greeting" class="font-headline text-headline-md text-on-surface">Elige la comunidad a visitar</h1>
+          <p class="font-body text-body-sm text-on-surface-variant">Toca un edificio para ver sus equipos, tickets abiertos o iniciar tu ronda de jornada.</p>
+        </header>
+        <div id="ops-buildings-list" class="flex flex-col gap-gutter-sm">
+          <p class="font-body text-body-sm text-on-surface-variant">Cargando comunidades...</p>
+        </div>
+      </section>
+    </main>
+
     <!-- VISTA 1: FICHA DE EQUIPO INDIVIDUAL -->
     <main id="view-equipment" class="hidden flex-col gap-section flex-1">
 
@@ -931,14 +945,33 @@
         </button>
       </header>
 
+      <div id="ronda-progress-wrap" class="flex flex-col gap-1">
+        <div class="flex items-center justify-between font-label text-[11px] text-on-surface-variant">
+          <span id="ronda-progress-text">Revisados 0 de 0 espacios</span>
+          <span id="ronda-progress-pct" class="tabular-nums">0%</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-surface-variant overflow-hidden">
+          <div id="ronda-progress-bar" class="h-full bg-primary rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
       <form id="ronda-item-form" class="bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-md">
         <div class="flex flex-col gap-gutter-xs">
-          <label for="ronda-area-select" class="font-label text-label-sm text-on-surface">1. Espacio o equipo revisado</label>
+          <div class="flex items-center justify-between gap-gutter-xs flex-wrap">
+            <label for="ronda-area-select" class="font-label text-label-sm text-on-surface">1. Espacio o equipo revisado</label>
+            <button type="button" id="btn-ronda-quick-ok" class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-full bg-success-container text-on-success-container border border-success/40 font-label text-[11px] hover:opacity-90">
+              <span class="material-symbols-outlined text-[14px]">check_circle</span>
+              <span>Todo OK (1 toque)</span>
+            </button>
+          </div>
           <select id="ronda-area-select" required class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></select>
         </div>
 
         <div class="flex flex-col gap-gutter-xs">
-          <span class="font-label text-label-sm text-on-surface">2. Estado general</span>
+          <div class="flex items-center justify-between gap-gutter-xs flex-wrap">
+            <span class="font-label text-label-sm text-on-surface">2. Estado general</span>
+            <span id="ronda-autodetect-hint" class="hidden font-label text-[10px] px-2 py-0.5 rounded-full bg-warning-container text-on-warning-container">Ajustado por hallazgo</span>
+          </div>
           <div class="grid grid-cols-3 gap-gutter-xs">
             <button type="button" data-ronda-state="Conforme" class="ronda-state-chip py-gutter-xs px-gutter-sm rounded-md bg-success-container text-on-success-container border border-success font-label text-label-sm">Conforme</button>
             <button type="button" data-ronda-state="Con observación" class="ronda-state-chip py-gutter-xs px-gutter-sm rounded-md bg-surface-card text-on-surface-variant border border-outline font-label text-label-sm">Observación</button>
@@ -975,6 +1008,11 @@
           <textarea id="ronda-notes" rows="3" placeholder="Escribe o dicta lo observado en terreno (ej. se revisó tablero y bomba 2, suena un poco el rodamiento, pedir visita)..." class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
         </div>
 
+        <label class="flex items-center gap-gutter-sm bg-warning-container/50 rounded-md px-gutter-md py-gutter-xs border border-warning/20 cursor-pointer">
+          <input id="ronda-create-order" type="checkbox" class="rounded-sm border-outline text-primary focus:ring-primary">
+          <span class="font-label text-[12px] text-on-surface">Crear Orden pendiente automática al guardar (para compra o técnico)</span>
+        </label>
+
         <div class="flex flex-col gap-gutter-xs">
           <input id="ronda-photo-input" type="file" accept="image/*" multiple class="hidden">
           <button id="btn-ronda-photos" type="button" class="w-full flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md border border-dashed border-primary bg-primary-container/60 text-on-primary-container font-label text-label-sm hover:bg-outline">
@@ -984,10 +1022,13 @@
           <div id="ronda-photo-preview" class="hidden flex-wrap gap-gutter-xs mt-gutter-xs"></div>
         </div>
 
-        <button type="submit" class="w-full min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-lg py-gutter-sm rounded-md bg-secondary text-on-secondary font-label text-label-md hover:bg-primary transition-colors duration-state-change">
-          <span class="material-symbols-outlined text-[18px]">add_circle</span>
-          <span>Agregar espacio al informe</span>
-        </button>
+        <div class="flex items-center gap-gutter-xs">
+          <button type="submit" class="flex-1 min-h-[42px] inline-flex items-center justify-center gap-gutter-xs px-gutter-lg py-gutter-sm rounded-md bg-secondary text-on-secondary font-label text-label-md hover:bg-primary transition-colors duration-state-change">
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span id="ronda-add-btn-label">Agregar espacio al informe</span>
+          </button>
+          <button type="button" id="btn-ronda-cancel-edit" class="hidden min-h-[42px] px-gutter-md rounded-md bg-surface-card border border-outline text-on-surface-variant font-label text-label-sm">Cancelar</button>
+        </div>
       </form>
 
       <div class="flex flex-col gap-gutter-sm">
@@ -1001,7 +1042,7 @@
       <div id="ronda-backup-banner" class="hidden flex-col gap-gutter-sm rounded-lg bg-success-container text-on-success-container border border-success/30 p-gutter-md">
         <div class="flex items-center gap-gutter-xs font-label text-label-md">
           <span class="material-symbols-outlined text-[18px]">cloud_done</span>
-          <span>Ronda registrada y PDF guardado en Drive</span>
+          <span id="ronda-backup-title">Ronda registrada y PDF guardado en Drive</span>
         </div>
         <div class="grid grid-cols-2 gap-gutter-xs">
           <button id="btn-ronda-download-pdf" type="button" class="min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-sm inline-flex items-center justify-center gap-1 px-gutter-sm">
@@ -1013,9 +1054,12 @@
             <span>Enviar PDF</span>
           </button>
         </div>
-        <div class="flex items-center gap-gutter-md flex-wrap text-[12px]">
-          <a id="ronda-backup-pdf-link" href="#" target="_blank" rel="noopener noreferrer" class="underline font-label text-primary">Abrir PDF en Drive</a>
-          <a id="ronda-backup-folder-link" href="#" target="_blank" rel="noopener noreferrer" class="underline font-label text-on-success-container">Ver carpeta de esta ronda</a>
+        <div class="flex items-center justify-between gap-gutter-sm flex-wrap text-[12px]">
+          <div class="flex items-center gap-gutter-md flex-wrap">
+            <a id="ronda-backup-pdf-link" href="#" target="_blank" rel="noopener noreferrer" class="underline font-label text-primary">Abrir PDF en Drive</a>
+            <a id="ronda-backup-folder-link" href="#" target="_blank" rel="noopener noreferrer" class="underline font-label text-on-success-container">Ver carpeta</a>
+          </div>
+          <button id="btn-ronda-finish-new" type="button" class="px-gutter-sm py-1 rounded-md bg-surface-card border border-success/40 text-on-success-container font-label text-[11px]">Finalizar y nueva ronda</button>
         </div>
       </div>
 
@@ -1187,6 +1231,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="./app.js?v=20261124d"></script>
+  <script src="./app.js?v=20261124e"></script>
 </body>
 </html>

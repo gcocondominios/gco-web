@@ -12,6 +12,7 @@
 
   const STORAGE_KEY = 'gco_session_v1';
   const QUEUE_KEY = 'gco_offline_queue_v1';
+  const LAST_EDIF_KEY = 'gco_last_edificio_v1';
 
   const state = {
     edificioId: '',
@@ -29,6 +30,12 @@
     rondaChecks: [],
     rondaPhotos: [],
     rondaItems: [],
+    rondaEditingIdx: -1,
+    rondaSavedToDrive: false,
+    rondaStateTouched: false,
+    rondaOrderTouched: false,
+    rondaTotalAreas: 0,
+    lastRondaPdf: null,
   };
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -71,14 +78,18 @@
     } else if (user && user.rol === 'operaciones') {
       if (paramEdificio && paramEdificio.toUpperCase() !== 'DEMO') {
         state.edificioId = paramEdificio;
+        try { localStorage.setItem(LAST_EDIF_KEY, paramEdificio); } catch (e) {}
       } else {
         state.edificioId = '';
-        showErrorState('Bienvenido a Operaciones. Abre el Panel de Operaciones arriba para elegir una comunidad.');
         updateSessionUI();
+        loadOpsHomeView();
         return;
       }
     } else if (paramEdificio) {
       state.edificioId = paramEdificio;
+      if (paramEdificio.toUpperCase() !== 'DEMO') {
+        try { localStorage.setItem(LAST_EDIF_KEY, paramEdificio); } catch (e) {}
+      }
     } else if (user && user.edificioId && user.edificioId.toUpperCase() !== 'ALL') {
       state.edificioId = user.edificioId;
     } else {
@@ -159,7 +170,7 @@
   }
 
   function showView(name) {
-    const views = ['loading', 'error', 'equipment', 'directory'];
+    const views = ['loading', 'error', 'ops-home', 'equipment', 'directory'];
     views.forEach(function (v) {
       const el = document.getElementById('view-' + v);
       if (!el) return;
@@ -180,6 +191,110 @@
       btnBack.classList.toggle('hidden', !showBack);
       btnBack.classList.toggle('inline-flex', showBack);
     }
+  }
+
+  async function loadOpsHomeView() {
+    const greet = document.getElementById('ops-home-greeting');
+    const user = state.session && state.session.user ? state.session.user : null;
+    if (greet && user && user.nombre) {
+      greet.textContent = 'Hola ' + user.nombre.split(' ')[0] + ' · Elige tu comunidad';
+    }
+    const headerName = document.getElementById('header-building-name');
+    if (headerName) headerName.textContent = 'Operaciones';
+
+    showView('ops-home');
+
+    const cached = loadDataCache('ops_home');
+    if (cached && cached.payload) {
+      renderOpsHomeBuildings(cached.payload);
+    }
+
+    if (!state.session || !state.session.token) return;
+    try {
+      const url = new URL(API_URL);
+      url.searchParams.set('action', 'adminData');
+      url.searchParams.set('token', state.session.token);
+      url.searchParams.set('edificio', '');
+      const res = await fetch(url.toString(), { method: 'GET' });
+      const json = await res.json();
+      if (json && json.ok) {
+        saveDataCache('ops_home', json);
+        renderOpsHomeBuildings(json);
+      }
+    } catch (e) {
+      if (!cached) {
+        const list = document.getElementById('ops-buildings-list');
+        if (list) list.innerHTML = '<p class="font-body text-body-sm text-error">Sin conexión. Abre el Panel de Operaciones arriba o revisa tu señal.</p>';
+      }
+    }
+  }
+
+  function renderOpsHomeBuildings(json) {
+    const list = document.getElementById('ops-buildings-list');
+    if (!list) return;
+
+    let lastId = '';
+    try { lastId = localStorage.getItem(LAST_EDIF_KEY) || ''; } catch (e) {}
+
+    const ccList = (json.controlCenter && Array.isArray(json.controlCenter.porComunidad) && json.controlCenter.porComunidad.length > 0)
+      ? json.controlCenter.porComunidad.slice()
+      : (json.edificios || []).map(function (ed) {
+          return { id: ed.id, nombre: ed.nombre, equipos: 0, atrasadas: 0, ticketsAbiertos: 0, ordenesAbiertas: 0 };
+        });
+
+    if (ccList.length === 0) {
+      list.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">No hay comunidades reales asignadas aún.</p>';
+      return;
+    }
+
+    // Poner la última comunidad visitada arriba para acceso en 1 toque
+    ccList.sort(function (a, b) {
+      const aLast = lastId && a.id.toLowerCase() === lastId.toLowerCase() ? 1 : 0;
+      const bLast = lastId && b.id.toLowerCase() === lastId.toLowerCase() ? 1 : 0;
+      if (aLast !== bLast) return bLast - aLast;
+      return (b.scoreUrgencia || 0) - (a.scoreUrgencia || 0);
+    });
+
+    list.innerHTML = ccList.map(function (c) {
+      const isLast = lastId && c.id.toLowerCase() === lastId.toLowerCase();
+      const hasAlerts = (c.atrasadas || 0) > 0 || (c.ticketsAbiertos || 0) > 0 || (c.ordenesAbiertas || 0) > 0;
+      const dotCls = (c.atrasadas || 0) > 0 ? 'bg-error' : (hasAlerts ? 'bg-warning' : 'bg-success');
+      return (
+        '<button type="button" data-ops-pick="' + escapeHtml(c.id) + '" class="w-full text-left bg-surface-subtle hover:bg-primary-container/40 rounded-lg border ' + (isLast ? 'border-primary/50' : 'border-outline') + ' p-gutter-md flex items-center justify-between gap-gutter-sm transition-colors duration-state-change active:scale-[0.99]">' +
+          '<div class="flex items-start gap-gutter-sm min-w-0">' +
+            '<span class="w-2.5 h-2.5 rounded-full ' + dotCls + ' mt-1.5 shrink-0"></span>' +
+            '<div class="flex flex-col gap-0.5 min-w-0">' +
+              '<div class="flex items-center gap-gutter-xs flex-wrap">' +
+                '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(c.nombre) + '</span>' +
+                (isLast ? '<span class="px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container font-label text-[10px]">Última visita</span>' : '') +
+              '</div>' +
+              '<span class="font-mono text-[11px] text-on-surface-variant">#' + escapeHtml(c.id) +
+                (c.equipos ? ' · ' + c.equipos + ' equipos' : '') +
+                ((c.ticketsAbiertos || 0) > 0 ? ' · ' + c.ticketsAbiertos + ' tickets' : '') +
+                ((c.ordenesAbiertas || 0) > 0 ? ' · ' + c.ordenesAbiertas + ' órdenes' : '') +
+                ((c.atrasadas || 0) > 0 ? ' · ' + c.atrasadas + ' alerta' : '') +
+              '</span>' +
+            '</div>' +
+          '</div>' +
+          '<span class="material-symbols-outlined text-[20px] text-primary shrink-0">chevron_right</span>' +
+        '</button>'
+      );
+    }).join('');
+
+    list.querySelectorAll('[data-ops-pick]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const targetId = btn.getAttribute('data-ops-pick');
+        if (!targetId) return;
+        state.edificioId = targetId;
+        state.equipoId = '';
+        try { localStorage.setItem(LAST_EDIF_KEY, targetId); } catch (e) {}
+        const url = new URL(window.location.href);
+        url.searchParams.set('edificio', targetId);
+        url.searchParams.delete('equipo');
+        window.history.pushState({}, '', url.toString());
+        loadData();
+      });
+    });
   }
 
   function showErrorState(msg) {
@@ -1659,7 +1774,7 @@
     const kpisHtml =
       '<div class="grid grid-cols-2 md:grid-cols-3 gap-gutter-sm">' +
         kpi('Comunidades', cc.totalComunidades, 'text-primary') +
-        kpi('Equipos activos', cc.totalEquipos, 'text-on-surface') +
+        kpi('Órdenes pendientes', cc.ordenesPendientes || 0, (cc.ordenesPendientes || 0) > 0 ? 'text-warning' : 'text-success') +
         kpi('Incidencias abiertas', cc.ticketsPendientes, cc.ticketsPendientes > 0 ? 'text-warning' : 'text-success') +
         kpi('Mant. atrasadas / falla', cc.mantencionesAtrasadas, cc.mantencionesAtrasadas > 0 ? 'text-error' : 'text-success') +
         kpi('Cotizaciones pend.', cc.cotizacionesPendientes, 'text-on-surface') +
@@ -1668,7 +1783,7 @@
 
     const listHtml = (cc.porComunidad || []).map(function (c) {
       const hasErr = c.atrasadas > 0;
-      const hasWarn = c.porVencer > 0 || c.ticketsAbiertos > 0 || c.docsAlerta > 0;
+      const hasWarn = c.porVencer > 0 || c.ticketsAbiertos > 0 || (c.ordenesAbiertas || 0) > 0 || c.docsAlerta > 0;
       const dotCls = hasErr ? 'bg-error' : (hasWarn ? 'bg-warning' : 'bg-success');
       return (
         '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex items-center justify-between gap-gutter-sm">' +
@@ -1677,7 +1792,7 @@
             '<div class="flex flex-col gap-0.5 min-w-0">' +
               '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(c.nombre) + ' <span class="font-mono text-[11px] text-on-surface-variant">#' + escapeHtml(c.id) + '</span></span>' +
               '<span class="font-label text-[11px] text-on-surface-variant">' +
-                c.equipos + ' equipos · ' + c.atrasadas + ' rojas · ' + c.ticketsAbiertos + ' tickets · ' + c.docsAlerta + ' docs alerta' +
+                c.equipos + ' eq · ' + c.atrasadas + ' rojas · ' + c.ticketsAbiertos + ' tickets · ' + (c.ordenesAbiertas || 0) + ' órdenes · ' + c.docsAlerta + ' docs' +
               '</span>' +
             '</div>' +
           '</div>' +
@@ -1685,6 +1800,40 @@
         '</article>'
       );
     }).join('');
+
+    const rondas = Array.isArray(cc.ultimasRondas) ? cc.ultimasRondas : [];
+    const rondasHtml = rondas.length === 0
+      ? '<p class="font-body text-body-sm text-on-surface-variant">Aún no hay rondas guardadas. Apenas Operaciones guarde una ronda aparecerá aquí.</p>'
+      : rondas.map(function (r) {
+          const hasUrg = (r.urgentes || 0) > 0;
+          const hasObs = (r.observaciones || 0) > 0;
+          const borderCls = hasUrg ? 'border-error/40' : (hasObs ? 'border-warning/40' : 'border-outline');
+          const badges =
+            (hasUrg ? '<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label text-[10px]">' + r.urgentes + ' urg.</span>' : '') +
+            (hasObs ? '<span class="px-2 py-0.5 rounded-full bg-warning-container text-on-warning-container font-label text-[10px]">' + r.observaciones + ' obs.</span>' : '') +
+            '<span class="px-2 py-0.5 rounded-full bg-success-container text-on-success-container font-label text-[10px]">' + (r.conformes || 0) + ' OK</span>';
+          const linesHtml = r.detalle
+            ? '<div class="font-body text-[12px] text-on-surface-variant whitespace-pre-line leading-relaxed bg-surface-card rounded-md border border-outline-subtle p-gutter-sm mt-gutter-xs">' + escapeHtml(r.detalle) + '</div>'
+            : '';
+          return (
+            '<details class="bg-surface-subtle rounded-lg border ' + borderCls + ' p-gutter-md">' +
+              '<summary class="cursor-pointer flex items-start justify-between gap-gutter-sm">' +
+                '<div class="flex flex-col gap-0.5 min-w-0">' +
+                  '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(r.edificioNombre || r.edificioId) + '</span>' +
+                  '<span class="font-label text-[11px] text-on-surface-variant">' + escapeHtml(formatShortDate(r.fecha)) + ' · ' + escapeHtml(r.operador || 'Operaciones') + ' (' + (r.totalEspacios || 0) + ' espacios)</span>' +
+                  '<div class="flex items-center gap-1 flex-wrap mt-0.5">' + badges + '</div>' +
+                '</div>' +
+                '<span class="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0">expand_more</span>' +
+              '</summary>' +
+              linesHtml +
+              '<div class="flex items-center gap-gutter-sm flex-wrap mt-gutter-sm">' +
+                (r.linkPdf ? '<a href="' + escapeHtml(r.linkPdf) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-md bg-primary text-on-primary font-label text-[11px]"><span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>Abrir PDF</a>' : '') +
+                (r.carpetaDrive ? '<a href="' + escapeHtml(r.carpetaDrive) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-md bg-surface-card border border-outline text-on-surface font-label text-[11px]"><span class="material-symbols-outlined text-[14px]">folder</span>Fotos Drive</a>' : '') +
+                '<button type="button" data-cc-go="' + escapeHtml(r.edificioId) + '" class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-md bg-primary-container text-on-primary-container font-label text-[11px]">Ir al edificio</button>' +
+              '</div>' +
+            '</details>'
+          );
+        }).join('');
 
     const isAdmin = Boolean(state.session && state.session.user && state.session.user.rol === 'admin');
     const panelGcoBtn = isAdmin
@@ -1698,6 +1847,10 @@
       '<div class="flex flex-col gap-gutter-md">' +
         panelGcoBtn +
         kpisHtml +
+        '<div class="flex flex-col gap-gutter-sm">' +
+          '<span class="font-title text-title-sm text-on-surface">Últimas Rondas en Terreno (revisión rápida)</span>' +
+          rondasHtml +
+        '</div>' +
         '<div class="flex flex-col gap-gutter-sm">' +
           '<span class="font-title text-title-sm text-on-surface">Estado por comunidad (priorizado por urgencia)</span>' +
           (listHtml || '<p class="font-body text-body-sm text-on-surface-variant">Sin comunidades registradas.</p>') +
@@ -3742,9 +3895,7 @@
     }
   }
 
-  function populateRondaAreas() {
-    const sel = document.getElementById('ronda-area-select');
-    if (!sel) return;
+  function getRondaAreaOptions() {
     const opts = [];
     const seen = {};
 
@@ -3773,9 +3924,165 @@
       if (!seen[gen.toLowerCase()]) opts.push(gen);
     });
 
+    return opts;
+  }
+
+  function populateRondaAreas(preserveValue, autoAdvanceNext) {
+    const sel = document.getElementById('ronda-area-select');
+    if (!sel) return;
+    const prevVal = preserveValue !== undefined ? preserveValue : sel.value;
+    const opts = getRondaAreaOptions();
+    state.rondaTotalAreas = opts.length;
+
+    const doneSet = {};
+    (state.rondaItems || []).forEach(function (it) {
+      if (it && it.espacio) doneSet[String(it.espacio).toLowerCase()] = true;
+    });
+
     sel.innerHTML = opts.map(function (o) {
-      return '<option value="' + escapeHtml(o) + '">' + escapeHtml(o) + '</option>';
+      const isDone = Boolean(doneSet[o.toLowerCase()]);
+      const label = (isDone ? '✓ ' : '') + o;
+      return '<option value="' + escapeHtml(o) + '">' + escapeHtml(label) + '</option>';
     }).join('');
+
+    if (autoAdvanceNext) {
+      const nextPending = opts.find(function (o) { return !doneSet[o.toLowerCase()]; });
+      if (nextPending) sel.value = nextPending;
+    } else if (prevVal && opts.indexOf(prevVal) !== -1) {
+      sel.value = prevVal;
+    } else {
+      const firstPending = opts.find(function (o) { return !doneSet[o.toLowerCase()]; });
+      if (firstPending) sel.value = firstPending;
+    }
+
+    updateRondaProgress(opts, doneSet);
+  }
+
+  function updateRondaProgress(optsInput, doneSetInput) {
+    const opts = optsInput || getRondaAreaOptions();
+    const doneSet = doneSetInput || {};
+    if (!doneSetInput) {
+      (state.rondaItems || []).forEach(function (it) {
+        if (it && it.espacio) doneSet[String(it.espacio).toLowerCase()] = true;
+      });
+    }
+    let reviewed = 0;
+    opts.forEach(function (o) {
+      if (doneSet[o.toLowerCase()]) reviewed++;
+    });
+    const total = opts.length || 1;
+    const pct = Math.min(100, Math.round((reviewed / total) * 100));
+    const txt = document.getElementById('ronda-progress-text');
+    const pctEl = document.getElementById('ronda-progress-pct');
+    const bar = document.getElementById('ronda-progress-bar');
+    if (txt) txt.textContent = 'Revisados ' + reviewed + ' de ' + opts.length + ' espacios';
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (bar) bar.style.width = pct + '%';
+  }
+
+  function setRondaStateUI(newState, autoDetected) {
+    state.rondaState = newState || 'Conforme';
+    document.querySelectorAll('.ronda-state-chip').forEach(function (b) {
+      const val = b.getAttribute('data-ronda-state');
+      const act = val === state.rondaState;
+      let cls = 'bg-surface-card text-on-surface-variant border border-outline';
+      if (act) {
+        if (val === 'Acción urgente') cls = 'bg-error-container text-on-error-container border border-error';
+        else if (val === 'Con observación') cls = 'bg-warning-container text-on-warning-container border border-warning';
+        else cls = 'bg-success-container text-on-success-container border border-success';
+      }
+      b.className = 'ronda-state-chip py-gutter-xs px-gutter-sm rounded-md font-label text-label-sm ' + cls;
+    });
+
+    const hint = document.getElementById('ronda-autodetect-hint');
+    if (hint) {
+      hint.classList.toggle('hidden', !autoDetected);
+      if (autoDetected) {
+        hint.textContent = state.rondaState === 'Acción urgente' ? 'Detectado: Urgente' : 'Detectado: Observación';
+      }
+    }
+
+    const chkOrder = document.getElementById('ronda-create-order');
+    if (chkOrder && !state.rondaOrderTouched) {
+      chkOrder.checked = state.rondaState !== 'Conforme';
+    }
+  }
+
+  function maybeAutoDetectRondaState() {
+    if (state.rondaStateTouched) return;
+    const notesEl = document.getElementById('ronda-notes');
+    const txt = (notesEl ? notesEl.value : '').toLowerCase();
+    const hasProblemChip = state.rondaChecks.some(function (c) {
+      return c.indexOf('Filtración') !== -1 || c.indexOf('Requiere mantención') !== -1;
+    });
+
+    const urgentRe = /\b(urgente|urgencia|emergencia|peligro|inundaci|sin servicio|no funciona|detenido|cortocircuito|atrapad|incendio)\b/i;
+    const obsRe = /\b(compra|comprar|solicita|repuesto|chapa|chapas|manilla|manillas|cerradura|roto|rota|falla|fallando|quemad|filtraci|goteo|fuga|suena|ruido|desgaste|reparar|arreglar|cambiar|reemplazar|mal olor|sucio|sin luz|pendiente)\b/i;
+
+    if (urgentRe.test(txt)) {
+      setRondaStateUI('Acción urgente', true);
+    } else if (hasProblemChip || obsRe.test(txt)) {
+      setRondaStateUI('Con observación', true);
+    } else {
+      setRondaStateUI('Conforme', false);
+    }
+  }
+
+  function syncRondaChecksUI() {
+    document.querySelectorAll('.ronda-check-chip').forEach(function (b) {
+      const val = b.getAttribute('data-rcheck');
+      const active = state.rondaChecks.indexOf(val) !== -1;
+      b.className = active
+        ? 'ronda-check-chip px-gutter-sm py-1 rounded-full bg-primary text-on-primary border border-primary font-label text-[11px]'
+        : 'ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]';
+    });
+  }
+
+  function resetRondaForm(autoAdvanceNext) {
+    state.rondaEditingIdx = -1;
+    state.rondaStateTouched = false;
+    state.rondaOrderTouched = false;
+    state.rondaChecks = [];
+    state.rondaPhotos = [];
+    const notesEl = document.getElementById('ronda-notes');
+    if (notesEl) notesEl.value = '';
+    const chkOrder = document.getElementById('ronda-create-order');
+    if (chkOrder) chkOrder.checked = false;
+    setRondaStateUI('Conforme', false);
+    syncRondaChecksUI();
+    renderRondaPhotosPreview();
+    const addLbl = document.getElementById('ronda-add-btn-label');
+    if (addLbl) addLbl.textContent = 'Agregar espacio al informe';
+    const cancelBtn = document.getElementById('btn-ronda-cancel-edit');
+    if (cancelBtn) cancelBtn.classList.add('hidden');
+    populateRondaAreas(undefined, Boolean(autoAdvanceNext));
+  }
+
+  function startEditRondaItem(idx) {
+    const it = state.rondaItems[idx];
+    if (!it) return;
+    state.rondaEditingIdx = idx;
+    state.rondaStateTouched = true;
+    state.rondaOrderTouched = true;
+    populateRondaAreas(it.espacio, false);
+    const sel = document.getElementById('ronda-area-select');
+    if (sel) sel.value = it.espacio;
+    setRondaStateUI(it.estado || 'Conforme', false);
+    state.rondaChecks = Array.isArray(it.checks) ? it.checks.slice() : [];
+    syncRondaChecksUI();
+    const notesEl = document.getElementById('ronda-notes');
+    if (notesEl) notesEl.value = it.notas || '';
+    const chkOrder = document.getElementById('ronda-create-order');
+    if (chkOrder) chkOrder.checked = Boolean(it.crearOrden);
+    state.rondaPhotos = Array.isArray(it.fotos) ? it.fotos.slice() : [];
+    renderRondaPhotosPreview();
+    const addLbl = document.getElementById('ronda-add-btn-label');
+    if (addLbl) addLbl.textContent = 'Guardar cambios del espacio';
+    const cancelBtn = document.getElementById('btn-ronda-cancel-edit');
+    if (cancelBtn) cancelBtn.classList.remove('hidden');
+    const form = document.getElementById('ronda-item-form');
+    if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast('Editando: ' + it.espacio);
   }
 
   function bindRondaEvents() {
@@ -3791,8 +4098,9 @@
           banner.classList.add('hidden');
           banner.classList.remove('flex');
         }
-        populateRondaAreas();
+        state.rondaSavedToDrive = false;
         loadRondaDraft();
+        resetRondaForm(false);
         renderRondaItemsList();
         openModal('modal-ronda');
         syncPendingRondaPhotos();
@@ -3801,34 +4109,70 @@
 
     document.querySelectorAll('.ronda-state-chip').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        state.rondaState = btn.getAttribute('data-ronda-state') || 'Conforme';
-        document.querySelectorAll('.ronda-state-chip').forEach(function (b) {
-          const val = b.getAttribute('data-ronda-state');
-          const act = val === state.rondaState;
-          let cls = 'bg-surface-card text-on-surface-variant border border-outline';
-          if (act) {
-            if (val === 'Acción urgente') cls = 'bg-error-container text-on-error-container border border-error';
-            else if (val === 'Con observación') cls = 'bg-warning-container text-on-warning-container border border-warning';
-            else cls = 'bg-success-container text-on-success-container border border-success';
-          }
-          b.className = 'ronda-state-chip py-gutter-xs px-gutter-sm rounded-md font-label text-label-sm ' + cls;
-        });
+        state.rondaStateTouched = true;
+        setRondaStateUI(btn.getAttribute('data-ronda-state') || 'Conforme', false);
       });
     });
+
+    const chkOrder = document.getElementById('ronda-create-order');
+    if (chkOrder) {
+      chkOrder.addEventListener('change', function () {
+        state.rondaOrderTouched = true;
+      });
+    }
+
+    const notesElLive = document.getElementById('ronda-notes');
+    if (notesElLive) {
+      notesElLive.addEventListener('input', maybeAutoDetectRondaState);
+    }
 
     document.querySelectorAll('.ronda-check-chip').forEach(function (btn) {
       btn.addEventListener('click', function () {
         const val = btn.getAttribute('data-rcheck');
         const idx = state.rondaChecks.indexOf(val);
-        if (idx === -1) {
-          state.rondaChecks.push(val);
-          btn.className = 'ronda-check-chip px-gutter-sm py-1 rounded-full bg-primary text-on-primary border border-primary font-label text-[11px]';
-        } else {
-          state.rondaChecks.splice(idx, 1);
-          btn.className = 'ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]';
-        }
+        if (idx === -1) state.rondaChecks.push(val);
+        else state.rondaChecks.splice(idx, 1);
+        syncRondaChecksUI();
+        maybeAutoDetectRondaState();
       });
     });
+
+    // Botón rápido "Todo OK (1 toque)"
+    const btnQuickOk = document.getElementById('btn-ronda-quick-ok');
+    if (btnQuickOk) {
+      btnQuickOk.addEventListener('click', function () {
+        const sel = document.getElementById('ronda-area-select');
+        const area = sel ? sel.value : '';
+        if (!area) return;
+        const newItem = {
+          id: 'R-' + Date.now(),
+          espacio: area,
+          estado: 'Conforme',
+          checks: ['Funcionamiento normal / sin ruidos', 'Aseo y orden conforme'],
+          notas: 'Espacio revisado conforme, sin observaciones.',
+          crearOrden: false,
+          fotos: [],
+          fotoUrls: [],
+          fotoFileIds: [],
+          fechaCarpeta: getTodayIsoLocal(),
+          backupStatus: 'none',
+          hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+        };
+        state.rondaItems.push(newItem);
+        state.rondaSavedToDrive = false;
+        saveRondaDraft();
+        resetRondaForm(true);
+        renderRondaItemsList();
+        showToast('✓ ' + area + ' marcado Todo OK');
+      });
+    }
+
+    const btnCancelEdit = document.getElementById('btn-ronda-cancel-edit');
+    if (btnCancelEdit) {
+      btnCancelEdit.addEventListener('click', function () {
+        resetRondaForm(false);
+      });
+    }
 
     // Dictado por voz nativo (Web Speech API)
     const btnVoice = document.getElementById('btn-ronda-voice');
@@ -3858,6 +4202,7 @@
           const notes = document.getElementById('ronda-notes');
           if (notes && transcript) {
             notes.value = (notes.value ? notes.value.trim() + ' ' : '') + transcript.trim();
+            maybeAutoDetectRondaState();
           }
         };
         rec.onerror = function () {
@@ -3902,6 +4247,7 @@
         }
         if (notesEl && res.polished) {
           notesEl.value = res.polished;
+          maybeAutoDetectRondaState();
           showToast('Redacción mejorada para el Comité');
         }
       });
@@ -3938,55 +4284,97 @@
           showToast('Marca al menos una opción, escribe un comentario o sube una foto.', true);
           return;
         }
+        maybeAutoDetectRondaState();
         const photosCopy = state.rondaPhotos.slice();
-        const newItem = {
-          id: 'R-' + Date.now(),
-          espacio: area,
-          estado: state.rondaState,
-          checks: state.rondaChecks.slice(),
-          notas: notes,
-          fotos: photosCopy,
-          fotoUrls: [],
-          fotoFileIds: [],
-          fechaCarpeta: getTodayIsoLocal(),
-          backupStatus: photosCopy.length > 0 ? 'pending' : 'none',
-          hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
-        };
-        state.rondaItems.push(newItem);
+        const createOrderVal = Boolean(document.getElementById('ronda-create-order') && document.getElementById('ronda-create-order').checked);
+        let savedItem = null;
+        let needPhotoUpload = false;
+
+        if (state.rondaEditingIdx >= 0 && state.rondaItems[state.rondaEditingIdx]) {
+          const prev = state.rondaItems[state.rondaEditingIdx];
+          const samePhotos = prev.fotos && prev.fotos.length === photosCopy.length && prev.fotos.every(function (p, i) { return p === photosCopy[i]; });
+          savedItem = {
+            id: prev.id,
+            espacio: area,
+            estado: state.rondaState,
+            checks: state.rondaChecks.slice(),
+            notas: notes,
+            crearOrden: createOrderVal,
+            fotos: photosCopy,
+            fotoUrls: samePhotos ? (prev.fotoUrls || []) : [],
+            fotoFileIds: samePhotos ? (prev.fotoFileIds || []) : [],
+            fechaCarpeta: prev.fechaCarpeta || getTodayIsoLocal(),
+            backupStatus: samePhotos ? (prev.backupStatus || 'none') : (photosCopy.length > 0 ? 'pending' : 'none'),
+            hora: prev.hora || new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+          };
+          state.rondaItems[state.rondaEditingIdx] = savedItem;
+          needPhotoUpload = !samePhotos && photosCopy.length > 0;
+        } else {
+          savedItem = {
+            id: 'R-' + Date.now(),
+            espacio: area,
+            estado: state.rondaState,
+            checks: state.rondaChecks.slice(),
+            notas: notes,
+            crearOrden: createOrderVal,
+            fotos: photosCopy,
+            fotoUrls: [],
+            fotoFileIds: [],
+            fechaCarpeta: getTodayIsoLocal(),
+            backupStatus: photosCopy.length > 0 ? 'pending' : 'none',
+            hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+          };
+          state.rondaItems.push(savedItem);
+          needPhotoUpload = photosCopy.length > 0;
+        }
+
+        const wasEdit = state.rondaEditingIdx >= 0;
+        state.rondaSavedToDrive = false;
         saveRondaDraft();
+        resetRondaForm(!wasEdit);
         renderRondaItemsList();
 
-        // Reset form for next space
-        document.getElementById('ronda-notes').value = '';
-        state.rondaChecks = [];
-        state.rondaPhotos = [];
-        document.querySelectorAll('.ronda-check-chip').forEach(function (b) {
-          b.className = 'ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]';
-        });
-        renderRondaPhotosPreview();
-
-        if (photosCopy.length > 0) {
-          showToast(navigator.onLine ? 'Espacio agregado · respaldando fotos en Drive...' : 'Espacio agregado · fotos en cola offline');
-          backupRondaItemPhotos(newItem);
+        if (needPhotoUpload) {
+          showToast(navigator.onLine ? (wasEdit ? 'Espacio actualizado · respaldando fotos...' : 'Espacio agregado · respaldando fotos en Drive...') : 'Guardado · fotos en cola offline');
+          backupRondaItemPhotos(savedItem);
         } else {
-          showToast('Espacio agregado al informe de ronda');
+          showToast(wasEdit ? 'Espacio actualizado en la ronda' : 'Espacio agregado al informe de ronda');
         }
       });
+    }
+
+    function clearRondaStateNow(skipConfirm) {
+      if (!skipConfirm && state.rondaItems.length > 0) {
+        const msg = state.rondaSavedToDrive
+          ? '¿Limpiar la ronda actual para empezar una nueva?'
+          : 'Aún no guardas el PDF de esta ronda en Drive. ¿Seguro que quieres borrar los ' + state.rondaItems.length + ' espacios registrados?';
+        if (!window.confirm(msg)) return;
+      }
+      state.rondaItems = [];
+      state.lastRondaPdf = null;
+      state.rondaSavedToDrive = false;
+      saveRondaDraft();
+      resetRondaForm(false);
+      renderRondaItemsList();
+      const banner = document.getElementById('ronda-backup-banner');
+      if (banner) {
+        banner.classList.add('hidden');
+        banner.classList.remove('flex');
+      }
+      showToast('Lista limpia para nueva ronda');
     }
 
     const btnClear = document.getElementById('btn-ronda-clear');
     if (btnClear) {
       btnClear.addEventListener('click', function () {
-        state.rondaItems = [];
-        state.lastRondaPdf = null;
-        saveRondaDraft();
-        renderRondaItemsList();
-        const banner = document.getElementById('ronda-backup-banner');
-        if (banner) {
-          banner.classList.add('hidden');
-          banner.classList.remove('flex');
-        }
-        showToast('Borrador de ronda limpiado');
+        clearRondaStateNow(false);
+      });
+    }
+
+    const btnFinishNew = document.getElementById('btn-ronda-finish-new');
+    if (btnFinishNew) {
+      btnFinishNew.addEventListener('click', function () {
+        clearRondaStateNow(true);
       });
     }
 
@@ -4044,9 +4432,10 @@
 
     title.textContent = 'Espacios en esta ronda (' + state.rondaItems.length + ')';
     if (btnPrint) btnPrint.disabled = state.rondaItems.length === 0;
+    updateRondaProgress();
 
     if (state.rondaItems.length === 0) {
-      list.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">Aún no agregas espacios. Completa el formulario arriba y toca "Agregar espacio al informe".</p>';
+      list.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant">Aún no agregas espacios. Completa el formulario arriba o toca "Todo OK (1 toque)".</p>';
       return;
     }
 
@@ -4064,6 +4453,9 @@
       } else if (item.backupStatus === 'pending' && localCount > 0) {
         backupPill = '<span class="px-gutter-sm py-0.5 rounded-full bg-warning-container text-on-warning-container font-label text-[10px]">☁️ Pendiente</span>';
       }
+      const orderPill = item.crearOrden
+        ? '<span class="px-gutter-sm py-0.5 rounded-full bg-primary-container text-on-primary-container font-label text-[10px]">📋 Crea Orden</span>'
+        : '';
       const thumbs = localCount > 0
         ? '<div class="flex flex-wrap gap-1 mt-1">' + item.fotos.map(function (f) {
             return '<img src="' + f + '" class="w-10 h-10 object-cover rounded-sm border border-outline">';
@@ -4077,21 +4469,34 @@
             '<div class="flex items-center gap-gutter-xs flex-wrap">' +
               '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(item.espacio) + '</span>' +
               '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-[11px]">' + escapeHtml(item.estado) + '</span>' +
+              orderPill +
               backupPill +
             '</div>' +
             (item.checks && item.checks.length > 0 ? '<span class="font-label text-[11px] text-primary">✓ ' + escapeHtml(item.checks.join(' · ')) + '</span>' : '') +
             (item.notas ? '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(item.notas) + '</p>' : '') +
             thumbs +
           '</div>' +
-          '<button type="button" data-rm-ronda-item="' + idx + '" aria-label="Quitar espacio" class="p-1 text-error hover:bg-error-container rounded-sm shrink-0"><span class="material-symbols-outlined text-[18px]">delete</span></button>' +
+          '<div class="flex items-center gap-0.5 shrink-0">' +
+            '<button type="button" data-edit-ronda-item="' + idx + '" aria-label="Editar espacio" class="p-1 text-primary hover:bg-primary-container rounded-sm"><span class="material-symbols-outlined text-[18px]">edit</span></button>' +
+            '<button type="button" data-rm-ronda-item="' + idx + '" aria-label="Quitar espacio" class="p-1 text-error hover:bg-error-container rounded-sm"><span class="material-symbols-outlined text-[18px]">delete</span></button>' +
+          '</div>' +
         '</article>'
       );
     }).join('');
 
+    list.querySelectorAll('[data-edit-ronda-item]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        startEditRondaItem(Number(btn.getAttribute('data-edit-ronda-item')));
+      });
+    });
+
     list.querySelectorAll('[data-rm-ronda-item]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        state.rondaItems.splice(Number(btn.getAttribute('data-rm-ronda-item')), 1);
+        const rmIdx = Number(btn.getAttribute('data-rm-ronda-item'));
+        state.rondaItems.splice(rmIdx, 1);
+        if (state.rondaEditingIdx === rmIdx) resetRondaForm(false);
         saveRondaDraft();
+        populateRondaAreas(undefined, false);
         renderRondaItemsList();
       });
     });
@@ -4200,6 +4605,7 @@
           estado: it.estado,
           checks: it.checks || [],
           notas: it.notas || '',
+          crearOrden: Boolean(it.crearOrden),
           hora: it.hora || '',
           fotoFileIds: hasIds ? it.fotoFileIds : [],
           fotos: hasIds ? [] : (it.fotos || []),
@@ -4215,6 +4621,7 @@
       });
 
       if (backupRes && backupRes.ok && backupRes.linkPdf) {
+        state.rondaSavedToDrive = true;
         state.lastRondaPdf = {
           edifName: edifName,
           fileName: backupRes.fileName || 'Informe_Ronda.pdf',
@@ -4224,8 +4631,14 @@
           pdfBase64: backupRes.pdfBase64 || '',
         };
         const banner = document.getElementById('ronda-backup-banner');
+        const bannerTitle = document.getElementById('ronda-backup-title');
         const pdfLink = document.getElementById('ronda-backup-pdf-link');
         const folderLink = document.getElementById('ronda-backup-folder-link');
+        if (bannerTitle) {
+          bannerTitle.textContent = backupRes.ordenesCreadas > 0
+            ? 'Ronda guardada en Drive · ' + backupRes.ordenesCreadas + ' orden(es) creada(s)'
+            : 'Ronda registrada y PDF guardado en Drive';
+        }
         if (pdfLink) pdfLink.href = backupRes.linkPdf;
         if (folderLink && backupRes.folderUrl) folderLink.href = backupRes.folderUrl;
         if (banner) {
@@ -4233,7 +4646,7 @@
           banner.classList.add('flex');
           banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-        showToast('Ronda registrada y PDF guardado en Drive');
+        showToast(backupRes.message || 'Ronda registrada y PDF guardado en Drive');
       } else if (backupRes && backupRes.queued) {
         showToast('Sin señal: la ronda quedó en cola y se respaldará al reconectar.');
       } else {
