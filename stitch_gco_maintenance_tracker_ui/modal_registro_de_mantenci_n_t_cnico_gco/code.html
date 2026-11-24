@@ -1,0 +1,294 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modal Registro de Mantención — GCO Gestión de Condominios</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#1D5B96',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#EAF1FF',
+        'on-primary-container': '#00325A',
+        'secondary': '#0F2942',
+        'on-secondary': '#FFFFFF',
+        'surface': '#F4F6F9',
+        'on-surface': '#0F2942',
+        'surface-card': '#FFFFFF',
+        'on-surface-card': '#0F2942',
+        'surface-variant': '#EFF1F4',
+        'on-surface-variant': '#49607C',
+        'surface-subtle': '#F9FAFC',
+        'outline': '#DEE3ED',
+        'outline-subtle': '#E8ECF2',
+        'success': '#10B981',
+        'on-success': '#393939',
+        'success-container': '#D1FAE5',
+        'on-success-container': '#005236',
+        'warning': '#F59E0B',
+        'on-warning': '#2A1700',
+        'warning-container': '#FEF3C7',
+        'on-warning-container': '#653E00',
+        'error': '#EF4444',
+        'on-error': '#1C1C1C',
+        'error-container': '#FFEDEB',
+        'on-error-container': '#930013',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '12px',
+        'gutter-lg': '16px',
+        'gutter-xl': '20px',
+        'section': '24px',
+        'page-margin': '16px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Rubik"', 'sans-serif'],
+        'label': ['"Rubik"', 'sans-serif'],
+        'mono': ['"Red Hat Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'accordion-toggle': '200ms',
+        'sheet-enter': '240ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'accordion-toggle': '0ms',
+        'sheet-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
+        'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Red+Hat+Mono:wght@500&amp;family=Rubik:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+
+  <div class="relative min-h-[884px] w-full max-w-md mx-auto overflow-hidden flex flex-col justify-end" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Background Screen Silhouette Context -->
+    <div class="absolute inset-0 px-page-margin py-gutter-xl flex flex-col gap-section pointer-events-none select-none" aria-hidden="true">
+      <div class="flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm">
+          <div class="w-9 h-9 rounded-md bg-primary/30"></div>
+          <div class="w-28 h-4 rounded-sm bg-outline"></div>
+        </div>
+        <div class="w-32 h-7 rounded-full bg-surface-card border border-outline"></div>
+      </div>
+
+      <div class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl flex flex-col gap-gutter-md">
+        <div class="w-40 h-5 rounded-sm bg-outline"></div>
+        <div class="w-full h-10 rounded-md bg-surface-variant"></div>
+      </div>
+    </div>
+
+    <!-- Scrim Overlay -->
+    <div class="absolute inset-0 bg-secondary/45" aria-hidden="true"></div>
+
+    <!-- Foreground Bottom Sheet Modal -->
+    <section role="dialog" aria-modal="true" aria-labelledby="sheet-maint-title" class="relative z-10 w-full bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <!-- Drag Handle -->
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+
+      <!-- Modal Header -->
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <h1 id="sheet-maint-title" class="font-headline text-headline-md text-on-surface" data-design-text-token="headline-md">Registro de Mantención</h1>
+          <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">Ascensor Torre A · #ASC-01</p>
+        </div>
+        <a href="../technician-portal/PortalTecnicoQR.html" data-component-id="button-icon" data-component-type="button" data-component-variant="icon" aria-label="Cerrar registro" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change ease-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </a>
+      </header>
+
+      <form id="sheet-maint-form" class="flex flex-col gap-gutter-md">
+
+        <!-- Service Type Segmented Control -->
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Tipo de intervención</span>
+          <div class="bg-surface-subtle rounded-md border border-outline p-gutter-xs grid grid-cols-2 gap-gutter-xs">
+            <button type="button" class="type-btn py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-md transition-colors duration-state-change ease-state-change">Preventiva</button>
+            <button type="button" class="type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-md transition-colors duration-state-change ease-state-change">Correctiva</button>
+          </div>
+        </div>
+
+        <!-- Quick Inspection Checklist -->
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Puntos verificados</span>
+          <div class="grid grid-cols-2 gap-gutter-sm">
+            <label class="flex items-center gap-gutter-sm bg-surface-subtle rounded-md px-gutter-md py-gutter-sm cursor-pointer">
+              <input type="checkbox" checked class="rounded-sm border-outline text-primary focus:ring-primary">
+              <span class="font-body text-body-sm text-on-surface" data-design-text-token="body-sm">Cables y guías</span>
+            </label>
+            <label class="flex items-center gap-gutter-sm bg-surface-subtle rounded-md px-gutter-md py-gutter-sm cursor-pointer">
+              <input type="checkbox" checked class="rounded-sm border-outline text-primary focus:ring-primary">
+              <span class="font-body text-body-sm text-on-surface" data-design-text-token="body-sm">Frenos</span>
+            </label>
+            <label class="flex items-center gap-gutter-sm bg-surface-subtle rounded-md px-gutter-md py-gutter-sm cursor-pointer">
+              <input type="checkbox" checked class="rounded-sm border-outline text-primary focus:ring-primary">
+              <span class="font-body text-body-sm text-on-surface" data-design-text-token="body-sm">Puertas</span>
+            </label>
+            <label class="flex items-center gap-gutter-sm bg-surface-subtle rounded-md px-gutter-md py-gutter-sm cursor-pointer">
+              <input type="checkbox" class="rounded-sm border-outline text-primary focus:ring-primary">
+              <span class="font-body text-body-sm text-on-surface" data-design-text-token="body-sm">Iluminación</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Resulting Traffic Light State -->
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Estado resultante del equipo</span>
+          <div class="grid grid-cols-3 gap-gutter-sm">
+            <button type="button" data-state="ok" class="state-pill py-gutter-sm px-gutter-xs rounded-md border-2 border-success bg-success-container text-on-success-container font-label text-label-sm transition-colors duration-state-change ease-state-change">Operativo</button>
+            <button type="button" data-state="warn" class="state-pill py-gutter-sm px-gutter-xs rounded-md border border-outline bg-surface-subtle text-on-surface-variant font-label text-label-sm transition-colors duration-state-change ease-state-change">En proceso</button>
+            <button type="button" data-state="err" class="state-pill py-gutter-sm px-gutter-xs rounded-md border border-outline bg-surface-subtle text-on-surface-variant font-label text-label-sm transition-colors duration-state-change ease-state-change">Sin servicio</button>
+          </div>
+        </div>
+
+        <!-- Technical Notes -->
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="maint-sheet-notes" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Observaciones</label>
+          <textarea id="maint-sheet-notes" rows="2" placeholder="Detalle breve de los trabajos efectuados..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+        </div>
+
+        <!-- Attach PDF -->
+        <button id="btn-maint-pdf" type="button" class="w-full flex items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container hover:bg-outline transition-colors duration-state-change ease-state-change">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">upload_file</span>
+          <span id="maint-pdf-label" class="font-label text-label-md" data-design-text-token="label-md">Adjuntar Informe Técnico (PDF)</span>
+        </button>
+
+        <!-- Submit CTA -->
+        <button type="submit" data-component-id="button-primary" data-component-type="button" data-component-variant="primary" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change ease-state-change active:scale-[0.99]">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">check_circle</span>
+          <span class="font-label text-label-lg" data-design-text-token="label-lg">Guardar y publicar registro</span>
+        </button>
+
+      </form>
+    </section>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="maint-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md" role="status" aria-live="polite">
+    <span class="material-symbols-outlined text-[18px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+    <span id="maint-toast-msg" class="font-label text-label-md" data-design-text-token="label-md">Guardado</span>
+  </div>
+
+  <script>
+    (function () {
+      var typeBtns = document.querySelectorAll('.type-btn');
+      var statePills = document.querySelectorAll('.state-pill');
+      var pdfBtn = document.getElementById('btn-maint-pdf');
+      var pdfLabel = document.getElementById('maint-pdf-label');
+      var form = document.getElementById('sheet-maint-form');
+      var toast = document.getElementById('maint-toast');
+      var toastMsg = document.getElementById('maint-toast-msg');
+      var timer;
+
+      function showToast(msg) {
+        if (!toast || !toastMsg) return;
+        toastMsg.textContent = msg;
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          toast.classList.add('hidden');
+          toast.classList.remove('flex');
+        }, 2600);
+      }
+
+      typeBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          typeBtns.forEach(function (b) {
+            b.className = 'type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-md transition-colors duration-state-change ease-state-change';
+          });
+          btn.className = 'type-btn py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-md transition-colors duration-state-change ease-state-change';
+        });
+      });
+
+      statePills.forEach(function (pill) {
+        pill.addEventListener('click', function () {
+          var s = pill.getAttribute('data-state');
+          statePills.forEach(function (p) {
+            p.className = 'state-pill py-gutter-sm px-gutter-xs rounded-md border border-outline bg-surface-subtle text-on-surface-variant font-label text-label-sm transition-colors duration-state-change ease-state-change';
+          });
+          if (s === 'ok') {
+            pill.className = 'state-pill py-gutter-sm px-gutter-xs rounded-md border-2 border-success bg-success-container text-on-success-container font-label text-label-sm transition-colors duration-state-change ease-state-change';
+          } else if (s === 'warn') {
+            pill.className = 'state-pill py-gutter-sm px-gutter-xs rounded-md border-2 border-warning bg-warning-container text-on-warning-container font-label text-label-sm transition-colors duration-state-change ease-state-change';
+          } else {
+            pill.className = 'state-pill py-gutter-sm px-gutter-xs rounded-md border-2 border-error bg-error-container text-on-error-container font-label text-label-sm transition-colors duration-state-change ease-state-change';
+          }
+        });
+      });
+
+      if (pdfBtn && pdfLabel) {
+        pdfBtn.addEventListener('click', function () {
+          pdfLabel.textContent = 'Informe_Mant_Nov2026.pdf';
+          showToast('Informe PDF adjuntado');
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          showToast('Registro de mantención publicado');
+        });
+      }
+    })();
+  </script>
+
+
+
+</body></html>

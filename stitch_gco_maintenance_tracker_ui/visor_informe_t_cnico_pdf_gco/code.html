@@ -1,0 +1,260 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visor Informe Técnico (PDF) — GCO Gestión de Condominios</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#1D5B96',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#EAF1FF',
+        'on-primary-container': '#00325A',
+        'secondary': '#0F2942',
+        'on-secondary': '#FFFFFF',
+        'surface': '#F4F6F9',
+        'on-surface': '#0F2942',
+        'surface-card': '#FFFFFF',
+        'on-surface-card': '#0F2942',
+        'surface-variant': '#EFF1F4',
+        'on-surface-variant': '#49607C',
+        'surface-subtle': '#F9FAFC',
+        'outline': '#DEE3ED',
+        'outline-subtle': '#E8ECF2',
+        'success': '#10B981',
+        'on-success': '#393939',
+        'success-container': '#D1FAE5',
+        'on-success-container': '#005236',
+        'warning': '#F59E0B',
+        'on-warning': '#2A1700',
+        'warning-container': '#FEF3C7',
+        'on-warning-container': '#653E00',
+        'error': '#EF4444',
+        'on-error': '#1C1C1C',
+        'error-container': '#FFEDEB',
+        'on-error-container': '#930013',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '12px',
+        'gutter-lg': '16px',
+        'gutter-xl': '20px',
+        'section': '24px',
+        'page-margin': '16px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Rubik"', 'sans-serif'],
+        'label': ['"Rubik"', 'sans-serif'],
+        'mono': ['"Red Hat Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'accordion-toggle': '200ms',
+        'sheet-enter': '240ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'accordion-toggle': '0ms',
+        'sheet-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
+        'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Red+Hat+Mono:wght@500&amp;family=Rubik:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+
+  <div class="min-h-[884px] w-full max-w-md mx-auto px-page-margin py-gutter-xl pb-24 flex flex-col gap-section" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Contextual Document Header -->
+    <header class="flex items-center justify-between gap-gutter-md">
+      <div class="flex items-center gap-gutter-sm min-w-0">
+        <a href="../asset-status/AscensorTorreA.html" aria-label="Volver a Ascensor Torre A" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-card border border-outline text-on-surface shadow-sm hover:bg-surface-subtle transition-colors duration-state-change ease-state-change shrink-0">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+        </a>
+        <div class="flex flex-col min-w-0">
+          <span class="font-headline text-title-sm text-on-surface leading-tight" data-design-text-token="title-sm">Informe Técnico</span>
+          <span class="font-mono text-label-sm text-on-surface-variant leading-tight" data-design-text-token="label-sm">#INF-2026-11 · PDF</span>
+        </div>
+      </div>
+
+      <span data-component-id="badge-success" data-component-type="badge" data-component-variant="success" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-success-container text-on-success-container shrink-0">
+        <span class="material-symbols-outlined text-[14px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">verified</span>
+        <span class="font-label text-label-sm" data-design-text-token="label-sm">Verificado</span>
+      </span>
+    </header>
+
+    <main class="flex flex-col gap-gutter-lg flex-1">
+
+      <!-- Document Metadata Bar -->
+      <div class="bg-surface-card rounded-lg border border-outline-subtle px-gutter-lg py-gutter-md shadow-sm flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-md min-w-0">
+          <div class="w-9 h-9 rounded-md bg-error-container text-on-error-container flex items-center justify-center shrink-0" aria-hidden="true">
+            <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <span class="font-title text-title-sm text-on-surface truncate" data-design-text-token="title-sm">Informe_ASC01_Nov2026.pdf</span>
+            <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">12 Nov 2026 · TK Elevator · 1.4 MB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- In-App PDF Sheet Preview -->
+      <article data-component-id="card-elevated" data-component-type="card" data-component-variant="elevated" class="w-full bg-surface-card text-on-surface-card rounded-lg border border-outline p-gutter-xl shadow-sm flex flex-col gap-gutter-lg">
+        <!-- Document Sheet Header -->
+        <header class="border-b border-outline-subtle pb-gutter-md flex flex-col gap-gutter-xs">
+          <div class="flex items-center justify-between gap-gutter-sm">
+            <span class="font-label text-label-sm text-primary uppercase tracking-wider" data-design-text-token="label-sm">Certificado de Mantención</span>
+            <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">Pág. 1 / 1</span>
+          </div>
+          <h1 class="font-headline text-headline-md text-on-surface text-balance" data-design-text-token="headline-md">Ascensor Torre A (#ASC-01)</h1>
+          <p class="font-body text-body-sm text-on-surface-variant" data-design-text-token="body-sm">Edificio Aníbal Pinto · Mantención Preventiva Mensual</p>
+        </header>
+
+        <!-- Inspection Checklist -->
+        <section class="flex flex-col gap-gutter-sm" aria-label="Puntos inspeccionados">
+          <h2 class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Pauta de Inspección</h2>
+
+          <ul class="flex flex-col gap-gutter-sm">
+            <li class="flex items-center justify-between gap-gutter-sm bg-surface-subtle rounded-md px-gutter-md py-gutter-sm">
+              <span class="font-body text-body-sm text-on-surface" data-design-text-token="body-sm">Cables de tracción y poleas</span>
+              <span class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-on-success-container shrink-0" data-design-text-token="label-sm">
+                <span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+                Conforme
+              </span>
+            </li>
+            <li class="flex items-center justify-between gap-gutter-sm bg-surface-subtle rounded-md px-gutter-md py-gutter-sm">
+              <span class="font-body text-body-sm text-on-surface" data-design-text-token="body-sm">Frenos de emergencia</span>
+              <span class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-on-success-container shrink-0" data-design-text-token="label-sm">
+                <span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+                Conforme
+              </span>
+            </li>
+            <li class="flex items-center justify-between gap-gutter-sm bg-surface-subtle rounded-md px-gutter-md py-gutter-sm">
+              <span class="font-body text-body-sm text-on-surface" data-design-text-token="body-sm">Nivelación pisos 1 al 14</span>
+              <span class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-on-success-container shrink-0" data-design-text-token="label-sm">
+                <span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+                Conforme
+              </span>
+            </li>
+            <li class="flex items-center justify-between gap-gutter-sm bg-surface-subtle rounded-md px-gutter-md py-gutter-sm">
+              <span class="font-body text-body-sm text-on-surface" data-design-text-token="body-sm">Citófono y luz de emergencia</span>
+              <span class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-on-success-container shrink-0" data-design-text-token="label-sm">
+                <span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+                Conforme
+              </span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Observations & Signature -->
+        <section class="border-t border-outline-subtle pt-gutter-md flex flex-col gap-gutter-sm">
+          <h2 class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Observaciones del Técnico</h2>
+          <p class="font-body text-body-sm text-on-surface-variant text-pretty" data-design-text-token="body-sm">
+            Equipo operando dentro de parámetros nominales. Se realiza lubricación de guías y limpieza de sala de máquinas. Próxima visita programada: 12 Dic 2026.
+          </p>
+          <div class="mt-gutter-xs bg-surface-subtle rounded-md p-gutter-md flex items-center justify-between gap-gutter-sm">
+            <div class="flex flex-col gap-gutter-xs">
+              <span class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Carlos Méndez</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Técnico Certificado · TK Elevator</span>
+            </div>
+            <span class="material-symbols-outlined text-[24px] text-primary" aria-hidden="true">draw</span>
+          </div>
+        </section>
+      </article>
+
+    </main>
+
+    <!-- Primary Download CTA -->
+    <footer class="flex flex-col items-center gap-gutter-md pt-gutter-xs">
+      <button id="btn-download-pdf" data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change ease-state-change active:scale-[0.99]">
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">download</span>
+        <span class="font-label text-label-lg" data-design-text-token="label-lg">Guardar copia PDF (1.4 MB)</span>
+      </button>
+
+      <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">
+        Powered by gcoadmin.cl
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="pdf-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md" role="status" aria-live="polite">
+    <span class="material-symbols-outlined text-[18px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+    <span class="font-label text-label-md" data-design-text-token="label-md">Copia PDF guardada en el dispositivo</span>
+  </div>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('btn-download-pdf');
+      var toast = document.getElementById('pdf-toast');
+      var timer;
+      if (btn && toast) {
+        btn.addEventListener('click', function () {
+          toast.classList.remove('hidden');
+          toast.classList.add('flex');
+          clearTimeout(timer);
+          timer = setTimeout(function () {
+            toast.classList.add('hidden');
+            toast.classList.remove('flex');
+          }, 2600);
+        });
+      }
+    })();
+  </script>
+
+
+
+</body></html>

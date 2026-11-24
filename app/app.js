@@ -136,6 +136,7 @@
 
       saveDataCache(cacheKey, json);
       state.data = json;
+      updateOfflineBanner();
       if (json.mode === 'equipo') {
         renderEquipoView(json);
       } else {

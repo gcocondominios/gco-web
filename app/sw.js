@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gco-app-v15';
+const CACHE_NAME = 'gco-app-v16';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -35,7 +35,8 @@ self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
   const url = event.request.url;
 
-  if (url.indexOf('script.google.com') !== -1 || url.indexOf(self.location.origin) === 0) {
+  // Never intercept cross-origin Apps Script redirects (localStorage handles offline data cache)
+  if (url.indexOf(self.location.origin) === 0) {
     event.respondWith(
       fetch(event.request)
         .then(function (response) {
@@ -48,7 +49,9 @@ self.addEventListener('fetch', function (event) {
           return response;
         })
         .catch(function () {
-          return caches.match(event.request);
+          return caches.match(event.request).then(function (cached) {
+            return cached || Response.error();
+          });
         })
     );
   }

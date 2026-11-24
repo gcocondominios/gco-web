@@ -1,0 +1,347 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso Técnico / Administración — GCO Gestión de Condominios</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#1D5B96',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#EAF1FF',
+        'on-primary-container': '#00325A',
+        'secondary': '#0F2942',
+        'on-secondary': '#FFFFFF',
+        'surface': '#F4F6F9',
+        'on-surface': '#0F2942',
+        'surface-card': '#FFFFFF',
+        'on-surface-card': '#0F2942',
+        'surface-variant': '#EFF1F4',
+        'on-surface-variant': '#49607C',
+        'surface-subtle': '#F9FAFC',
+        'outline': '#DEE3ED',
+        'outline-subtle': '#E8ECF2',
+        'success': '#10B981',
+        'on-success': '#393939',
+        'success-container': '#D1FAE5',
+        'on-success-container': '#005236',
+        'warning': '#F59E0B',
+        'on-warning': '#2A1700',
+        'warning-container': '#FEF3C7',
+        'on-warning-container': '#653E00',
+        'error': '#EF4444',
+        'on-error': '#1C1C1C',
+        'error-container': '#FFEDEB',
+        'on-error-container': '#930013',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '12px',
+        'gutter-lg': '16px',
+        'gutter-xl': '20px',
+        'section': '24px',
+        'page-margin': '16px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Rubik"', 'sans-serif'],
+        'label': ['"Rubik"', 'sans-serif'],
+        'mono': ['"Red Hat Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'accordion-toggle': '200ms',
+        'sheet-enter': '240ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'accordion-toggle': '0ms',
+        'sheet-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
+        'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Red+Hat+Mono:wght@500&amp;family=Rubik:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+
+  <div class="min-h-[884px] w-full max-w-md mx-auto px-page-margin py-gutter-xl pb-24 flex flex-col gap-section" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Contextual Admin Header -->
+    <header class="flex items-center justify-between gap-gutter-md">
+      <div class="flex items-center gap-gutter-sm min-w-0">
+        <a href="../asset-status/AscensorTorreA.html" aria-label="Volver a ficha pública" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-card border border-outline text-on-surface shadow-sm hover:bg-surface-subtle transition-colors duration-state-change ease-state-change shrink-0">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+        </a>
+        <div class="flex flex-col min-w-0">
+          <span class="font-headline text-title-sm text-on-surface leading-tight" data-design-text-token="title-sm">Acceso Técnico</span>
+          <span class="font-body text-label-sm text-on-surface-variant leading-tight" data-design-text-token="label-sm">Gestión de Equipo</span>
+        </div>
+      </div>
+
+      <span data-component-id="badge-status" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant shrink-0 shadow-sm">
+        <span class="material-symbols-outlined text-[14px] text-primary" aria-hidden="true">apartment</span>
+        <span class="font-label text-label-sm" data-design-text-token="label-sm">Edificio Aníbal Pinto</span>
+      </span>
+    </header>
+
+    <main class="flex flex-col gap-section flex-1">
+
+      <!-- Asset Traffic-Light Control Card -->
+      <article data-component-id="card-elevated" data-component-type="card" data-component-variant="elevated" class="w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-lg">
+        <header class="flex items-start justify-between gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <h1 class="font-headline text-headline-md text-on-surface" data-design-text-token="headline-md">Ascensor Torre A</h1>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">Equipo #ASC-01 · TK Elevator</p>
+          </div>
+          <span id="live-status-pill" data-component-id="badge-success" data-component-type="badge" data-component-variant="success" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-success-container text-on-success-container shrink-0">
+            <span class="material-symbols-outlined text-[14px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+            <span class="font-label text-label-sm" data-design-text-token="label-sm">Operativo</span>
+          </span>
+        </header>
+
+        <div class="flex flex-col gap-gutter-sm">
+          <span class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">Estado del semáforo visible a vecinos</span>
+          <div class="grid grid-cols-3 gap-gutter-sm" role="radiogroup" aria-label="Estado operativo del equipo">
+            <button type="button" data-status="operativo" class="status-btn flex flex-col items-center justify-center gap-gutter-xs py-gutter-md px-gutter-xs rounded-md border-2 border-success bg-success-container text-on-success-container transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[20px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+              <span class="font-label text-label-sm" data-design-text-token="label-sm">Operativo</span>
+            </button>
+            <button type="button" data-status="proceso" class="status-btn flex flex-col items-center justify-center gap-gutter-xs py-gutter-md px-gutter-xs rounded-md border border-outline bg-surface-subtle text-on-surface-variant hover:bg-warning-container hover:text-on-warning-container transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[20px] text-warning" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">schedule</span>
+              <span class="font-label text-label-sm" data-design-text-token="label-sm">En proceso</span>
+            </button>
+            <button type="button" data-status="alerta" class="status-btn flex flex-col items-center justify-center gap-gutter-xs py-gutter-md px-gutter-xs rounded-md border border-outline bg-surface-subtle text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[20px] text-error" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">error</span>
+              <span class="font-label text-label-sm" data-design-text-token="label-sm">Sin servicio</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Active Resident Tickets Management -->
+      <section class="flex flex-col gap-gutter-md" aria-labelledby="heading-admin-tickets">
+        <div class="flex items-center justify-between px-gutter-xs">
+          <h2 id="heading-admin-tickets" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Tickets de Residentes</h2>
+          <span data-component-id="badge-numeric" data-component-type="badge" data-component-variant="numeric" role="status" class="inline-flex items-center justify-center min-w-6 h-6 px-gutter-sm rounded-full bg-warning-container text-on-warning-container tabular-nums">
+            <span class="font-label text-label-sm" data-design-text-token="label-sm">1</span>
+          </span>
+        </div>
+
+        <article id="ticket-card" data-component-id="card-action" data-component-type="card" data-component-variant="action" class="w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle border-l-4 border-l-warning p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+          <div class="flex items-start justify-between gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs">
+              <span class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">TK-409 · Depto. 804 · Hace 2h</span>
+              <h3 class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Luz interior de cabina parpadeando</h3>
+            </div>
+            <span id="ticket-badge" data-component-id="badge-warning" data-component-type="badge" data-component-variant="warning" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-full bg-warning-container text-on-warning-container shrink-0">
+              <span class="font-label text-label-sm" data-design-text-token="label-sm">En revisión</span>
+            </span>
+          </div>
+
+          <p class="font-body text-body-sm text-on-surface-variant text-pretty" data-design-text-token="body-sm">
+            Vecino reporta parpadeo intermitente en luminaria LED del techo de cabina al subir desde el piso 1.
+          </p>
+
+          <footer class="grid grid-cols-2 gap-gutter-sm pt-gutter-xs">
+            <button id="btn-assign-tech" type="button" class="inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-surface-subtle border border-outline text-on-surface hover:bg-surface-variant transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[16px] text-primary" aria-hidden="true">engineering</span>
+              <span class="font-label text-label-md" data-design-text-token="label-md">Notificar visita</span>
+            </button>
+            <button id="btn-resolve-ticket" type="button" class="inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-success-container text-on-success-container hover:bg-outline transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+              <span class="font-label text-label-md" data-design-text-token="label-md">Marcar resuelto</span>
+            </button>
+          </footer>
+        </article>
+      </section>
+
+      <!-- Register New Maintenance & Upload PDF -->
+      <section class="flex flex-col gap-gutter-md" aria-labelledby="heading-upload">
+        <h2 id="heading-upload" class="font-headline text-title-md text-on-surface px-gutter-xs" data-design-text-token="title-md">Registrar Mantención e Informe</h2>
+
+        <form id="admin-form" data-component-id="card-action" data-component-type="card" data-component-variant="action" class="w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-md">
+          <div class="grid grid-cols-2 gap-gutter-sm">
+            <div class="flex flex-col gap-gutter-xs">
+              <label for="maint-type" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Tipo</label>
+              <select id="maint-type" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+                <option value="preventiva">Preventiva</option>
+                <option value="correctiva">Correctiva</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-gutter-xs">
+              <label for="maint-date" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Fecha</label>
+              <input id="maint-date" type="text" value="21 Nov 2026" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm tabular-nums px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="maint-notes" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Resumen técnico para residentes</label>
+            <textarea id="maint-notes" rows="2" placeholder="Ej. Cambio de fuente LED en cabina y prueba de sensores..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+          </div>
+
+          <button id="btn-attach-pdf" type="button" class="w-full flex items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container hover:bg-outline transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">upload_file</span>
+            <span id="pdf-label" class="font-label text-label-md" data-design-text-token="label-md">Adjuntar Informe Técnico (PDF)</span>
+          </button>
+
+          <button type="submit" data-component-id="button-primary" data-component-type="button" data-component-variant="primary" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">publish</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Publicar actualización</span>
+          </button>
+        </form>
+      </section>
+
+    </main>
+
+    <footer class="flex flex-col items-center gap-gutter-xs text-center pt-gutter-sm">
+      <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">
+        Sesión técnica activa · gcoadmin.cl
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="admin-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md" role="status" aria-live="polite">
+    <span class="material-symbols-outlined text-[18px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+    <span id="admin-toast-msg" class="font-label text-label-md" data-design-text-token="label-md">Actualizado</span>
+  </div>
+
+  <script>
+    (function () {
+      var statusBtns = document.querySelectorAll('.status-btn');
+      var livePill = document.getElementById('live-status-pill');
+      var toast = document.getElementById('admin-toast');
+      var toastMsg = document.getElementById('admin-toast-msg');
+      var toastTimer;
+
+      function showToast(msg) {
+        if (!toast || !toastMsg) return;
+        toastMsg.textContent = msg;
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toast.classList.add('hidden');
+          toast.classList.remove('flex');
+        }, 2600);
+      }
+
+      statusBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var mode = btn.getAttribute('data-status');
+          statusBtns.forEach(function (b) {
+            b.className = 'status-btn flex flex-col items-center justify-center gap-gutter-xs py-gutter-md px-gutter-xs rounded-md border border-outline bg-surface-subtle text-on-surface-variant transition-colors duration-state-change ease-state-change';
+          });
+          if (mode === 'operativo') {
+            btn.className = 'status-btn flex flex-col items-center justify-center gap-gutter-xs py-gutter-md px-gutter-xs rounded-md border-2 border-success bg-success-container text-on-success-container transition-colors duration-state-change ease-state-change';
+            livePill.className = 'inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-success-container text-on-success-container shrink-0';
+            livePill.innerHTML = '<span class="material-symbols-outlined text-[14px] text-success" style="font-variation-settings: \'FILL\' 1;" aria-hidden="true">check_circle</span><span class="font-label text-label-sm">Operativo</span>';
+            showToast('Estado cambiado a Operativo');
+          } else if (mode === 'proceso') {
+            btn.className = 'status-btn flex flex-col items-center justify-center gap-gutter-xs py-gutter-md px-gutter-xs rounded-md border-2 border-warning bg-warning-container text-on-warning-container transition-colors duration-state-change ease-state-change';
+            livePill.className = 'inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-warning-container text-on-warning-container shrink-0';
+            livePill.innerHTML = '<span class="material-symbols-outlined text-[14px] text-warning" style="font-variation-settings: \'FILL\' 1;" aria-hidden="true">schedule</span><span class="font-label text-label-sm">En proceso</span>';
+            showToast('Estado cambiado a En proceso');
+          } else {
+            btn.className = 'status-btn flex flex-col items-center justify-center gap-gutter-xs py-gutter-md px-gutter-xs rounded-md border-2 border-error bg-error-container text-on-error-container transition-colors duration-state-change ease-state-change';
+            livePill.className = 'inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-error-container text-on-error-container shrink-0';
+            livePill.innerHTML = '<span class="material-symbols-outlined text-[14px] text-error" style="font-variation-settings: \'FILL\' 1;" aria-hidden="true">error</span><span class="font-label text-label-sm">Sin servicio</span>';
+            showToast('Alerta: Fuera de servicio');
+          }
+        });
+      });
+
+      var resolveBtn = document.getElementById('btn-resolve-ticket');
+      var ticketBadge = document.getElementById('ticket-badge');
+      var ticketCard = document.getElementById('ticket-card');
+      if (resolveBtn && ticketBadge && ticketCard) {
+        resolveBtn.addEventListener('click', function () {
+          ticketBadge.className = 'inline-flex items-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-full bg-success-container text-on-success-container shrink-0';
+          ticketBadge.innerHTML = '<span class="font-label text-label-sm">Resuelto</span>';
+          ticketCard.classList.remove('border-l-warning');
+          ticketCard.classList.add('border-l-success');
+          showToast('Ticket #TK-409 marcado como resuelto');
+        });
+      }
+
+      var assignBtn = document.getElementById('btn-assign-tech');
+      if (assignBtn) {
+        assignBtn.addEventListener('click', function () {
+          showToast('Aviso enviado al residente del Depto. 804');
+        });
+      }
+
+      var attachBtn = document.getElementById('btn-attach-pdf');
+      var pdfLabel = document.getElementById('pdf-label');
+      if (attachBtn && pdfLabel) {
+        attachBtn.addEventListener('click', function () {
+          pdfLabel.textContent = 'Informe_ASC01_Nov2026.pdf (1.4 MB)';
+          showToast('PDF adjuntado correctamente');
+        });
+      }
+
+      var adminForm = document.getElementById('admin-form');
+      if (adminForm) {
+        adminForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          showToast('Mantención publicada en ficha pública');
+        });
+      }
+    })();
+  </script>
+
+
+
+</body></html>

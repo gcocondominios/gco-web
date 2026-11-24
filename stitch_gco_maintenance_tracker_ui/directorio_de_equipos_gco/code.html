@@ -1,0 +1,319 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Directorio de Equipos — GCO Gestión de Condominios</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#1D5B96',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#EAF1FF',
+        'on-primary-container': '#00325A',
+        'secondary': '#0F2942',
+        'on-secondary': '#FFFFFF',
+        'surface': '#F4F6F9',
+        'on-surface': '#0F2942',
+        'surface-card': '#FFFFFF',
+        'on-surface-card': '#0F2942',
+        'surface-variant': '#EFF1F4',
+        'on-surface-variant': '#49607C',
+        'surface-subtle': '#F9FAFC',
+        'outline': '#DEE3ED',
+        'outline-subtle': '#E8ECF2',
+        'success': '#10B981',
+        'on-success': '#393939',
+        'success-container': '#D1FAE5',
+        'on-success-container': '#005236',
+        'warning': '#F59E0B',
+        'on-warning': '#2A1700',
+        'warning-container': '#FEF3C7',
+        'on-warning-container': '#653E00',
+        'error': '#EF4444',
+        'on-error': '#1C1C1C',
+        'error-container': '#FFEDEB',
+        'on-error-container': '#930013',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '12px',
+        'gutter-lg': '16px',
+        'gutter-xl': '20px',
+        'section': '24px',
+        'page-margin': '16px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Rubik"', 'sans-serif'],
+        'label': ['"Rubik"', 'sans-serif'],
+        'mono': ['"Red Hat Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'accordion-toggle': '200ms',
+        'sheet-enter': '240ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'accordion-toggle': '0ms',
+        'sheet-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
+        'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Red+Hat+Mono:wght@500&amp;family=Rubik:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+
+  <div class="min-h-[884px] w-full max-w-md mx-auto px-page-margin py-gutter-xl flex flex-col gap-section" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Compact Top Header -->
+    <header class="flex items-center justify-between gap-gutter-md">
+      <div class="flex items-center gap-gutter-sm min-w-0">
+        <div class="w-9 h-9 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm" aria-hidden="true">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V7l8-4v18"></path>
+            <path d="M19 21V11l-6-4"></path>
+            <path d="M9 9v.01"></path>
+            <path d="M9 12v.01"></path>
+            <path d="M9 15v.01"></path>
+          </svg>
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span class="font-headline text-title-sm text-on-surface leading-tight" data-design-text-token="title-sm">GCO</span>
+          <span class="font-body text-label-sm text-on-surface-variant leading-tight" data-design-text-token="label-sm">Gestión de Condominios</span>
+        </div>
+      </div>
+
+      <span data-component-id="badge-status" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant shrink-0 shadow-sm">
+        <span class="material-symbols-outlined text-[14px] text-primary" aria-hidden="true">apartment</span>
+        <span class="font-label text-label-sm" data-design-text-token="label-sm">Edificio Aníbal Pinto</span>
+      </span>
+    </header>
+
+    <main class="flex flex-col gap-gutter-lg flex-1">
+
+      <!-- Page Title & Traffic Light Summary -->
+      <section class="flex flex-col gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <h1 class="font-headline text-headline-lg text-on-surface" data-design-text-token="headline-lg">Equipos del Edificio</h1>
+          <p class="font-body text-body-sm text-on-surface-variant" data-design-text-token="body-sm">Estado en tiempo real y mantenciones al día</p>
+        </div>
+
+        <!-- 3-State Summary Pills -->
+        <div class="grid grid-cols-3 gap-gutter-sm">
+          <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center gap-gutter-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operativos</span>
+            </div>
+            <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">3</span>
+          </div>
+          <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center gap-gutter-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-warning shrink-0" aria-hidden="true"></span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">En proceso</span>
+            </div>
+            <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">1</span>
+          </div>
+          <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center gap-gutter-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-error shrink-0" aria-hidden="true"></span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Sin servicio</span>
+            </div>
+            <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">1</span>
+          </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex items-center gap-gutter-sm" role="tablist" aria-label="Filtrar equipos por estado">
+          <button type="button" data-filter="all" class="filter-chip px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-md transition-colors duration-state-change ease-state-change">Todos (5)</button>
+          <button type="button" data-filter="ok" class="filter-chip px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-label-md hover:bg-surface-subtle transition-colors duration-state-change ease-state-change">Operativos</button>
+          <button type="button" data-filter="alert" class="filter-chip px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-label-md hover:bg-surface-subtle transition-colors duration-state-change ease-state-change">Con alertas</button>
+        </div>
+      </section>
+
+      <!-- Asset List -->
+      <section class="flex flex-col gap-gutter-md" aria-label="Lista de equipos">
+
+        <!-- 1. Ascensor Torre A (Operativo) -->
+        <a href="../asset-status/AscensorTorreA.html" data-state="ok" data-component-id="card-interactive" data-component-type="card" data-component-variant="interactive" class="asset-item w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-lg shadow-sm flex items-center justify-between gap-gutter-md hover:bg-surface-subtle transition-colors duration-state-change ease-state-change">
+          <div class="flex items-center gap-gutter-md min-w-0">
+            <div class="w-10 h-10 rounded-md bg-primary-container text-on-primary-container flex items-center justify-center shrink-0" aria-hidden="true">
+              <span class="material-symbols-outlined text-[20px]">elevator</span>
+            </div>
+            <div class="flex flex-col gap-gutter-xs min-w-0">
+              <span class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Ascensor Torre A</span>
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">#ASC-01 · 12 Nov 2026</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-gutter-xs shrink-0">
+            <span class="inline-flex items-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-full bg-success-container text-on-success-container font-label text-label-sm" data-design-text-token="label-sm">Operativo</span>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">chevron_right</span>
+          </div>
+        </a>
+
+        <!-- 2. Ascensor Torre B (Fuera de servicio) -->
+        <a href="../asset-status/AscensorTorreBAlerta.html" data-state="alert" data-component-id="card-interactive" data-component-type="card" data-component-variant="interactive" class="asset-item w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle border-l-4 border-l-error p-gutter-lg shadow-sm flex items-center justify-between gap-gutter-md hover:bg-surface-subtle transition-colors duration-state-change ease-state-change">
+          <div class="flex items-center gap-gutter-md min-w-0">
+            <div class="w-10 h-10 rounded-md bg-error-container text-on-error-container flex items-center justify-center shrink-0" aria-hidden="true">
+              <span class="material-symbols-outlined text-[20px]">elevator</span>
+            </div>
+            <div class="flex flex-col gap-gutter-xs min-w-0">
+              <span class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Ascensor Torre B</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">#ASC-02 · Técnico en camino</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-gutter-xs shrink-0">
+            <span class="inline-flex items-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-full bg-error-container text-on-error-container font-label text-label-sm" data-design-text-token="label-sm">Sin servicio</span>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">chevron_right</span>
+          </div>
+        </a>
+
+        <!-- 3. Sala de Bombas de Agua (Operativo) -->
+        <a href="../asset-status/AscensorTorreA.html" data-state="ok" data-component-id="card-interactive" data-component-type="card" data-component-variant="interactive" class="asset-item w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-lg shadow-sm flex items-center justify-between gap-gutter-md hover:bg-surface-subtle transition-colors duration-state-change ease-state-change">
+          <div class="flex items-center gap-gutter-md min-w-0">
+            <div class="w-10 h-10 rounded-md bg-primary-container text-on-primary-container flex items-center justify-center shrink-0" aria-hidden="true">
+              <span class="material-symbols-outlined text-[20px]">water_pump</span>
+            </div>
+            <div class="flex flex-col gap-gutter-xs min-w-0">
+              <span class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Sala de Bombas</span>
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">#BMB-01 · 08 Nov 2026</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-gutter-xs shrink-0">
+            <span class="inline-flex items-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-full bg-success-container text-on-success-container font-label text-label-sm" data-design-text-token="label-sm">Operativo</span>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">chevron_right</span>
+          </div>
+        </a>
+
+        <!-- 4. Grupo Electrógeno (En proceso) -->
+        <a href="../asset-status/AscensorTorreBAlerta.html" data-state="alert" data-component-id="card-interactive" data-component-type="card" data-component-variant="interactive" class="asset-item w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle border-l-4 border-l-warning p-gutter-lg shadow-sm flex items-center justify-between gap-gutter-md hover:bg-surface-subtle transition-colors duration-state-change ease-state-change">
+          <div class="flex items-center gap-gutter-md min-w-0">
+            <div class="w-10 h-10 rounded-md bg-warning-container text-on-warning-container flex items-center justify-center shrink-0" aria-hidden="true">
+              <span class="material-symbols-outlined text-[20px]">bolt</span>
+            </div>
+            <div class="flex flex-col gap-gutter-xs min-w-0">
+              <span class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Grupo Electrógeno</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">#GEN-01 · Revisión de filtro</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-gutter-xs shrink-0">
+            <span class="inline-flex items-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-full bg-warning-container text-on-warning-container font-label text-label-sm" data-design-text-token="label-sm">En proceso</span>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">chevron_right</span>
+          </div>
+        </a>
+
+        <!-- 5. Portón Vehicular Principal (Operativo) -->
+        <a href="../asset-status/AscensorTorreA.html" data-state="ok" data-component-id="card-interactive" data-component-type="card" data-component-variant="interactive" class="asset-item w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-lg shadow-sm flex items-center justify-between gap-gutter-md hover:bg-surface-subtle transition-colors duration-state-change ease-state-change">
+          <div class="flex items-center gap-gutter-md min-w-0">
+            <div class="w-10 h-10 rounded-md bg-primary-container text-on-primary-container flex items-center justify-center shrink-0" aria-hidden="true">
+              <span class="material-symbols-outlined text-[20px]">garage</span>
+            </div>
+            <div class="flex flex-col gap-gutter-xs min-w-0">
+              <span class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Portón Vehicular</span>
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">#PRT-01 · 02 Nov 2026</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-gutter-xs shrink-0">
+            <span class="inline-flex items-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-full bg-success-container text-on-success-container font-label text-label-sm" data-design-text-token="label-sm">Operativo</span>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">chevron_right</span>
+          </div>
+        </a>
+
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="flex flex-col items-center gap-gutter-xs text-center pt-gutter-sm pb-gutter-md">
+      <a href="../admin-panel/AccesoTecnico.html" class="font-label text-label-md text-on-surface-variant hover:text-primary transition-colors duration-state-change ease-state-change py-gutter-xs px-gutter-sm rounded-sm" data-design-text-token="label-md">
+        Acceso Técnico / Administración
+      </a>
+      <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">
+        Powered by gcoadmin.cl
+      </p>
+    </footer>
+
+  </div>
+
+  <script>
+    (function () {
+      var chips = document.querySelectorAll('.filter-chip');
+      var items = document.querySelectorAll('.asset-item');
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var filter = chip.getAttribute('data-filter');
+          chips.forEach(function (c) {
+            c.className = 'filter-chip px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-label-md hover:bg-surface-subtle transition-colors duration-state-change ease-state-change';
+          });
+          chip.className = 'filter-chip px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-md transition-colors duration-state-change ease-state-change';
+          items.forEach(function (item) {
+            var state = item.getAttribute('data-state');
+            if (filter === 'all' || filter === state) {
+              item.classList.remove('hidden');
+              item.classList.add('flex');
+            } else {
+              item.classList.add('hidden');
+              item.classList.remove('flex');
+            }
+          });
+        });
+      });
+    })();
+  </script>
+
+
+
+</body></html>

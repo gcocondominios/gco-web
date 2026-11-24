@@ -1,0 +1,386 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración — GCO Gestión de Condominios</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#1D5B96',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#EAF1FF',
+        'on-primary-container': '#00325A',
+        'secondary': '#0F2942',
+        'on-secondary': '#FFFFFF',
+        'surface': '#F4F6F9',
+        'on-surface': '#0F2942',
+        'surface-card': '#FFFFFF',
+        'on-surface-card': '#0F2942',
+        'surface-variant': '#EFF1F4',
+        'on-surface-variant': '#49607C',
+        'surface-subtle': '#F9FAFC',
+        'outline': '#DEE3ED',
+        'outline-subtle': '#E8ECF2',
+        'success': '#10B981',
+        'on-success': '#393939',
+        'success-container': '#D1FAE5',
+        'on-success-container': '#005236',
+        'warning': '#F59E0B',
+        'on-warning': '#2A1700',
+        'warning-container': '#FEF3C7',
+        'on-warning-container': '#653E00',
+        'error': '#EF4444',
+        'on-error': '#1C1C1C',
+        'error-container': '#FFEDEB',
+        'on-error-container': '#930013',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '12px',
+        'gutter-lg': '16px',
+        'gutter-xl': '20px',
+        'section': '24px',
+        'page-margin': '16px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Rubik"', 'sans-serif'],
+        'label': ['"Rubik"', 'sans-serif'],
+        'mono': ['"Red Hat Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'accordion-toggle': '200ms',
+        'sheet-enter': '240ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'accordion-toggle': '0ms',
+        'sheet-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
+        'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Red+Hat+Mono:wght@500&amp;family=Rubik:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+
+  <div class="min-h-[884px] w-full max-w-md mx-auto px-page-margin py-gutter-xl pb-24 flex flex-col gap-section" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Compact Admin Header -->
+    <header class="flex items-center justify-between gap-gutter-md">
+      <div class="flex items-center gap-gutter-sm min-w-0">
+        <div class="w-9 h-9 rounded-md bg-secondary text-on-secondary flex items-center justify-center shrink-0 shadow-sm" aria-hidden="true">
+          <span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span class="font-headline text-title-sm text-on-surface leading-tight" data-design-text-token="title-sm">Administración</span>
+          <span class="font-body text-label-sm text-on-surface-variant leading-tight" data-design-text-token="label-sm">Control y Cierre</span>
+        </div>
+      </div>
+
+      <span data-component-id="badge-status" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant shrink-0 shadow-sm">
+        <span class="material-symbols-outlined text-[14px] text-primary" aria-hidden="true">apartment</span>
+        <span class="font-label text-label-sm" data-design-text-token="label-sm">Edificio Aníbal Pinto</span>
+      </span>
+    </header>
+
+    <main class="flex flex-col gap-gutter-lg flex-1">
+
+      <!-- Role-specific Segmented Tabs -->
+      <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-xs grid grid-cols-3 gap-gutter-xs shadow-sm" role="tablist" aria-label="Secciones de administración">
+        <button type="button" data-tab="informes" role="tab" aria-selected="true" class="admin-tab py-gutter-sm px-gutter-xs rounded-sm bg-primary text-on-primary font-label text-label-sm transition-colors duration-state-change ease-state-change">Informes (2)</button>
+        <button type="button" data-tab="tickets" role="tab" aria-selected="false" class="admin-tab py-gutter-sm px-gutter-xs rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-label-sm transition-colors duration-state-change ease-state-change">Tickets (2)</button>
+        <button type="button" data-tab="asignar" role="tab" aria-selected="false" class="admin-tab py-gutter-sm px-gutter-xs rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-label-sm transition-colors duration-state-change ease-state-change">+ A técnico</button>
+      </div>
+
+      <!-- TAB 1: Review Submitted Technician Reports -->
+      <section id="panel-informes" class="admin-panel flex flex-col gap-gutter-md" aria-label="Informes por revisar">
+        <div class="flex items-center justify-between px-gutter-xs">
+          <h1 class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Informes Recibidos</h1>
+          <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Pendientes de revisión</span>
+        </div>
+
+        <!-- Report 1 -->
+        <article data-component-id="card-action" data-component-type="card" data-component-variant="action" class="report-card w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+          <div class="flex items-start justify-between gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs">
+              <span class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">#INF-2026-11 · Hace 15 min</span>
+              <h2 class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Ascensor Torre A · Mant. Preventiva</h2>
+            </div>
+            <span class="report-status inline-flex items-center px-gutter-sm py-gutter-xs rounded-full bg-warning-container text-on-warning-container font-label text-label-sm shrink-0" data-design-text-token="label-sm">Por revisar</span>
+          </div>
+
+          <p class="font-body text-body-sm text-on-surface-variant text-pretty" data-design-text-token="body-sm">
+            Subido por Carlos Méndez (TK Elevator). Incluye reemplazo de luminaria LED de cabina.
+          </p>
+
+          <footer class="grid grid-cols-2 gap-gutter-sm">
+            <a href="../report-viewer/InformeTecnicoPDF.html" class="inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-surface-subtle border border-outline text-on-surface hover:bg-surface-variant transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[16px] text-primary" aria-hidden="true">picture_as_pdf</span>
+              <span class="font-label text-label-md" data-design-text-token="label-md">Ver PDF</span>
+            </a>
+            <button type="button" class="btn-approve-report inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-success-container text-on-success-container hover:bg-outline transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+              <span class="font-label text-label-md" data-design-text-token="label-md">Aprobar</span>
+            </button>
+          </footer>
+        </article>
+
+        <!-- Report 2 -->
+        <article data-component-id="card-action" data-component-type="card" data-component-variant="action" class="report-card w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+          <div class="flex items-start justify-between gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs">
+              <span class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">#INF-2026-10 · Ayer</span>
+              <h2 class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Grupo Electrógeno · Revisión filtro</h2>
+            </div>
+            <span class="report-status inline-flex items-center px-gutter-sm py-gutter-xs rounded-full bg-warning-container text-on-warning-container font-label text-label-sm shrink-0" data-design-text-token="label-sm">Por revisar</span>
+          </div>
+
+          <p class="font-body text-body-sm text-on-surface-variant text-pretty" data-design-text-token="body-sm">
+            Subido por Cummins Chile. Se realizó prueba de arranque automático sin carga.
+          </p>
+
+          <footer class="grid grid-cols-2 gap-gutter-sm">
+            <a href="../report-viewer/InformeTecnicoPDF.html" class="inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-surface-subtle border border-outline text-on-surface hover:bg-surface-variant transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[16px] text-primary" aria-hidden="true">picture_as_pdf</span>
+              <span class="font-label text-label-md" data-design-text-token="label-md">Ver PDF</span>
+            </a>
+            <button type="button" class="btn-approve-report inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md bg-success-container text-on-success-container hover:bg-outline transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+              <span class="font-label text-label-md" data-design-text-token="label-md">Aprobar</span>
+            </button>
+          </footer>
+        </article>
+      </section>
+
+      <!-- TAB 2: Close Completed Tickets -->
+      <section id="panel-tickets" class="admin-panel hidden flex-col gap-gutter-md" aria-label="Cierre de tickets">
+        <div class="flex items-center justify-between px-gutter-xs">
+          <h2 class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Cierre de Tickets</h2>
+          <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Trabajos finalizados</span>
+        </div>
+
+        <article class="ticket-admin-card w-full bg-surface-card rounded-lg border border-outline-subtle border-l-4 border-l-success p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+          <div class="flex items-start justify-between gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs">
+              <span class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">#TK-409 · Ascensor Torre A</span>
+              <h3 class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Luz interior de cabina parpadeando</h3>
+            </div>
+            <span class="ticket-admin-pill inline-flex items-center px-gutter-sm py-gutter-xs rounded-full bg-success-container text-on-success-container font-label text-label-sm shrink-0" data-design-text-token="label-sm">Listo</span>
+          </div>
+          <p class="font-body text-body-sm text-on-surface-variant" data-design-text-token="body-sm">
+            Técnico confirmó cambio de fuente LED. Listo para cerrar y notificar al Depto. 804.
+          </p>
+          <button type="button" class="btn-close-ticket w-full inline-flex items-center justify-center gap-gutter-xs px-gutter-lg py-gutter-sm rounded-md bg-primary text-on-primary hover:bg-secondary transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">task_alt</span>
+            <span class="font-label text-label-md" data-design-text-token="label-md">Cerrar ticket terminado</span>
+          </button>
+        </article>
+
+        <article class="ticket-admin-card w-full bg-surface-card rounded-lg border border-outline-subtle border-l-4 border-l-warning p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+          <div class="flex items-start justify-between gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs">
+              <span class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">#TK-408 · Ascensor Torre B</span>
+              <h3 class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Falla en sensor de puerta piso 1</h3>
+            </div>
+            <span class="ticket-admin-pill inline-flex items-center px-gutter-sm py-gutter-xs rounded-full bg-warning-container text-on-warning-container font-label text-label-sm shrink-0" data-design-text-token="label-sm">En curso</span>
+          </div>
+          <p class="font-body text-body-sm text-on-surface-variant" data-design-text-token="body-sm">
+            Técnico en camino. Se cerrará una vez subido el informe de reparación.
+          </p>
+          <button type="button" class="btn-close-ticket w-full inline-flex items-center justify-center gap-gutter-xs px-gutter-lg py-gutter-sm rounded-md bg-surface-subtle border border-outline text-on-surface hover:bg-surface-variant transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">task_alt</span>
+            <span class="font-label text-label-md" data-design-text-token="label-md">Cerrar ticket terminado</span>
+          </button>
+        </article>
+      </section>
+
+      <!-- TAB 3: Add Instructions / Tasks for Technicians -->
+      <section id="panel-asignar" class="admin-panel hidden flex-col gap-gutter-md" aria-label="Agregar tareas a técnicos">
+        <div class="flex flex-col gap-gutter-xs px-gutter-xs">
+          <h2 class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Agregar Tarea para Técnico</h2>
+          <p class="font-body text-body-sm text-on-surface-variant" data-design-text-token="body-sm">Se mostrará al técnico cuando escanee el QR de Conserjería.</p>
+        </div>
+
+        <form id="assign-task-form" class="w-full bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="assign-asset" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Equipo</label>
+            <select id="assign-asset" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-md px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+              <option value="ASC-01">Ascensor Torre A (#ASC-01)</option>
+              <option value="ASC-02">Ascensor Torre B (#ASC-02)</option>
+              <option value="BMB-01">Sala de Bombas (#BMB-01)</option>
+              <option value="GEN-01">Grupo Electrógeno (#GEN-01)</option>
+              <option value="PRT-01">Portón Vehicular (#PRT-01)</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="assign-priority" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Prioridad</label>
+            <select id="assign-priority" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-md px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+              <option value="normal">Normal · Próxima visita</option>
+              <option value="urgente">Urgente · Revisión prioritaria</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="assign-note" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Instrucción o requerimiento</label>
+            <textarea id="assign-note" rows="3" placeholder="Ej. Revisar vibración leve en cabina entre pisos 4 y 6..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+          </div>
+
+          <button type="submit" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">add_task</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Publicar nota para técnico</span>
+          </button>
+        </form>
+      </section>
+
+    </main>
+
+    <footer class="flex flex-col items-center gap-gutter-xs text-center pt-gutter-xs">
+      <a href="../directory/DirectorioEquipos.html" class="font-label text-label-md text-on-surface-variant hover:text-primary transition-colors duration-state-change ease-state-change py-gutter-xs px-gutter-sm" data-design-text-token="label-md">
+        Ir al directorio público
+      </a>
+      <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">
+        Powered by gcoadmin.cl
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="admin-panel-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md" role="status" aria-live="polite">
+    <span class="material-symbols-outlined text-[18px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+    <span id="admin-panel-toast-msg" class="font-label text-label-md" data-design-text-token="label-md">Guardado</span>
+  </div>
+
+  <script>
+    (function () {
+      var tabs = document.querySelectorAll('.admin-tab');
+      var panels = document.querySelectorAll('.admin-panel');
+      var toast = document.getElementById('admin-panel-toast');
+      var toastMsg = document.getElementById('admin-panel-toast-msg');
+      var timer;
+
+      function showToast(msg) {
+        if (!toast || !toastMsg) return;
+        toastMsg.textContent = msg;
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          toast.classList.add('hidden');
+          toast.classList.remove('flex');
+        }, 2600);
+      }
+
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          var target = tab.getAttribute('data-tab');
+          tabs.forEach(function (t) {
+            t.setAttribute('aria-selected', 'false');
+            t.className = 'admin-tab py-gutter-sm px-gutter-xs rounded-sm text-on-surface-variant hover:bg-surface-subtle font-label text-label-sm transition-colors duration-state-change ease-state-change';
+          });
+          tab.setAttribute('aria-selected', 'true');
+          tab.className = 'admin-tab py-gutter-sm px-gutter-xs rounded-sm bg-primary text-on-primary font-label text-label-sm transition-colors duration-state-change ease-state-change';
+
+          panels.forEach(function (p) {
+            if (p.id === 'panel-' + target) {
+              p.classList.remove('hidden');
+              p.classList.add('flex');
+            } else {
+              p.classList.add('hidden');
+              p.classList.remove('flex');
+            }
+          });
+        });
+      });
+
+      document.querySelectorAll('.btn-approve-report').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var card = btn.closest('.report-card');
+          var badge = card ? card.querySelector('.report-status') : null;
+          if (badge) {
+            badge.className = 'report-status inline-flex items-center px-gutter-sm py-gutter-xs rounded-full bg-success-container text-on-success-container font-label text-label-sm shrink-0';
+            badge.textContent = 'Aprobado';
+          }
+          showToast('Informe aprobado y publicado en historial');
+        });
+      });
+
+      document.querySelectorAll('.btn-close-ticket').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var card = btn.closest('.ticket-admin-card');
+          var pill = card ? card.querySelector('.ticket-admin-pill') : null;
+          if (pill) {
+            pill.className = 'ticket-admin-pill inline-flex items-center px-gutter-sm py-gutter-xs rounded-full bg-surface-variant text-on-surface-variant font-label text-label-sm shrink-0';
+            pill.textContent = 'Cerrado';
+          }
+          showToast('Ticket cerrado y residente notificado');
+        });
+      });
+
+      var assignForm = document.getElementById('assign-task-form');
+      if (assignForm) {
+        assignForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          assignForm.reset();
+          showToast('Instrucción agregada al QR de Conserjería');
+        });
+      }
+    })();
+  </script>
+
+
+
+</body></html>

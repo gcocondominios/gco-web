@@ -1,0 +1,264 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modal Reportar Problema — GCO Gestión de Condominios</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#1D5B96',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#EAF1FF',
+        'on-primary-container': '#00325A',
+        'secondary': '#0F2942',
+        'on-secondary': '#FFFFFF',
+        'surface': '#F4F6F9',
+        'on-surface': '#0F2942',
+        'surface-card': '#FFFFFF',
+        'on-surface-card': '#0F2942',
+        'surface-variant': '#EFF1F4',
+        'on-surface-variant': '#49607C',
+        'surface-subtle': '#F9FAFC',
+        'outline': '#DEE3ED',
+        'outline-subtle': '#E8ECF2',
+        'success': '#10B981',
+        'on-success': '#393939',
+        'success-container': '#D1FAE5',
+        'on-success-container': '#005236',
+        'warning': '#F59E0B',
+        'on-warning': '#2A1700',
+        'warning-container': '#FEF3C7',
+        'on-warning-container': '#653E00',
+        'error': '#EF4444',
+        'on-error': '#1C1C1C',
+        'error-container': '#FFEDEB',
+        'on-error-container': '#930013',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '12px',
+        'gutter-lg': '16px',
+        'gutter-xl': '20px',
+        'section': '24px',
+        'page-margin': '16px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Rubik"', 'sans-serif'],
+        'label': ['"Rubik"', 'sans-serif'],
+        'mono': ['"Red Hat Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'accordion-toggle': '200ms',
+        'sheet-enter': '240ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'accordion-toggle': '0ms',
+        'sheet-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
+        'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Red+Hat+Mono:wght@500&amp;family=Rubik:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+
+  <div class="relative min-h-[884px] w-full max-w-md mx-auto overflow-hidden flex flex-col justify-end" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Background Screen Silhouette Context -->
+    <div class="absolute inset-0 px-page-margin py-gutter-xl flex flex-col gap-section pointer-events-none select-none" aria-hidden="true">
+      <div class="flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm">
+          <div class="w-9 h-9 rounded-md bg-primary/30"></div>
+          <div class="w-28 h-4 rounded-sm bg-outline"></div>
+        </div>
+        <div class="w-32 h-7 rounded-full bg-surface-card border border-outline"></div>
+      </div>
+
+      <div class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl flex flex-col gap-gutter-md">
+        <div class="w-44 h-6 rounded-sm bg-outline"></div>
+        <div class="w-24 h-4 rounded-sm bg-surface-variant"></div>
+        <div class="w-48 h-7 rounded-full bg-success-container"></div>
+      </div>
+    </div>
+
+    <!-- Scrim Overlay -->
+    <div class="absolute inset-0 bg-secondary/45" aria-hidden="true"></div>
+
+    <!-- Foreground Bottom Sheet Modal -->
+    <section role="dialog" aria-modal="true" aria-labelledby="sheet-report-title" class="relative z-10 w-full bg-surface-card rounded-t-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-lg">
+      <!-- Drag Handle -->
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto" aria-hidden="true"></div>
+
+      <!-- Modal Header -->
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <h1 id="sheet-report-title" class="font-headline text-headline-md text-on-surface" data-design-text-token="headline-md">Reportar un problema</h1>
+          <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">Ascensor Torre A · Equipo #ASC-01</p>
+        </div>
+        <a href="../asset-status/AscensorTorreA.html" data-component-id="button-icon" data-component-type="button" data-component-variant="icon" aria-label="Cerrar modal" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change ease-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </a>
+      </header>
+
+      <!-- Duplicate Prevention Hint -->
+      <div class="bg-warning-container text-on-warning-container rounded-md px-gutter-md py-gutter-sm flex items-center gap-gutter-sm">
+        <span class="material-symbols-outlined text-[18px] text-warning shrink-0" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">info</span>
+        <span class="font-label text-label-sm" data-design-text-token="label-sm">Reporte activo: Luz interior parpadeando (Hace 2h)</span>
+      </div>
+
+      <!-- Form -->
+      <form id="sheet-report-form" class="flex flex-col gap-gutter-md">
+
+        <!-- Quick Category Chips -->
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">¿Qué ocurre con el equipo?</span>
+          <div class="flex flex-wrap gap-gutter-sm">
+            <button type="button" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-sm transition-colors duration-state-change ease-state-change">Ruido inusual</button>
+            <button type="button" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change ease-state-change">Puertas</button>
+            <button type="button" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change ease-state-change">Botonera</button>
+            <button type="button" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change ease-state-change">Iluminación</button>
+            <button type="button" class="cat-chip px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change ease-state-change">Detenido</button>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="resident-desc" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Detalle breve</label>
+          <textarea id="resident-desc" rows="3" placeholder="Ej. Se escucha un roce al subir entre los pisos 4 y 6..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+        </div>
+
+        <!-- Unit & Photo Row -->
+        <div class="grid grid-cols-2 gap-gutter-sm">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="resident-unit" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Tu Depto. (opcional)</label>
+            <input id="resident-unit" type="text" placeholder="Ej. Depto. 804" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Evidencia</span>
+            <button id="btn-add-photo" type="button" class="w-full inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container hover:bg-outline transition-colors duration-state-change ease-state-change">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add_a_photo</span>
+              <span id="photo-label" class="font-label text-label-sm" data-design-text-token="label-sm">Subir foto</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit CTA -->
+        <button type="submit" data-component-id="button-primary" data-component-type="button" data-component-variant="primary" class="w-full mt-gutter-xs inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change ease-state-change active:scale-[0.99]">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">send</span>
+          <span class="font-label text-label-lg" data-design-text-token="label-lg">Enviar reporte a administración</span>
+        </button>
+
+      </form>
+    </section>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="sheet-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md" role="status" aria-live="polite">
+    <span class="material-symbols-outlined text-[18px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+    <span id="sheet-toast-msg" class="font-label text-label-md" data-design-text-token="label-md">Enviado</span>
+  </div>
+
+  <script>
+    (function () {
+      var chips = document.querySelectorAll('.cat-chip');
+      var photoBtn = document.getElementById('btn-add-photo');
+      var photoLabel = document.getElementById('photo-label');
+      var form = document.getElementById('sheet-report-form');
+      var toast = document.getElementById('sheet-toast');
+      var toastMsg = document.getElementById('sheet-toast-msg');
+      var timer;
+
+      function showToast(msg) {
+        if (!toast || !toastMsg) return;
+        toastMsg.textContent = msg;
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          toast.classList.add('hidden');
+          toast.classList.remove('flex');
+        }, 2600);
+      }
+
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          chips.forEach(function (c) {
+            c.className = 'cat-chip px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change ease-state-change';
+          });
+          chip.className = 'cat-chip px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-sm transition-colors duration-state-change ease-state-change';
+        });
+      });
+
+      if (photoBtn && photoLabel) {
+        photoBtn.addEventListener('click', function () {
+          photoLabel.textContent = 'Foto_01.jpg';
+          showToast('Foto adjuntada');
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          showToast('Ticket #TK-410 creado correctamente');
+        });
+      }
+    })();
+  </script>
+
+
+
+</body></html>

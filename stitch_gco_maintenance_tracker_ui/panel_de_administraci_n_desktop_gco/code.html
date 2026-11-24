@@ -1,0 +1,387 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración (Desktop) — GCO Gestión de Condominios</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#1D5B96',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#EAF1FF',
+        'on-primary-container': '#00325A',
+        'secondary': '#0F2942',
+        'on-secondary': '#FFFFFF',
+        'surface': '#F4F6F9',
+        'on-surface': '#0F2942',
+        'surface-card': '#FFFFFF',
+        'on-surface-card': '#0F2942',
+        'surface-variant': '#EFF1F4',
+        'on-surface-variant': '#49607C',
+        'surface-subtle': '#F9FAFC',
+        'outline': '#DEE3ED',
+        'outline-subtle': '#E8ECF2',
+        'success': '#10B981',
+        'on-success': '#393939',
+        'success-container': '#D1FAE5',
+        'on-success-container': '#005236',
+        'warning': '#F59E0B',
+        'on-warning': '#2A1700',
+        'warning-container': '#FEF3C7',
+        'on-warning-container': '#653E00',
+        'error': '#EF4444',
+        'on-error': '#1C1C1C',
+        'error-container': '#FFEDEB',
+        'on-error-container': '#930013',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '12px',
+        'gutter-lg': '16px',
+        'gutter-xl': '20px',
+        'section': '24px',
+        'page-margin': '16px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Rubik"', 'sans-serif'],
+        'label': ['"Rubik"', 'sans-serif'],
+        'mono': ['"Red Hat Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'accordion-toggle': '200ms',
+        'sheet-enter': '240ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'accordion-toggle': '0ms',
+        'sheet-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
+        'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Red+Hat+Mono:wght@500&amp;family=Rubik:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+
+  <div class="min-h-[1024px] flex" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Desktop Sidebar -->
+    <aside class="w-64 shrink-0 bg-surface-card border-r border-outline-subtle p-gutter-xl flex flex-col justify-between min-h-[1024px]" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col gap-section">
+        <!-- Brand -->
+        <div class="flex items-center gap-gutter-sm">
+          <div class="w-10 h-10 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm" aria-hidden="true">
+            <span class="material-symbols-outlined text-[22px]">apartment</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-headline text-title-md text-on-surface leading-tight" data-design-text-token="title-md">GCO Admin</span>
+            <span class="font-body text-label-sm text-on-surface-variant leading-tight" data-design-text-token="label-sm">Gestión de Condominios</span>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex flex-col gap-gutter-xs" aria-label="Navegación principal">
+          <a href="#resumen" class="flex items-center gap-gutter-md px-gutter-md py-gutter-sm rounded-md bg-primary-container text-on-primary-container font-label text-label-lg">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-lg">Resumen Operativo</span>
+          </a>
+          <a href="../directory/DirectorioEquipos.html" class="flex items-center justify-between gap-gutter-md px-gutter-md py-gutter-sm rounded-md text-on-surface-variant hover:bg-surface-subtle font-label text-label-lg transition-colors duration-state-change ease-state-change">
+            <span class="flex items-center gap-gutter-md">
+              <span class="material-symbols-outlined text-[20px]" aria-hidden="true">precision_manufacturing</span>
+              <span data-design-text-token="label-lg">Equipos</span>
+            </span>
+            <span class="font-mono text-label-sm tabular-nums">5</span>
+          </a>
+          <a href="../report-viewer/InformeTecnicoPDF.html" class="flex items-center justify-between gap-gutter-md px-gutter-md py-gutter-sm rounded-md text-on-surface-variant hover:bg-surface-subtle font-label text-label-lg transition-colors duration-state-change ease-state-change">
+            <span class="flex items-center gap-gutter-md">
+              <span class="material-symbols-outlined text-[20px]" aria-hidden="true">description</span>
+              <span data-design-text-token="label-lg">Informes PDF</span>
+            </span>
+            <span class="px-gutter-sm py-gutter-xs rounded-full bg-warning-container text-on-warning-container font-label text-label-sm tabular-nums">2</span>
+          </a>
+          <a href="#tickets" class="flex items-center justify-between gap-gutter-md px-gutter-md py-gutter-sm rounded-md text-on-surface-variant hover:bg-surface-subtle font-label text-label-lg transition-colors duration-state-change ease-state-change">
+            <span class="flex items-center gap-gutter-md">
+              <span class="material-symbols-outlined text-[20px]" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-lg">Tickets Vecinos</span>
+            </span>
+            <span class="font-mono text-label-sm tabular-nums">2</span>
+          </a>
+          <a href="../technician-portal/PortalTecnicoQR.html" class="flex items-center gap-gutter-md px-gutter-md py-gutter-sm rounded-md text-on-surface-variant hover:bg-surface-subtle font-label text-label-lg transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">qr_code_2</span>
+            <span data-design-text-token="label-lg">QR Conserjería</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="border-t border-outline-subtle pt-gutter-lg flex items-center gap-gutter-sm">
+        <div class="w-9 h-9 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-title text-title-sm shrink-0">MR</div>
+        <div class="flex flex-col min-w-0">
+          <span class="font-title text-title-sm text-on-surface truncate" data-design-text-token="title-sm">Marcela Rojas</span>
+          <span class="font-label text-label-sm text-on-surface-variant truncate" data-design-text-token="label-sm">Administradora</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- Top Bar -->
+      <header class="bg-surface-card border-b border-outline-subtle px-section py-gutter-lg flex items-center justify-between gap-gutter-lg">
+        <div class="flex flex-col gap-gutter-xs">
+          <h1 class="font-headline text-headline-lg text-on-surface" data-design-text-token="headline-lg">Edificio Aníbal Pinto</h1>
+          <p class="font-body text-body-sm text-on-surface-variant" data-design-text-token="body-sm">Control de mantenciones, informes técnicos y tickets vecinales</p>
+        </div>
+
+        <div class="flex items-center gap-gutter-md">
+          <span class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-success-container text-on-success-container font-label text-label-md">
+            <span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+            QR Conserjería Activo
+          </span>
+        </div>
+      </header>
+
+      <main class="p-section flex flex-col gap-section max-w-6xl">
+
+        <!-- 4-Card KPI Row -->
+        <section class="grid grid-cols-4 gap-gutter-lg" aria-label="Resumen de estado">
+          <article class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">Equipos Operativos</span>
+            <div class="flex items-baseline justify-between">
+              <span class="font-headline text-display-lg-mobile text-on-surface tabular-nums" data-design-text-token="display-lg-mobile">3</span>
+              <span class="w-3 h-3 rounded-full bg-success" aria-hidden="true"></span>
+            </div>
+          </article>
+
+          <article class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">En Proceso</span>
+            <div class="flex items-baseline justify-between">
+              <span class="font-headline text-display-lg-mobile text-on-surface tabular-nums" data-design-text-token="display-lg-mobile">1</span>
+              <span class="w-3 h-3 rounded-full bg-warning" aria-hidden="true"></span>
+            </div>
+          </article>
+
+          <article class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">Fuera de Servicio</span>
+            <div class="flex items-baseline justify-between">
+              <span class="font-headline text-display-lg-mobile text-on-surface tabular-nums" data-design-text-token="display-lg-mobile">1</span>
+              <span class="w-3 h-3 rounded-full bg-error" aria-hidden="true"></span>
+            </div>
+          </article>
+
+          <article class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">Informes por Revisar</span>
+            <div class="flex items-baseline justify-between">
+              <span class="font-headline text-display-lg-mobile text-primary tabular-nums" data-design-text-token="display-lg-mobile">2</span>
+              <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">description</span>
+            </div>
+          </article>
+        </section>
+
+        <!-- 2-Column Main Workspace -->
+        <div class="grid grid-cols-3 gap-gutter-xl items-start">
+
+          <!-- Left 2 Columns: Informes + Tickets -->
+          <div class="col-span-2 flex flex-col gap-section">
+
+            <!-- Informes Recibidos -->
+            <section class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-md">
+              <header class="flex items-center justify-between">
+                <h2 class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Informes Subidos por Técnicos</h2>
+                <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Vía QR Conserjería</span>
+              </header>
+
+              <div class="divide-y divide-outline-subtle">
+                <div class="py-gutter-md flex items-center justify-between gap-gutter-md">
+                  <div class="flex flex-col gap-gutter-xs">
+                    <span class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Ascensor Torre A (#ASC-01) · Mantención Preventiva</span>
+                    <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Carlos Méndez (TK Elevator) · Hace 15 min · #INF-2026-11</span>
+                  </div>
+                  <div class="flex items-center gap-gutter-sm shrink-0">
+                    <a href="../report-viewer/InformeTecnicoPDF.html" class="px-gutter-md py-gutter-xs rounded-md bg-surface-subtle border border-outline font-label text-label-sm text-on-surface hover:bg-surface-variant">Ver PDF</a>
+                    <button type="button" class="desktop-approve px-gutter-md py-gutter-xs rounded-md bg-success-container text-on-success-container font-label text-label-sm hover:bg-outline">Aprobar</button>
+                  </div>
+                </div>
+
+                <div class="py-gutter-md flex items-center justify-between gap-gutter-md">
+                  <div class="flex flex-col gap-gutter-xs">
+                    <span class="font-title text-title-sm text-on-surface" data-design-text-token="title-sm">Grupo Electrógeno (#GEN-01) · Revisión de Filtro</span>
+                    <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Cummins Chile · Ayer · #INF-2026-10</span>
+                  </div>
+                  <div class="flex items-center gap-gutter-sm shrink-0">
+                    <a href="../report-viewer/InformeTecnicoPDF.html" class="px-gutter-md py-gutter-xs rounded-md bg-surface-subtle border border-outline font-label text-label-sm text-on-surface hover:bg-surface-variant">Ver PDF</a>
+                    <button type="button" class="desktop-approve px-gutter-md py-gutter-xs rounded-md bg-success-container text-on-success-container font-label text-label-sm hover:bg-outline">Aprobar</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Tickets Vecinales -->
+            <section id="tickets" class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-md">
+              <header class="flex items-center justify-between">
+                <h2 class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Tickets de Vecinos</h2>
+                <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Cierre administrativo</span>
+              </header>
+
+              <div class="divide-y divide-outline-subtle">
+                <div class="py-gutter-md flex items-center justify-between gap-gutter-md">
+                  <div class="flex flex-col gap-gutter-xs">
+                    <div class="flex items-center gap-gutter-sm">
+                      <span class="font-mono text-mono-sm text-on-surface-variant">#TK-409</span>
+                      <span class="font-title text-title-sm text-on-surface">Luz interior de cabina parpadeando</span>
+                    </div>
+                    <span class="font-label text-label-sm text-on-surface-variant">Ascensor Torre A · Depto. 804 · Trabajo finalizado por técnico</span>
+                  </div>
+                  <button type="button" class="desktop-close-ticket px-gutter-md py-gutter-sm rounded-md bg-primary text-on-primary font-label text-label-sm hover:bg-secondary shrink-0">Cerrar ticket</button>
+                </div>
+
+                <div class="py-gutter-md flex items-center justify-between gap-gutter-md">
+                  <div class="flex flex-col gap-gutter-xs">
+                    <div class="flex items-center gap-gutter-sm">
+                      <span class="font-mono text-mono-sm text-on-surface-variant">#TK-408</span>
+                      <span class="font-title text-title-sm text-on-surface">Falla en sensor de puerta piso 1</span>
+                    </div>
+                    <span class="font-label text-label-sm text-on-surface-variant">Ascensor Torre B · Técnico asignado en camino</span>
+                  </div>
+                  <button type="button" class="desktop-close-ticket px-gutter-md py-gutter-sm rounded-md bg-surface-subtle border border-outline text-on-surface font-label text-label-sm hover:bg-surface-variant shrink-0">Cerrar ticket</button>
+                </div>
+              </div>
+            </section>
+
+          </div>
+
+          <!-- Right Column: Assign Task to Technician -->
+          <aside class="bg-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs">
+              <h2 class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Agregar Tarea a Técnico</h2>
+              <p class="font-body text-body-sm text-on-surface-variant" data-design-text-token="body-sm">Visible al escanear el QR de Conserjería.</p>
+            </div>
+
+            <form id="desktop-assign-form" class="flex flex-col gap-gutter-md">
+              <div class="flex flex-col gap-gutter-xs">
+                <label for="d-asset" class="font-label text-label-sm text-on-surface-variant">Equipo</label>
+                <select id="d-asset" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">
+                  <option>Ascensor Torre A (#ASC-01)</option>
+                  <option>Ascensor Torre B (#ASC-02)</option>
+                  <option>Sala de Bombas (#BMB-01)</option>
+                  <option>Grupo Electrógeno (#GEN-01)</option>
+                </select>
+              </div>
+
+              <div class="flex flex-col gap-gutter-xs">
+                <label for="d-note" class="font-label text-label-sm text-on-surface-variant">Instrucción</label>
+                <textarea id="d-note" rows="4" placeholder="Ej. Revisar ruido en puerta de piso 5 en la próxima visita..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm"></textarea>
+              </div>
+
+              <button type="submit" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md bg-primary text-on-primary font-label text-label-md hover:bg-secondary transition-colors duration-state-change ease-state-change">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add_task</span>
+                Publicar en QR Conserjería
+              </button>
+            </form>
+          </aside>
+
+        </div>
+
+      </main>
+    </div>
+
+  </div>
+
+  <div id="desktop-toast" class="fixed bottom-6 right-6 z-50 hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md" role="status" aria-live="polite">
+    <span class="material-symbols-outlined text-[18px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+    <span id="desktop-toast-msg" class="font-label text-label-md">Actualizado</span>
+  </div>
+
+  <script>
+    (function () {
+      var toast = document.getElementById('desktop-toast');
+      var msgEl = document.getElementById('desktop-toast-msg');
+      var timer;
+      function show(msg) {
+        if (!toast || !msgEl) return;
+        msgEl.textContent = msg;
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          toast.classList.add('hidden');
+          toast.classList.remove('flex');
+        }, 2600);
+      }
+      document.querySelectorAll('.desktop-approve').forEach(function (b) {
+        b.addEventListener('click', function () {
+          b.textContent = 'Aprobado';
+          show('Informe aprobado y publicado');
+        });
+      });
+      document.querySelectorAll('.desktop-close-ticket').forEach(function (b) {
+        b.addEventListener('click', function () {
+          b.textContent = 'Cerrado';
+          show('Ticket cerrado');
+        });
+      });
+      var f = document.getElementById('desktop-assign-form');
+      if (f) {
+        f.addEventListener('submit', function (e) {
+          e.preventDefault();
+          f.reset();
+          show('Instrucción publicada en el QR de Conserjería');
+        });
+      }
+    })();
+  </script>
+
+
+
+</body></html>

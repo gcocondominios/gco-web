@@ -1,0 +1,278 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Técnico (QR Conserjería) — GCO Gestión de Condominios</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#1D5B96',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#EAF1FF',
+        'on-primary-container': '#00325A',
+        'secondary': '#0F2942',
+        'on-secondary': '#FFFFFF',
+        'surface': '#F4F6F9',
+        'on-surface': '#0F2942',
+        'surface-card': '#FFFFFF',
+        'on-surface-card': '#0F2942',
+        'surface-variant': '#EFF1F4',
+        'on-surface-variant': '#49607C',
+        'surface-subtle': '#F9FAFC',
+        'outline': '#DEE3ED',
+        'outline-subtle': '#E8ECF2',
+        'success': '#10B981',
+        'on-success': '#393939',
+        'success-container': '#D1FAE5',
+        'on-success-container': '#005236',
+        'warning': '#F59E0B',
+        'on-warning': '#2A1700',
+        'warning-container': '#FEF3C7',
+        'on-warning-container': '#653E00',
+        'error': '#EF4444',
+        'on-error': '#1C1C1C',
+        'error-container': '#FFEDEB',
+        'on-error-container': '#930013',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '12px',
+        'gutter-lg': '16px',
+        'gutter-xl': '20px',
+        'section': '24px',
+        'page-margin': '16px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Rubik"', 'sans-serif'],
+        'label': ['"Rubik"', 'sans-serif'],
+        'mono': ['"Red Hat Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-lg': ['24px', { lineHeight: '30px', letterSpacing: '-0.3px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '26px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '21px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '19px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.2px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'accordion-toggle': '200ms',
+        'sheet-enter': '240ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'accordion-toggle': '0ms',
+        'sheet-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'accordion-toggle': 'cubic-bezier(0.2, 0, 0, 1)',
+        'sheet-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Red+Hat+Mono:wght@500&amp;family=Rubik:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+
+  <div class="min-h-[884px] w-full max-w-md mx-auto px-page-margin py-gutter-xl pb-24 flex flex-col gap-section" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Compact Top Header -->
+    <header class="flex items-center justify-between gap-gutter-md">
+      <div class="flex items-center gap-gutter-sm min-w-0">
+        <div class="w-9 h-9 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm" aria-hidden="true">
+          <span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span class="font-headline text-title-sm text-on-surface leading-tight" data-design-text-token="title-sm">Portal Técnico</span>
+          <span class="font-body text-label-sm text-on-surface-variant leading-tight" data-design-text-token="label-sm">QR Conserjería</span>
+        </div>
+      </div>
+
+      <span data-component-id="badge-status" data-component-type="badge" data-component-variant="status" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-card border border-outline text-on-surface-variant shrink-0 shadow-sm">
+        <span class="material-symbols-outlined text-[14px] text-primary" aria-hidden="true">apartment</span>
+        <span class="font-label text-label-sm" data-design-text-token="label-sm">Edificio Aníbal Pinto</span>
+      </span>
+    </header>
+
+    <main class="flex flex-col gap-gutter-lg flex-1">
+
+      <!-- Check-in Confirmation Banner -->
+      <div class="bg-primary-container text-on-primary-container rounded-lg px-gutter-lg py-gutter-md flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm min-w-0">
+          <span class="material-symbols-outlined text-[20px] shrink-0" aria-hidden="true">verified_user</span>
+          <div class="flex flex-col min-w-0">
+            <span class="font-title text-title-sm leading-tight" data-design-text-token="title-sm">Visita registrada en Conserjería</span>
+            <span class="font-label text-label-sm tabular-nums opacity-90" data-design-text-token="label-sm">Hoy · 07:30 hrs · Acceso autorizado</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Tasks from Administration -->
+      <section class="flex flex-col gap-gutter-sm" aria-labelledby="heading-admin-notes">
+        <h2 id="heading-admin-notes" class="font-headline text-title-md text-on-surface px-gutter-xs" data-design-text-token="title-md">Notas de Administración</h2>
+
+        <article data-component-id="card-elevated" data-component-type="card" data-component-variant="elevated" class="w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle border-l-4 border-l-warning p-gutter-lg shadow-sm flex items-start gap-gutter-md">
+          <div class="w-8 h-8 rounded-md bg-warning-container text-on-warning-container flex items-center justify-center shrink-0 mt-0.5" aria-hidden="true">
+            <span class="material-symbols-outlined text-[18px]">assignment</span>
+          </div>
+          <div class="flex flex-col gap-gutter-xs min-w-0">
+            <span class="font-label text-label-sm text-on-warning-container" data-design-text-token="label-sm">Ascensor Torre A (#ASC-01) · Prioridad</span>
+            <p class="font-body text-body-sm text-on-surface text-pretty" data-design-text-token="body-sm">
+              Revisar luz interior de cabina parpadeando (#TK-409) y verificar ruido leve al abrir puerta en piso 5.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <!-- Upload Maintenance Report Form -->
+      <section class="flex flex-col gap-gutter-sm" aria-labelledby="heading-tech-upload">
+        <h2 id="heading-tech-upload" class="font-headline text-title-md text-on-surface px-gutter-xs" data-design-text-token="title-md">Subir Informe de Visita</h2>
+
+        <form id="tech-report-form" data-component-id="card-action" data-component-type="card" data-component-variant="action" class="w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle p-gutter-xl shadow-sm flex flex-col gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="tech-asset" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Equipo intervenido</label>
+            <select id="tech-asset" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-md px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+              <option value="ASC-01">Ascensor Torre A (#ASC-01)</option>
+              <option value="ASC-02">Ascensor Torre B (#ASC-02)</option>
+              <option value="BMB-01">Sala de Bombas (#BMB-01)</option>
+              <option value="GEN-01">Grupo Electrógeno (#GEN-01)</option>
+              <option value="PRT-01">Portón Vehicular (#PRT-01)</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-gutter-sm">
+            <div class="flex flex-col gap-gutter-xs">
+              <label for="tech-type" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Tipo de trabajo</label>
+              <select id="tech-type" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+                <option value="preventiva">Mant. Preventiva</option>
+                <option value="correctiva">Mant. Correctiva</option>
+                <option value="ticket">Atención Ticket</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-gutter-xs">
+              <label for="tech-result" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Estado final</label>
+              <select id="tech-result" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+                <option value="operativo">Operativo</option>
+                <option value="proceso">En proceso</option>
+                <option value="fuera">Fuera de servicio</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="tech-summary" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Detalle técnico realizado</label>
+            <textarea id="tech-summary" rows="3" placeholder="Describe los trabajos realizados, repuestos cambiados o pendientes..." class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary"></textarea>
+          </div>
+
+          <button id="btn-tech-file" type="button" class="w-full flex items-center justify-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-md border border-dashed border-primary bg-primary-container text-on-primary-container hover:bg-outline transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">upload_file</span>
+            <span id="tech-file-label" class="font-label text-label-md" data-design-text-token="label-md">Adjuntar Informe PDF o Foto</span>
+          </button>
+
+          <button type="submit" data-component-id="button-primary" data-component-type="button" data-component-variant="primary" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change ease-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">send</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Enviar informe a Administración</span>
+          </button>
+        </form>
+      </section>
+
+    </main>
+
+    <footer class="flex flex-col items-center gap-gutter-xs text-center pt-gutter-xs">
+      <a href="../directory/DirectorioEquipos.html" class="font-label text-label-md text-on-surface-variant hover:text-primary transition-colors duration-state-change ease-state-change py-gutter-xs px-gutter-sm" data-design-text-token="label-md">
+        Ver directorio de equipos
+      </a>
+      <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">
+        Powered by gcoadmin.cl
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="tech-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md" role="status" aria-live="polite">
+    <span class="material-symbols-outlined text-[18px] text-success" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">check_circle</span>
+    <span id="tech-toast-msg" class="font-label text-label-md" data-design-text-token="label-md">Enviado</span>
+  </div>
+
+  <script>
+    (function () {
+      var fileBtn = document.getElementById('btn-tech-file');
+      var fileLabel = document.getElementById('tech-file-label');
+      var form = document.getElementById('tech-report-form');
+      var toast = document.getElementById('tech-toast');
+      var toastMsg = document.getElementById('tech-toast-msg');
+      var timer;
+
+      function showToast(msg) {
+        if (!toast || !toastMsg) return;
+        toastMsg.textContent = msg;
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          toast.classList.add('hidden');
+          toast.classList.remove('flex');
+        }, 2800);
+      }
+
+      if (fileBtn && fileLabel) {
+        fileBtn.addEventListener('click', function () {
+          fileLabel.textContent = 'Informe_Visita_ASC01.pdf (1.2 MB)';
+          showToast('Archivo adjuntado');
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          showToast('Informe enviado para revisión de Administración');
+        });
+      }
+    })();
+  </script>
+
+
+
+</body></html>
