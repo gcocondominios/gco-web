@@ -56,11 +56,30 @@
     const params = new URLSearchParams(window.location.search);
     const paramEdificio = (params.get('edificio') || '').trim();
     state.equipoId = (params.get('equipo') || '').trim();
+    const user = state.session && state.session.user ? state.session.user : null;
 
-    if (paramEdificio) {
+    if (user && user.rol === 'comite' && user.edificioId && user.edificioId.toUpperCase() !== 'ALL') {
+      state.edificioId = user.edificioId;
+    } else if (user && user.rol === 'tecnico' && user.edificioId && user.edificioId.toUpperCase() !== 'ALL') {
+      state.edificioId = paramEdificio || user.edificioId;
+      if (!state.equipoId) {
+        showErrorState('Escanea el código QR del equipo asignado a tu especialidad para registrar tu mantención.');
+        updateSessionUI();
+        return;
+      }
+    } else if (user && user.rol === 'operaciones') {
+      if (paramEdificio && paramEdificio.toUpperCase() !== 'DEMO') {
+        state.edificioId = paramEdificio;
+      } else {
+        state.edificioId = '';
+        showErrorState('Bienvenido a Operaciones. Abre el Panel de Operaciones arriba para elegir una comunidad.');
+        updateSessionUI();
+        return;
+      }
+    } else if (paramEdificio) {
       state.edificioId = paramEdificio;
-    } else if (state.session && state.session.user && state.session.user.edificioId && state.session.user.edificioId.toUpperCase() !== 'ALL') {
-      state.edificioId = state.session.user.edificioId;
+    } else if (user && user.edificioId && user.edificioId.toUpperCase() !== 'ALL') {
+      state.edificioId = user.edificioId;
     } else {
       state.edificioId = 'DEMO';
     }
@@ -99,11 +118,18 @@
     if (state.equipoId) {
       url.searchParams.set('equipo', state.equipoId);
     }
+    if (state.session && state.session.token) {
+      url.searchParams.set('token', state.session.token);
+    }
 
     try {
       const res = await fetch(url.toString(), { method: 'GET' });
       const json = await res.json();
       if (!json.ok) {
+        if (json.requireAuth) {
+          showErrorState(json.error || 'Inicia sesión para ver esta comunidad o escanea el QR del equipo.');
+          return;
+        }
         if (!cached) showErrorState(json.error || 'No se pudo cargar la información.');
         return;
       }
@@ -146,7 +172,8 @@
       btnReport.classList.toggle('inline-flex', name === 'equipment');
     }
     if (btnBack) {
-      const canSeeDir = Boolean(state.session && state.session.user && ['tecnico', 'operaciones', 'admin', 'comite'].indexOf(state.session.user.rol) !== -1);
+      const isDemoPublic = String(state.edificioId || '').toUpperCase() === 'DEMO';
+      const canSeeDir = isDemoPublic || Boolean(state.session && state.session.user && ['operaciones', 'admin', 'comite'].indexOf(state.session.user.rol) !== -1);
       const showBack = name === 'equipment' && canSeeDir;
       btnBack.classList.toggle('hidden', !showBack);
       btnBack.classList.toggle('inline-flex', showBack);
@@ -242,7 +269,7 @@
     if (!sec || !list) return;
 
     const user = state.session ? state.session.user : null;
-    const canSee = Boolean(user && (user.rol === 'tecnico' || user.rol === 'operaciones' || user.rol === 'admin'));
+    const canSee = Boolean(user && (user.rol === 'operaciones' || user.rol === 'admin' || (user.rol === 'tecnico' && canTechEditCurrentEquipment())));
     if (!canSee || !orders || orders.length === 0) {
       sec.classList.add('hidden');
       sec.classList.remove('flex');
@@ -833,6 +860,30 @@
       localStorage.removeItem(STORAGE_KEY);
     }
     updateSessionUI();
+    readUrlAndLoad();
+  }
+
+  function canTechEditCurrentEquipment() {
+    const user = state.session && state.session.user ? state.session.user : null;
+    if (!user) return false;
+    if (user.rol === 'admin') return true;
+    if (user.rol === 'operaciones') return String(state.edificioId || '').toUpperCase() !== 'DEMO';
+    if (user.rol !== 'tecnico') return false;
+    if (!state.data || state.data.mode !== 'equipo' || !state.data.equipo) return false;
+    if (String(state.edificioId || '').toLowerCase() !== String(user.edificioId || '').toLowerCase()) return false;
+
+    const assignedRaw = String(user.equiposAsignados || '').trim().toLowerCase();
+    const curEqId = String(state.data.equipo.id || '').trim().toLowerCase();
+    if (assignedRaw) {
+      if (assignedRaw === 'all') return true;
+      return assignedRaw.split(',').map(function (s) { return s.trim(); }).indexOf(curEqId) !== -1;
+    }
+    const empUser = String(user.deptoOEmpresa || '').trim().toLowerCase();
+    const empEq = String(state.data.equipo.empresa || '').trim().toLowerCase();
+    if (empUser && empEq) {
+      return empEq.indexOf(empUser) !== -1 || empUser.indexOf(empEq) !== -1;
+    }
+    return false;
   }
 
   function updateSessionUI() {
@@ -870,12 +921,17 @@
     btnLogout.classList.remove('hidden');
     roleText.textContent = user.nombre + ' (' + user.rol.toUpperCase() + ')';
 
-    const canMaint = Boolean(user.rol === 'tecnico' || user.rol === 'operaciones' || user.rol === 'admin');
+    const canMaint = Boolean(
+      user.rol === 'admin' ||
+      user.rol === 'operaciones' ||
+      (user.rol === 'tecnico' && canTechEditCurrentEquipment())
+    );
+    const canRonda = Boolean(user.rol === 'admin' || user.rol === 'operaciones');
     const isAdminPanel = Boolean(user.rol === 'admin' || user.rol === 'operaciones');
     const isOpsOnly = user.rol === 'operaciones';
     const isCommittee = user.rol === 'comite' || user.rol === 'admin';
 
-    if (canMaint || isAdminPanel || isCommittee) {
+    if (canMaint || canRonda || isAdminPanel || isCommittee) {
       roleBar.classList.remove('hidden');
       roleBar.classList.add('flex');
     } else {
@@ -887,8 +943,8 @@
     btnMaint.classList.toggle('inline-flex', canMaint);
     const btnRonda = document.getElementById('btn-open-ronda');
     if (btnRonda) {
-      btnRonda.classList.toggle('hidden', !canMaint);
-      btnRonda.classList.toggle('inline-flex', canMaint);
+      btnRonda.classList.toggle('hidden', !canRonda);
+      btnRonda.classList.toggle('inline-flex', canRonda);
     }
     btnAdmin.classList.toggle('hidden', !isAdminPanel);
     btnAdmin.classList.toggle('inline-flex', isAdminPanel);
@@ -3110,6 +3166,7 @@
             '</select>' +
             '<input id="new-usr-extra" type="text" placeholder="Cargo / Empresa / Depto" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
           '</div>' +
+          '<input id="new-usr-equipos" type="text" placeholder="Equipos asignados (solo técnicos, ej. BMB-01,EST-AGUA)" class="w-full rounded-md border border-outline bg-surface-card text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">' +
           '<button type="submit" id="btn-create-usr-submit" class="w-full min-h-[40px] rounded-md bg-primary text-on-primary font-label text-label-md">Crear y enviar clave por correo</button>' +
         '</form>' +
       '</details>';
@@ -3166,6 +3223,7 @@
           email: document.getElementById('new-usr-email').value.trim(),
           rol: document.getElementById('new-usr-role').value,
           deptoOEmpresa: document.getElementById('new-usr-extra').value.trim(),
+          equiposAsignados: (document.getElementById('new-usr-equipos') ? document.getElementById('new-usr-equipos').value.trim() : ''),
         });
         setLoadingBtn(btn, false, 'Crear y enviar clave por correo');
         if (!res.ok) {
