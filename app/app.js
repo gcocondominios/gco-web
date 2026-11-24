@@ -3804,26 +3804,32 @@
   }
 
   function saveRondaDraft() {
+    // Para ítems ya respaldados en Drive, no guardamos el base64 pesado en localStorage
+    // (ya tenemos fotoFileIds y fotoUrls), evitando llenar el límite de 5 MB en rondas largas.
+    const toStore = state.rondaItems.map(function (it) {
+      const alreadyInDrive = it.backupStatus === 'backed_up' && it.fotoFileIds && it.fotoFileIds.length > 0;
+      return {
+        id: it.id,
+        espacio: it.espacio,
+        estado: it.estado,
+        checks: it.checks,
+        notas: it.notas,
+        crearOrden: Boolean(it.crearOrden),
+        fotos: alreadyInDrive ? [] : (it.fotos || []),
+        fotoUrls: it.fotoUrls || [],
+        fotoFileIds: it.fotoFileIds || [],
+        fechaCarpeta: it.fechaCarpeta || getTodayIsoLocal(),
+        backupStatus: it.backupStatus || 'none',
+        hora: it.hora,
+      };
+    });
     try {
-      localStorage.setItem(getRondaDraftKey(), JSON.stringify(state.rondaItems));
+      localStorage.setItem(getRondaDraftKey(), JSON.stringify(toStore));
     } catch (e) {
-      // Si las fotos superan los ~5 MB de localStorage, conservamos los IDs/URLs de Drive
-      // y todos los textos/espacios como respaldo.
+      // Si aún así supera 5 MB (muchas fotos tomadas offline), conservamos IDs/URLs de Drive y textos.
       try {
-        const light = state.rondaItems.map(function (it) {
-          return {
-            id: it.id,
-            espacio: it.espacio,
-            estado: it.estado,
-            checks: it.checks,
-            notas: it.notas,
-            fotos: [],
-            fotoUrls: it.fotoUrls || [],
-            fotoFileIds: it.fotoFileIds || [],
-            fechaCarpeta: it.fechaCarpeta || getTodayIsoLocal(),
-            backupStatus: it.backupStatus || 'none',
-            hora: it.hora,
-          };
+        const light = toStore.map(function (it) {
+          return Object.assign({}, it, { fotos: [] });
         });
         localStorage.setItem(getRondaDraftKey(), JSON.stringify(light));
       } catch (e2) {}
@@ -4261,13 +4267,21 @@
       });
       photoInput.addEventListener('change', async function (e) {
         const files = Array.from(e.target.files || []);
+        let failed = 0;
         for (let i = 0; i < files.length; i++) {
           if (state.rondaPhotos.length >= 10) {
             showToast('Máximo 10 fotos por espacio en el informe');
             break;
           }
-          const comp = await compressImage(files[i], 760, 0.7);
-          state.rondaPhotos.push(comp.dataUrl);
+          try {
+            const comp = await compressImage(files[i], 760, 0.7);
+            state.rondaPhotos.push(comp.dataUrl);
+          } catch (imgErr) {
+            failed++;
+          }
+        }
+        if (failed > 0) {
+          showToast('No se pudieron leer ' + failed + ' foto(s). Intenta en formato JPG/PNG.', true);
         }
         renderRondaPhotosPreview();
         e.target.value = '';
@@ -4280,7 +4294,9 @@
         e.preventDefault();
         const area = document.getElementById('ronda-area-select').value;
         const notes = document.getElementById('ronda-notes').value.trim();
-        if (!notes && state.rondaChecks.length === 0 && state.rondaPhotos.length === 0) {
+        const prevEditing = (state.rondaEditingIdx >= 0 && state.rondaItems[state.rondaEditingIdx]) ? state.rondaItems[state.rondaEditingIdx] : null;
+        const prevHasDrivePhotos = Boolean(prevEditing && prevEditing.fotoFileIds && prevEditing.fotoFileIds.length > 0);
+        if (!notes && state.rondaChecks.length === 0 && state.rondaPhotos.length === 0 && !prevHasDrivePhotos) {
           showToast('Marca al menos una opción, escribe un comentario o sube una foto.', true);
           return;
         }
@@ -4290,9 +4306,11 @@
         let savedItem = null;
         let needPhotoUpload = false;
 
-        if (state.rondaEditingIdx >= 0 && state.rondaItems[state.rondaEditingIdx]) {
-          const prev = state.rondaItems[state.rondaEditingIdx];
+        if (prevEditing) {
+          const prev = prevEditing;
           const samePhotos = prev.fotos && prev.fotos.length === photosCopy.length && prev.fotos.every(function (p, i) { return p === photosCopy[i]; });
+          const keepDriveOnly = prevHasDrivePhotos && photosCopy.length === 0;
+          const preserveDrive = samePhotos || keepDriveOnly;
           savedItem = {
             id: prev.id,
             espacio: area,
@@ -4301,14 +4319,14 @@
             notas: notes,
             crearOrden: createOrderVal,
             fotos: photosCopy,
-            fotoUrls: samePhotos ? (prev.fotoUrls || []) : [],
-            fotoFileIds: samePhotos ? (prev.fotoFileIds || []) : [],
+            fotoUrls: preserveDrive ? (prev.fotoUrls || []) : [],
+            fotoFileIds: preserveDrive ? (prev.fotoFileIds || []) : [],
             fechaCarpeta: prev.fechaCarpeta || getTodayIsoLocal(),
-            backupStatus: samePhotos ? (prev.backupStatus || 'none') : (photosCopy.length > 0 ? 'pending' : 'none'),
+            backupStatus: preserveDrive ? (prev.backupStatus || 'none') : (photosCopy.length > 0 ? 'pending' : 'none'),
             hora: prev.hora || new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
           };
           state.rondaItems[state.rondaEditingIdx] = savedItem;
-          needPhotoUpload = !samePhotos && photosCopy.length > 0;
+          needPhotoUpload = !preserveDrive && photosCopy.length > 0;
         } else {
           savedItem = {
             id: 'R-' + Date.now(),
