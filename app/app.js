@@ -44,6 +44,7 @@
     window.addEventListener('online', function () {
       updateOfflineBanner();
       syncOfflineQueue();
+      syncPendingRondaPhotos();
     });
     window.addEventListener('offline', updateOfflineBanner);
 
@@ -395,6 +396,9 @@
               (pdfLinks.length > 0 && state.session && ['admin', 'comite'].indexOf(state.session.user.rol) !== -1
                 ? '<button type="button" data-ai-maint="' + idx + '" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[15px]">auto_awesome</span>Analizar con IA</button>'
                 : '') +
+              (state.session && state.session.user && state.session.user.rol === 'admin' && m.id
+                ? '<button type="button" data-edit-maint="' + idx + '" class="inline-flex items-center gap-gutter-xs font-label text-label-sm text-primary hover:underline"><span class="material-symbols-outlined text-[15px]">edit</span>Editar</button>'
+                : '') +
             '</div>' +
           '</div>' +
         '</details>'
@@ -419,6 +423,13 @@
           contexto: 'informe de mantención ' + m.tipo,
           titulo: state.data ? state.data.equipo.nombre : '',
         });
+      });
+    });
+
+    container.querySelectorAll('[data-edit-maint]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const m = items[Number(btn.getAttribute('data-edit-maint'))];
+        if (m) openEditMaintenanceModal(m);
       });
     });
   }
@@ -897,6 +908,8 @@
     const btnAuth = document.getElementById('btn-open-auth');
     const btnLogout = document.getElementById('btn-logout');
 
+    const btnEditEqHero = document.getElementById('btn-edit-current-eq');
+
     if (!user) {
       roleBar.classList.add('hidden');
       roleBar.classList.remove('flex');
@@ -906,6 +919,10 @@
       if (btnRondaOut) {
         btnRondaOut.classList.add('hidden');
         btnRondaOut.classList.remove('inline-flex');
+      }
+      if (btnEditEqHero) {
+        btnEditEqHero.classList.add('hidden');
+        btnEditEqHero.classList.remove('inline-flex');
       }
       btnAdmin.classList.add('hidden');
       btnAdmin.classList.remove('inline-flex');
@@ -921,6 +938,12 @@
     btnAuth.classList.add('hidden');
     btnLogout.classList.remove('hidden');
     roleText.textContent = user.nombre + ' (' + user.rol.toUpperCase() + ')';
+
+    const isAdminOnly = user.rol === 'admin';
+    if (btnEditEqHero) {
+      btnEditEqHero.classList.toggle('hidden', !isAdminOnly);
+      btnEditEqHero.classList.toggle('inline-flex', isAdminOnly);
+    }
 
     const canMaint = Boolean(
       user.rol === 'admin' ||
@@ -979,6 +1002,7 @@
   function bindEvents() {
     document.getElementById('btn-retry-load').addEventListener('click', loadData);
     bindRondaEvents();
+    bindAdminEditModals();
 
     document.getElementById('btn-back-directory').addEventListener('click', function () {
       navigateToEquipo('');
@@ -990,7 +1014,7 @@
       });
     });
 
-    ['modal-report', 'modal-auth', 'modal-maintenance', 'modal-admin', 'modal-qr', 'modal-committee', 'modal-ai'].forEach(function (id) {
+    ['modal-report', 'modal-auth', 'modal-maintenance', 'modal-admin', 'modal-qr', 'modal-committee', 'modal-ai', 'modal-edit-equipment', 'modal-edit-maint'].forEach(function (id) {
       const m = document.getElementById(id);
       if (!m) return;
       m.addEventListener('click', function (e) {
@@ -2191,6 +2215,9 @@
             '<button type="button" data-go-eq="' + escapeHtml(eq.equipoId) + '" class="min-h-[40px] rounded-md bg-surface-card border border-outline text-on-surface font-label text-label-sm">Abrir ficha</button>' +
             '<button type="button" data-copy-qr="' + escapeHtml(qrUrl) + '" class="min-h-[40px] rounded-md bg-surface-card border border-outline text-on-surface font-label text-label-sm">Copiar link</button>' +
             '<a href="' + escapeHtml(waUrl) + '" target="_blank" rel="noopener noreferrer" class="min-h-[40px] rounded-md bg-success-container text-on-success-container font-label text-label-sm inline-flex items-center justify-center">WhatsApp</a>' +
+            (state.session && state.session.user && state.session.user.rol === 'admin'
+              ? '<button type="button" data-edit-eq="' + idx + '" class="col-span-2 min-h-[38px] rounded-md bg-primary-container text-on-primary-container border border-primary/20 font-label text-label-sm inline-flex items-center justify-center gap-gutter-xs"><span class="material-symbols-outlined text-[16px]">edit</span>Editar datos del equipo</button>'
+              : '') +
           '</div>' +
         '</article>'
       );
@@ -2248,6 +2275,13 @@
         const eqId = btn.getAttribute('data-go-eq');
         closeModal('modal-admin');
         navigateToEquipo(eqId);
+      });
+    });
+
+    container.querySelectorAll('[data-edit-eq]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const eq = equipos[Number(btn.getAttribute('data-edit-eq'))];
+        if (eq) openEditEquipmentModal(eq);
       });
     });
 
@@ -3374,7 +3408,7 @@
   }
 
   async function postApi(payload) {
-    const queueable = ['createTicket', 'addMaintenance', 'updateTicket'].indexOf(payload.action) !== -1;
+    const queueable = ['createTicket', 'addMaintenance', 'updateTicket', 'saveRondaReport'].indexOf(payload.action) !== -1;
 
     if (!navigator.onLine && queueable) {
       const q = loadOfflineQueue();
@@ -3590,6 +3624,14 @@
     return 'gco_ronda_draft_v1_' + (state.edificioId || 'DEMO');
   }
 
+  function getTodayIsoLocal() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
   function loadRondaDraft() {
     try {
       const raw = localStorage.getItem(getRondaDraftKey());
@@ -3603,8 +3645,8 @@
     try {
       localStorage.setItem(getRondaDraftKey(), JSON.stringify(state.rondaItems));
     } catch (e) {
-      // Si las fotos superan los ~5 MB de localStorage, seguimos en memoria sin perder fotos
-      // y guardamos al menos los textos/espacios como respaldo.
+      // Si las fotos superan los ~5 MB de localStorage, conservamos los IDs/URLs de Drive
+      // y todos los textos/espacios como respaldo.
       try {
         const light = state.rondaItems.map(function (it) {
           return {
@@ -3614,11 +3656,80 @@
             checks: it.checks,
             notas: it.notas,
             fotos: [],
+            fotoUrls: it.fotoUrls || [],
+            fotoFileIds: it.fotoFileIds || [],
+            fechaCarpeta: it.fechaCarpeta || getTodayIsoLocal(),
+            backupStatus: it.backupStatus || 'none',
             hora: it.hora,
           };
         });
         localStorage.setItem(getRondaDraftKey(), JSON.stringify(light));
       } catch (e2) {}
+    }
+  }
+
+  async function backupRondaItemPhotos(item) {
+    if (!item || !item.fotos || item.fotos.length === 0) {
+      if (item) item.backupStatus = 'none';
+      return true;
+    }
+    if (item.backupStatus === 'backed_up' && item.fotoFileIds && item.fotoFileIds.length > 0) {
+      return true;
+    }
+    if (item.backupStatus === 'uploading') return false;
+    if (!navigator.onLine || !state.session || !state.session.token || !state.edificioId) {
+      item.backupStatus = 'pending';
+      saveRondaDraft();
+      renderRondaItemsList();
+      return false;
+    }
+
+    item.backupStatus = 'uploading';
+    renderRondaItemsList();
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'uploadRondaPhotos',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          fechaCarpeta: item.fechaCarpeta || getTodayIsoLocal(),
+          espacio: item.espacio,
+          hora: item.hora || '',
+          fotos: item.fotos,
+        }),
+      });
+      const json = await res.json();
+      if (json && json.ok) {
+        item.fotoUrls = Array.isArray(json.urls) ? json.urls : [];
+        item.fotoFileIds = Array.isArray(json.fileIds) ? json.fileIds : [];
+        item.backupStatus = 'backed_up';
+        saveRondaDraft();
+        renderRondaItemsList();
+        return true;
+      }
+      item.backupStatus = 'pending';
+      saveRondaDraft();
+      renderRondaItemsList();
+      return false;
+    } catch (err) {
+      item.backupStatus = 'pending';
+      saveRondaDraft();
+      renderRondaItemsList();
+      return false;
+    }
+  }
+
+  async function syncPendingRondaPhotos() {
+    if (!navigator.onLine || !state.session || !state.session.token || !state.edificioId) return;
+    if (!state.rondaItems || state.rondaItems.length === 0) return;
+    for (let i = 0; i < state.rondaItems.length; i++) {
+      const it = state.rondaItems[i];
+      if (it && it.fotos && it.fotos.length > 0 && it.backupStatus !== 'backed_up') {
+        await backupRondaItemPhotos(it);
+      }
     }
   }
 
@@ -3664,12 +3775,18 @@
       btnOpen.addEventListener('click', function () {
         const sub = document.getElementById('ronda-building-subtitle');
         if (sub && state.data && state.data.edificio) {
-          sub.textContent = state.data.edificio.nombre + ' · Agrega espacios revisados y genera PDF';
+          sub.textContent = state.data.edificio.nombre + ' · Fotos e informe se respaldan en Drive';
+        }
+        const banner = document.getElementById('ronda-backup-banner');
+        if (banner) {
+          banner.classList.add('hidden');
+          banner.classList.remove('flex');
         }
         populateRondaAreas();
         loadRondaDraft();
         renderRondaItemsList();
         openModal('modal-ronda');
+        syncPendingRondaPhotos();
       });
     }
 
@@ -3812,15 +3929,21 @@
           showToast('Marca al menos una opción, escribe un comentario o sube una foto.', true);
           return;
         }
-        state.rondaItems.push({
+        const photosCopy = state.rondaPhotos.slice();
+        const newItem = {
           id: 'R-' + Date.now(),
           espacio: area,
           estado: state.rondaState,
           checks: state.rondaChecks.slice(),
           notas: notes,
-          fotos: state.rondaPhotos.slice(),
+          fotos: photosCopy,
+          fotoUrls: [],
+          fotoFileIds: [],
+          fechaCarpeta: getTodayIsoLocal(),
+          backupStatus: photosCopy.length > 0 ? 'pending' : 'none',
           hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
-        });
+        };
+        state.rondaItems.push(newItem);
         saveRondaDraft();
         renderRondaItemsList();
 
@@ -3832,7 +3955,13 @@
           b.className = 'ronda-check-chip px-gutter-sm py-1 rounded-full bg-surface-card border border-outline text-on-surface-variant font-label text-[11px]';
         });
         renderRondaPhotosPreview();
-        showToast('Espacio agregado al informe de ronda');
+
+        if (photosCopy.length > 0) {
+          showToast(navigator.onLine ? 'Espacio agregado · respaldando fotos en Drive...' : 'Espacio agregado · fotos en cola offline');
+          backupRondaItemPhotos(newItem);
+        } else {
+          showToast('Espacio agregado al informe de ronda');
+        }
       });
     }
 
@@ -3842,6 +3971,11 @@
         state.rondaItems = [];
         saveRondaDraft();
         renderRondaItemsList();
+        const banner = document.getElementById('ronda-backup-banner');
+        if (banner) {
+          banner.classList.add('hidden');
+          banner.classList.remove('flex');
+        }
         showToast('Borrador de ronda limpiado');
       });
     }
@@ -3900,17 +4034,30 @@
       const badgeCls = item.estado === 'Acción urgente'
         ? 'bg-error-container text-on-error-container'
         : (item.estado === 'Con observación' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
-      const thumbs = (item.fotos || []).length > 0
-        ? '<div class="flex gap-1 mt-1">' + item.fotos.map(function (f) {
+      const localCount = (item.fotos || []).length;
+      const driveCount = (item.fotoFileIds || []).length;
+      let backupPill = '';
+      if (item.backupStatus === 'backed_up' && (driveCount > 0 || localCount > 0)) {
+        backupPill = '<span class="px-gutter-sm py-0.5 rounded-full bg-success-container text-on-success-container font-label text-[10px]">☁️ ' + (driveCount || localCount) + ' en Drive</span>';
+      } else if (item.backupStatus === 'uploading') {
+        backupPill = '<span class="px-gutter-sm py-0.5 rounded-full bg-primary-container text-on-primary-container font-label text-[10px]">☁️ Respaldando...</span>';
+      } else if (item.backupStatus === 'pending' && localCount > 0) {
+        backupPill = '<span class="px-gutter-sm py-0.5 rounded-full bg-warning-container text-on-warning-container font-label text-[10px]">☁️ Pendiente</span>';
+      }
+      const thumbs = localCount > 0
+        ? '<div class="flex flex-wrap gap-1 mt-1">' + item.fotos.map(function (f) {
             return '<img src="' + f + '" class="w-10 h-10 object-cover rounded-sm border border-outline">';
           }).join('') + '</div>'
-        : '';
+        : (driveCount > 0
+          ? '<span class="font-label text-[11px] text-on-surface-variant mt-1">' + driveCount + ' foto(s) ya respaldadas en Drive</span>'
+          : '');
       return (
         '<article class="bg-surface-subtle rounded-lg border border-outline p-gutter-sm flex items-start justify-between gap-gutter-sm">' +
           '<div class="flex flex-col gap-0.5 min-w-0">' +
             '<div class="flex items-center gap-gutter-xs flex-wrap">' +
               '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(item.espacio) + '</span>' +
               '<span class="px-gutter-sm py-0.5 rounded-full ' + badgeCls + ' font-label text-[11px]">' + escapeHtml(item.estado) + '</span>' +
+              backupPill +
             '</div>' +
             (item.checks && item.checks.length > 0 ? '<span class="font-label text-[11px] text-primary">✓ ' + escapeHtml(item.checks.join(' · ')) + '</span>' : '') +
             (item.notas ? '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(item.notas) + '</p>' : '') +
@@ -3930,13 +4077,78 @@
     });
   }
 
-  function printRondaPdf() {
+  async function printRondaPdf() {
     if (!state.rondaItems || state.rondaItems.length === 0) return;
     const sheet = document.getElementById('print-ronda-sheet');
     if (!sheet) return;
 
+    const btnPrint = document.getElementById('btn-ronda-print-pdf');
+    const btnLbl = document.getElementById('ronda-pdf-btn-label');
+    const origLbl = btnLbl ? btnLbl.textContent : 'Respaldar en Drive y Generar PDF Comité';
+    if (btnPrint) btnPrint.disabled = true;
+    if (btnLbl) btnLbl.textContent = 'Respaldando fotos e informe en Drive...';
+
     const edifName = (state.data && state.data.edificio && state.data.edificio.nombre) ? state.data.edificio.nombre : (state.edificioId || 'Comunidad');
     const supName = (state.session && state.session.user && state.session.user.nombre) ? state.session.user.nombre : 'Supervisión Operaciones GCO';
+    const fechaCarpeta = (state.rondaItems[0] && state.rondaItems[0].fechaCarpeta) ? state.rondaItems[0].fechaCarpeta : getTodayIsoLocal();
+
+    // 1. Subir a Drive cualquier foto pendiente antes de armar el PDF en Drive
+    if (navigator.onLine && state.session && state.session.token) {
+      for (let i = 0; i < state.rondaItems.length; i++) {
+        const it = state.rondaItems[i];
+        if (it && it.fotos && it.fotos.length > 0 && it.backupStatus !== 'backed_up') {
+          await backupRondaItemPhotos(it);
+        }
+      }
+    }
+
+    // 2. Respaldar el PDF definitivo del Informe de Ronda en Google Drive (y en Documentos)
+    if (state.session && state.session.token && state.edificioId) {
+      try {
+        const itemsPayload = state.rondaItems.map(function (it) {
+          const hasIds = it.fotoFileIds && it.fotoFileIds.length > 0;
+          return {
+            espacio: it.espacio,
+            estado: it.estado,
+            checks: it.checks || [],
+            notas: it.notas || '',
+            hora: it.hora || '',
+            fotoFileIds: hasIds ? it.fotoFileIds : [],
+            fotos: hasIds ? [] : (it.fotos || []),
+          };
+        });
+        const backupRes = await postApi({
+          action: 'saveRondaReport',
+          token: state.session.token,
+          edificioId: state.edificioId,
+          edificioNombre: edifName,
+          fechaCarpeta: fechaCarpeta,
+          items: itemsPayload,
+        });
+        if (backupRes && backupRes.ok && backupRes.linkPdf) {
+          const banner = document.getElementById('ronda-backup-banner');
+          const pdfLink = document.getElementById('ronda-backup-pdf-link');
+          const folderLink = document.getElementById('ronda-backup-folder-link');
+          if (pdfLink) pdfLink.href = backupRes.linkPdf;
+          if (folderLink && backupRes.folderUrl) folderLink.href = backupRes.folderUrl;
+          if (banner) {
+            banner.classList.remove('hidden');
+            banner.classList.add('flex');
+          }
+          showToast('Informe PDF y fotos respaldados en Google Drive');
+        } else if (backupRes && backupRes.queued) {
+          showToast('Sin señal: PDF local listo y respaldo en Drive en cola');
+        } else if (backupRes && backupRes.error) {
+          showToast('PDF local listo · Aviso Drive: ' + backupRes.error, true);
+        }
+      } catch (bkErr) {
+        showToast('No se pudo respaldar en Drive ahora, abriendo PDF local...', true);
+      }
+    }
+
+    if (btnPrint) btnPrint.disabled = false;
+    if (btnLbl) btnLbl.textContent = origLbl;
+
     const fechaHoy = new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' });
     const horaHoy = new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
 
@@ -4015,5 +4227,201 @@
       sheet.classList.remove('print-active');
       sheet.classList.add('hidden');
     }, 250);
+  }
+
+  function openEditEquipmentModal(eq) {
+    if (!state.session || !state.session.user || state.session.user.rol !== 'admin') return;
+    const edifId = eq.edificioId || state.edificioId || '';
+    const eqId = eq.equipoId || eq.id || '';
+    if (!edifId || !eqId) return;
+
+    document.getElementById('edit-eq-edificio').value = edifId;
+    document.getElementById('edit-eq-id').value = eqId;
+    document.getElementById('edit-eq-subtitle').textContent = '#' + eqId + ' · ' + edifId;
+    document.getElementById('edit-eq-name').value = eq.nombre || '';
+    document.getElementById('edit-eq-company').value = eq.empresa || '';
+    document.getElementById('edit-eq-days').value = Number(eq.periodicidadDias || 30);
+    document.getElementById('edit-eq-marca').value = eq.marca || '';
+    document.getElementById('edit-eq-modelo').value = eq.modelo || '';
+    document.getElementById('edit-eq-serie').value = eq.numeroSerie || '';
+    openModal('modal-edit-equipment');
+  }
+
+  function openEditMaintenanceModal(m) {
+    if (!state.session || !state.session.user || state.session.user.rol !== 'admin') return;
+    if (!m || !m.id) return;
+
+    document.getElementById('edit-maint-id').value = m.id;
+    document.getElementById('edit-maint-subtitle').textContent = m.id + (state.data && state.data.equipo ? ' · ' + state.data.equipo.nombre : '');
+
+    const rawDate = String(m.fecha || '').trim();
+    const dateMatch = rawDate.match(/^(\d{4}-\d{2}-\d{2})/);
+    document.getElementById('edit-maint-date').value = dateMatch ? dateMatch[1] : getTodayIsoLocal();
+
+    const typeSel = document.getElementById('edit-maint-type');
+    if (typeSel) {
+      const tipoVal = String(m.tipo || 'Preventiva').trim();
+      const hasOpt = Array.from(typeSel.options).some(function (o) { return o.value === tipoVal; });
+      if (!hasOpt) {
+        const opt = document.createElement('option');
+        opt.value = tipoVal;
+        opt.textContent = tipoVal;
+        typeSel.appendChild(opt);
+      }
+      typeSel.value = tipoVal;
+    }
+
+    const stateSel = document.getElementById('edit-maint-state');
+    if (stateSel) {
+      const est = String(m.estadoResultante || 'Operativo').trim();
+      if (est.toLowerCase().indexOf('fuera') !== -1) stateSel.value = 'Fuera de Servicio';
+      else if (est.toLowerCase().indexOf('observ') !== -1) stateSel.value = 'En Observacion';
+      else stateSel.value = 'Operativo';
+    }
+
+    document.getElementById('edit-maint-cost').value = m.costoClp ? String(m.costoClp) : '';
+    document.getElementById('edit-maint-tech').value = m.tecnico || '';
+    document.getElementById('edit-maint-notes').value = m.observaciones || '';
+    const fileInput = document.getElementById('edit-maint-file');
+    if (fileInput) fileInput.value = '';
+    const repChk = document.getElementById('edit-maint-replace-files');
+    if (repChk) repChk.checked = false;
+
+    openModal('modal-edit-maint');
+  }
+
+  function bindAdminEditModals() {
+    const btnEditHero = document.getElementById('btn-edit-current-eq');
+    if (btnEditHero) {
+      btnEditHero.addEventListener('click', function () {
+        if (!state.data || !state.data.equipo) return;
+        openEditEquipmentModal({
+          edificioId: (state.data.edificio && state.data.edificio.id) || state.edificioId,
+          equipoId: state.data.equipo.id,
+          nombre: state.data.equipo.nombre,
+          empresa: state.data.equipo.empresa,
+          periodicidadDias: state.data.equipo.periodicidadDias,
+          marca: state.data.equipo.marca,
+          modelo: state.data.equipo.modelo,
+          numeroSerie: state.data.equipo.numeroSerie,
+        });
+      });
+    }
+
+    document.querySelectorAll('[data-eq-days-preset]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const inp = document.getElementById('edit-eq-days');
+        if (inp) inp.value = btn.getAttribute('data-eq-days-preset');
+      });
+    });
+
+    const formEditEq = document.getElementById('form-edit-equipment');
+    if (formEditEq) {
+      formEditEq.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-edit-eq-submit');
+        setLoadingBtn(btn, true, 'Guardando...');
+        const res = await postApi({
+          action: 'updateEquipment',
+          token: state.session.token,
+          edificioId: document.getElementById('edit-eq-edificio').value.trim(),
+          equipoId: document.getElementById('edit-eq-id').value.trim(),
+          nombreEquipo: document.getElementById('edit-eq-name').value.trim(),
+          empresa: document.getElementById('edit-eq-company').value.trim(),
+          periodicidadDias: Number(document.getElementById('edit-eq-days').value || 30),
+          marca: document.getElementById('edit-eq-marca').value.trim(),
+          modelo: document.getElementById('edit-eq-modelo').value.trim(),
+          numeroSerie: document.getElementById('edit-eq-serie').value.trim(),
+        });
+        setLoadingBtn(btn, false, 'Guardar cambios del equipo');
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo actualizar el equipo', true);
+          return;
+        }
+        closeModal('modal-edit-equipment');
+        showToast(res.message || 'Equipo actualizado');
+        loadData();
+        const adminModal = document.getElementById('modal-admin');
+        if (adminModal && !adminModal.classList.contains('hidden')) {
+          loadAdminPanelData();
+        }
+      });
+    }
+
+    const formEditMaint = document.getElementById('form-edit-maint');
+    if (formEditMaint) {
+      formEditMaint.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-edit-maint-submit');
+        setLoadingBtn(btn, true, 'Guardando...');
+
+        const archivos = [];
+        const fileInput = document.getElementById('edit-maint-file');
+        const files = fileInput && fileInput.files ? Array.from(fileInput.files) : [];
+        try {
+          for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            if (f.type && f.type.indexOf('image/') === 0) {
+              const comp = await compressImage(f, 1280, 0.78);
+              archivos.push({ base64: comp.dataUrl, mimeType: 'image/jpeg' });
+            } else {
+              const dataUrl = await readFileAsDataUrl(f);
+              archivos.push({ base64: dataUrl, mimeType: f.type || 'application/pdf' });
+            }
+          }
+        } catch (fErr) {
+          setLoadingBtn(btn, false, 'Guardar cambios');
+          showToast('Error al leer archivo adjunto', true);
+          return;
+        }
+
+        const res = await postApi({
+          action: 'updateMaintenance',
+          token: state.session.token,
+          maintId: document.getElementById('edit-maint-id').value.trim(),
+          fecha: document.getElementById('edit-maint-date').value.trim(),
+          tipo: document.getElementById('edit-maint-type').value,
+          estadoResultante: document.getElementById('edit-maint-state').value,
+          tecnico: document.getElementById('edit-maint-tech').value.trim(),
+          observaciones: document.getElementById('edit-maint-notes').value.trim(),
+          costoClp: Number(document.getElementById('edit-maint-cost').value || 0),
+          archivos: archivos,
+          reemplazarAdjuntos: Boolean(document.getElementById('edit-maint-replace-files') && document.getElementById('edit-maint-replace-files').checked),
+        });
+        setLoadingBtn(btn, false, 'Guardar cambios');
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo actualizar la mantención', true);
+          return;
+        }
+        closeModal('modal-edit-maint');
+        showToast(res.message || 'Mantención actualizada');
+        loadData();
+      });
+    }
+
+    const btnDelMaint = document.getElementById('btn-delete-maint');
+    if (btnDelMaint) {
+      btnDelMaint.addEventListener('click', async function () {
+        const maintId = document.getElementById('edit-maint-id').value.trim();
+        if (!maintId) return;
+        if (!window.confirm('¿Eliminar permanentemente el registro ' + maintId + '? Esta acción recalculará el semáforo del equipo.')) {
+          return;
+        }
+        setLoadingBtn(btnDelMaint, true, 'Eliminando...');
+        const res = await postApi({
+          action: 'deleteMaintenance',
+          token: state.session.token,
+          maintId: maintId,
+        });
+        setLoadingBtn(btnDelMaint, false, 'Eliminar esta mantención');
+        if (!res.ok) {
+          showToast(res.error || 'No se pudo eliminar', true);
+          return;
+        }
+        closeModal('modal-edit-maint');
+        showToast(res.message || 'Mantención eliminada');
+        loadData();
+      });
+    }
   }
 })();

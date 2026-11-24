@@ -233,11 +233,15 @@
           </div>
 
           <!-- Prominent Traffic Light Status Pill -->
-          <div class="pt-gutter-xs">
+          <div class="pt-gutter-xs flex items-center justify-between gap-gutter-sm flex-wrap">
             <span id="eq-status-pill" role="status" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-success-container text-on-success-container">
               <span id="eq-status-icon" class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">check_circle</span>
               <span id="eq-status-text" class="font-label text-label-md">OPERATIVO</span>
             </span>
+            <button id="btn-edit-current-eq" type="button" class="hidden inline-flex items-center gap-1 px-gutter-md py-gutter-xs rounded-full bg-surface-subtle border border-outline text-primary font-label text-label-sm hover:bg-primary-container transition-colors duration-state-change">
+              <span class="material-symbols-outlined text-[15px]" aria-hidden="true">edit</span>
+              <span>Editar equipo</span>
+            </button>
           </div>
         </header>
 
@@ -994,9 +998,20 @@
         <div id="ronda-items-list" class="flex flex-col gap-gutter-sm"></div>
       </div>
 
+      <div id="ronda-backup-banner" class="hidden flex-col gap-1 rounded-md bg-success-container text-on-success-container border border-success/30 px-gutter-md py-gutter-sm">
+        <div class="flex items-center gap-gutter-xs font-label text-label-sm">
+          <span class="material-symbols-outlined text-[16px]">cloud_done</span>
+          <span>Informe PDF y fotos respaldados en Google Drive</span>
+        </div>
+        <div class="flex items-center gap-gutter-md flex-wrap text-[12px]">
+          <a id="ronda-backup-pdf-link" href="#" target="_blank" rel="noopener noreferrer" class="underline font-label text-primary">Abrir PDF en Drive</a>
+          <a id="ronda-backup-folder-link" href="#" target="_blank" rel="noopener noreferrer" class="underline font-label text-on-success-container">Ver carpeta de esta ronda</a>
+        </div>
+      </div>
+
       <button id="btn-ronda-print-pdf" type="button" disabled class="w-full min-h-[46px] inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-gutter-md rounded-md bg-primary text-on-primary shadow-sm hover:bg-secondary transition-colors duration-state-change disabled:opacity-40 disabled:cursor-not-allowed">
         <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-        <span class="font-label text-label-lg">Generar Informe PDF de Ronda para Comité</span>
+        <span id="ronda-pdf-btn-label" class="font-label text-label-lg">Respaldar en Drive y Generar PDF Comité</span>
       </button>
     </div>
   </div>
@@ -1032,6 +1047,129 @@
     </div>
   </div>
 
+  <!-- BOTTOM SHEET 9: EDITAR EQUIPO (SOLO ADMIN) -->
+  <div id="modal-edit-equipment" class="fixed inset-0 z-[56] hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-edit-eq-title">
+    <div class="sheet-panel w-full max-w-md md:max-w-lg bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-md">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs min-w-0">
+          <h2 id="sheet-edit-eq-title" class="font-headline text-headline-md text-on-surface">Editar Equipo</h2>
+          <p id="edit-eq-subtitle" class="font-mono text-mono-sm text-on-surface-variant truncate">#---</p>
+        </div>
+        <button type="button" data-close-modal="modal-edit-equipment" aria-label="Cerrar edición de equipo" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <form id="form-edit-equipment" class="flex flex-col gap-gutter-sm">
+        <input id="edit-eq-edificio" type="hidden">
+        <input id="edit-eq-id" type="hidden">
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="edit-eq-name" class="font-label text-label-sm text-on-surface">Nombre del equipo / certificación</label>
+          <input id="edit-eq-name" type="text" required class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+        </div>
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="edit-eq-company" class="font-label text-label-sm text-on-surface">Empresa mantenedora / certificador</label>
+          <input id="edit-eq-company" type="text" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+        </div>
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="edit-eq-days" class="font-label text-label-sm text-on-surface">Periodicidad (días)</label>
+          <input id="edit-eq-days" type="number" min="1" max="3650" required class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-mono text-body-sm px-gutter-md py-gutter-sm focus:border-primary focus:ring-primary">
+          <div class="flex flex-wrap gap-gutter-xs">
+            <button type="button" data-eq-days-preset="30" class="px-2 py-0.5 rounded-full bg-surface-subtle border border-outline font-label text-[11px] text-on-surface-variant hover:bg-primary-container">30d</button>
+            <button type="button" data-eq-days-preset="90" class="px-2 py-0.5 rounded-full bg-surface-subtle border border-outline font-label text-[11px] text-on-surface-variant hover:bg-primary-container">90d</button>
+            <button type="button" data-eq-days-preset="180" class="px-2 py-0.5 rounded-full bg-surface-subtle border border-outline font-label text-[11px] text-on-surface-variant hover:bg-primary-container">180d</button>
+            <button type="button" data-eq-days-preset="365" class="px-2 py-0.5 rounded-full bg-surface-subtle border border-outline font-label text-[11px] text-on-surface-variant hover:bg-primary-container">365d</button>
+            <button type="button" data-eq-days-preset="730" class="px-2 py-0.5 rounded-full bg-surface-subtle border border-outline font-label text-[11px] text-on-surface-variant hover:bg-primary-container">730d</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-gutter-xs">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="edit-eq-marca" class="font-label text-[11px] text-on-surface-variant">Marca</label>
+            <input id="edit-eq-marca" type="text" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="edit-eq-modelo" class="font-label text-[11px] text-on-surface-variant">Modelo</label>
+            <input id="edit-eq-modelo" type="text" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-sm py-gutter-xs">
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="edit-eq-serie" class="font-label text-[11px] text-on-surface-variant">N° Serie</label>
+            <input id="edit-eq-serie" type="text" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-mono text-body-sm px-gutter-sm py-gutter-xs">
+          </div>
+        </div>
+        <button id="btn-edit-eq-submit" type="submit" class="w-full min-h-[44px] mt-gutter-xs rounded-md bg-primary text-on-primary font-label text-label-md hover:bg-secondary transition-colors duration-state-change">Guardar cambios del equipo</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET 10: EDITAR MANTENCIÓN (SOLO ADMIN) -->
+  <div id="modal-edit-maint" class="fixed inset-0 z-[56] hidden items-end md:items-center justify-center bg-secondary/45 md:p-6" role="dialog" aria-modal="true" aria-labelledby="sheet-edit-maint-title">
+    <div class="sheet-panel w-full max-w-md md:max-w-lg bg-surface-card rounded-t-xl md:rounded-xl shadow-lg p-gutter-xl pt-gutter-md flex flex-col gap-gutter-md">
+      <div class="w-10 h-1 rounded-full bg-outline mx-auto md:hidden" aria-hidden="true"></div>
+      <header class="flex items-start justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs min-w-0">
+          <h2 id="sheet-edit-maint-title" class="font-headline text-headline-md text-on-surface">Editar Mantención</h2>
+          <p id="edit-maint-subtitle" class="font-mono text-mono-sm text-on-surface-variant truncate">MNT-...</p>
+        </div>
+        <button type="button" data-close-modal="modal-edit-maint" aria-label="Cerrar edición de mantención" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-variant text-on-surface hover:bg-outline transition-colors duration-state-change shrink-0">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <form id="form-edit-maint" class="flex flex-col gap-gutter-sm">
+        <input id="edit-maint-id" type="hidden">
+        <div class="grid grid-cols-2 gap-gutter-xs">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="edit-maint-date" class="font-label text-label-sm text-on-surface">Fecha de visita</label>
+            <input id="edit-maint-date" type="date" required class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-sm py-gutter-sm focus:border-primary focus:ring-primary">
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="edit-maint-type" class="font-label text-label-sm text-on-surface">Tipo</label>
+            <select id="edit-maint-type" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-sm py-gutter-sm focus:border-primary focus:ring-primary">
+              <option value="Preventiva">Preventiva</option>
+              <option value="Correctiva">Correctiva</option>
+              <option value="Emergencia">Emergencia</option>
+              <option value="Certificación">Certificación</option>
+              <option value="Ronda Administración">Ronda Administración</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-gutter-xs">
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="edit-maint-state" class="font-label text-label-sm text-on-surface">Estado resultante</label>
+            <select id="edit-maint-state" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-sm py-gutter-sm focus:border-primary focus:ring-primary">
+              <option value="Operativo">Operativo</option>
+              <option value="En Observacion">En Observación</option>
+              <option value="Fuera de Servicio">Fuera de Servicio</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <label for="edit-maint-cost" class="font-label text-label-sm text-on-surface">Costo CLP (opc.)</label>
+            <input id="edit-maint-cost" type="number" min="0" step="1000" placeholder="0" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-mono text-body-sm px-gutter-sm py-gutter-sm">
+          </div>
+        </div>
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="edit-maint-tech" class="font-label text-label-sm text-on-surface">Técnico / responsable</label>
+          <input id="edit-maint-tech" type="text" class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm">
+        </div>
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="edit-maint-notes" class="font-label text-label-sm text-on-surface">Observaciones técnicas</label>
+          <textarea id="edit-maint-notes" rows="3" required class="w-full rounded-md border border-outline bg-surface-subtle text-on-surface font-body text-body-sm px-gutter-md py-gutter-sm"></textarea>
+        </div>
+        <div class="flex flex-col gap-gutter-xs">
+          <label for="edit-maint-file" class="font-label text-[11px] text-on-surface-variant">Agregar o reemplazar PDF/fotos (opcional)</label>
+          <input id="edit-maint-file" type="file" accept="application/pdf,image/*" multiple class="w-full text-[12px] text-on-surface-variant">
+          <label class="inline-flex items-center gap-gutter-xs text-[11px] text-on-surface-variant">
+            <input id="edit-maint-replace-files" type="checkbox" class="rounded-sm border-outline text-primary">
+            <span>Reemplazar adjuntos anteriores (si subes nuevos archivos)</span>
+          </label>
+        </div>
+        <div class="flex flex-col gap-gutter-xs mt-gutter-xs">
+          <button id="btn-edit-maint-submit" type="submit" class="w-full min-h-[44px] rounded-md bg-primary text-on-primary font-label text-label-md hover:bg-secondary transition-colors duration-state-change">Guardar cambios</button>
+          <button id="btn-delete-maint" type="button" class="w-full min-h-[40px] rounded-md bg-error-container text-on-error-container font-label text-label-sm hover:opacity-90 transition-opacity">Eliminar esta mantención</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Lightweight Feedback Toast -->
   <div id="feedback-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] hidden items-center gap-gutter-sm px-gutter-lg py-gutter-md rounded-full bg-secondary text-on-secondary shadow-md max-w-[90vw]" role="status" aria-live="polite">
     <span id="toast-icon" class="material-symbols-outlined text-[18px] text-success shrink-0" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">check_circle</span>
@@ -1039,6 +1177,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="./app.js?v=20261124a"></script>
+  <script src="./app.js?v=20261124c"></script>
 </body>
 </html>
