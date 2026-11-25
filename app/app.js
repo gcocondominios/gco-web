@@ -344,6 +344,11 @@
       pillIcon.className = 'material-symbols-outlined text-[16px] text-warning';
       pillIcon.textContent = 'schedule';
       eqIconBox.className = 'w-10 h-10 rounded-md bg-warning-container text-on-warning-container flex items-center justify-center shrink-0';
+    } else if (sem.color === 'gris') {
+      pill.className = 'inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-subtle text-on-surface-variant border border-outline';
+      pillIcon.className = 'material-symbols-outlined text-[16px] text-on-surface-variant';
+      pillIcon.textContent = 'event_upcoming';
+      eqIconBox.className = 'w-10 h-10 rounded-md bg-surface-subtle text-on-surface-variant flex items-center justify-center shrink-0';
     } else {
       pill.className = 'inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-error-container text-on-error-container';
       pillIcon.className = 'material-symbols-outlined text-[16px] text-error';
@@ -623,19 +628,27 @@
     document.getElementById('dir-count-ok').textContent = String(data.resumen.operativos);
     document.getElementById('dir-count-warn').textContent = String(data.resumen.observacion);
     document.getElementById('dir-count-err').textContent = String(data.resumen.fueraServicio);
+    const pendingEl = document.getElementById('dir-count-pending');
+    if (pendingEl) pendingEl.textContent = String(data.resumen.porProgramar || 0);
 
     const list = document.getElementById('directory-list');
     list.innerHTML = data.equipos.map(function (eq) {
       const sem = eq.semaforo;
       const isOk = sem.color === 'verde';
-      const dataState = isOk ? 'ok' : 'alert';
-      const borderLeft = sem.color === 'rojo' ? 'border-l-4 border-l-error' : (sem.color === 'amarillo' ? 'border-l-4 border-l-warning' : '');
+      const dataState = isOk ? 'ok' : (sem.color === 'gris' ? 'pending' : 'alert');
+      const borderLeft = sem.color === 'rojo'
+        ? 'border-l-4 border-l-error'
+        : (sem.color === 'amarillo' ? 'border-l-4 border-l-warning' : '');
       const iconBg = sem.color === 'rojo'
         ? 'bg-error-container text-on-error-container'
-        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-primary-container text-on-primary-container');
+        : (sem.color === 'amarillo'
+          ? 'bg-warning-container text-on-warning-container'
+          : (sem.color === 'gris' ? 'bg-surface-subtle text-on-surface-variant' : 'bg-primary-container text-on-primary-container'));
       const badgeClass = sem.color === 'rojo'
         ? 'bg-error-container text-on-error-container'
-        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
+        : (sem.color === 'amarillo'
+          ? 'bg-warning-container text-on-warning-container'
+          : (sem.color === 'gris' ? 'bg-surface-subtle text-on-surface-variant border border-outline' : 'bg-success-container text-on-success-container'));
 
       return (
         '<button type="button" data-equipo-id="' + escapeHtml(eq.id) + '" data-state="' + dataState + '" class="dir-asset-item text-left w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle ' + borderLeft + ' p-gutter-md lg:p-gutter-lg shadow-gco flex items-center justify-between gap-gutter-sm hover:bg-surface-subtle transition-colors duration-state-change">' +
@@ -2516,13 +2529,17 @@
     const vencidas = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'rojo'; }).length;
     const porVencer = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'amarillo'; }).length;
     const alDia = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'verde'; }).length;
+    const porProgramar = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'gris'; }).length;
 
     const agendaStrip = equipos.length > 0
       ? '<div class="grid grid-cols-3 gap-gutter-xs">' +
           '<div class="bg-error-container text-on-error-container rounded-md p-gutter-sm text-center"><div class="font-headline text-title-md">' + vencidas + '</div><div class="font-label text-[11px]">Vencidas/Alerta</div></div>' +
           '<div class="bg-warning-container text-on-warning-container rounded-md p-gutter-sm text-center"><div class="font-headline text-title-md">' + porVencer + '</div><div class="font-label text-[11px]">Por vencer</div></div>' +
           '<div class="bg-success-container text-on-success-container rounded-md p-gutter-sm text-center"><div class="font-headline text-title-md">' + alDia + '</div><div class="font-label text-[11px]">Al día</div></div>' +
-        '</div>'
+        '</div>' +
+        (porProgramar > 0
+          ? '<p class="font-label text-[11px] text-on-surface-variant text-center">Pendientes de primera mantención (por programar): <strong>' + porProgramar + '</strong></p>'
+          : '')
       : '';
 
     const printTopBtn = equipos.length > 0
@@ -2540,7 +2557,9 @@
       const sem = eq.semaforo || { color: 'verde', etiquetaCorta: 'Al día', proximaVisita: '--' };
       const semCls = sem.color === 'rojo'
         ? 'bg-error-container text-on-error-container'
-        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
+        : (sem.color === 'amarillo'
+          ? 'bg-warning-container text-on-warning-container'
+          : (sem.color === 'gris' ? 'bg-surface-subtle text-on-surface-variant border border-outline' : 'bg-success-container text-on-success-container'));
       return (
         '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
           '<div class="flex items-start justify-between gap-gutter-sm">' +
@@ -2770,9 +2789,12 @@
   }
 
   function renderCommitteeModal(data) {
-    document.getElementById('committee-building-subtitle').textContent = data.edificio.nombre + ' · Actualizado ' + formatShortDate(data.generadoEn);
-
     const r = data.resumen;
+    document.getElementById('committee-building-subtitle').textContent =
+      data.edificio.nombre +
+      ' · Actualizado ' + formatShortDate(data.generadoEn) +
+      ((r.porProgramar || 0) > 0 ? ' · ' + r.porProgramar + ' por programar' : '');
+
     document.getElementById('committee-summary-cards').innerHTML =
       '<div class="bg-success-container text-on-success-container rounded-md p-gutter-md flex flex-col gap-gutter-xs">' +
         '<span class="font-label text-label-sm">Operativos</span>' +
@@ -2791,7 +2813,9 @@
       const sem = eq.semaforo;
       const badgeClass = sem.color === 'rojo'
         ? 'bg-error-container text-on-error-container'
-        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
+        : (sem.color === 'amarillo'
+          ? 'bg-warning-container text-on-warning-container'
+          : (sem.color === 'gris' ? 'bg-surface-subtle text-on-surface-variant border border-outline' : 'bg-success-container text-on-success-container'));
       const pdfLink = splitLinks(eq.ultimoPdf)[0] || '';
       const pdfHtml = pdfLink
         ? '<a href="' + escapeHtml(pdfLink) + '" target="_blank" rel="noopener noreferrer" class="font-label text-label-sm text-primary hover:underline">Ver PDF</a>'

@@ -13,7 +13,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Red+Hat+Mono:wght@500&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=20261124h">
+  <link rel="stylesheet" href="./style.css?v=20261125a">
 </head>
 <body class="bg-surface text-on-surface font-body antialiased">
 
@@ -252,7 +252,7 @@
 
         <section id="directory-notices-box" class="hidden flex-col gap-gutter-sm" aria-label="Avisos de administración"></section>
 
-        <div class="grid grid-cols-3 gap-gutter-sm">
+        <div class="grid grid-cols-2 gap-gutter-sm">
           <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
             <div class="flex items-center gap-gutter-xs">
               <span class="w-2.5 h-2.5 rounded-full bg-success shrink-0" aria-hidden="true"></span>
@@ -273,6 +273,13 @@
               <span class="font-label text-label-sm text-on-surface-variant">Alerta</span>
             </div>
             <span id="dir-count-err" class="font-headline text-headline-md text-on-surface tabular-nums">0</span>
+          </div>
+          <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center gap-gutter-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-outline shrink-0" aria-hidden="true"></span>
+              <span class="font-label text-label-sm text-on-surface-variant">Por programar</span>
+            </div>
+            <span id="dir-count-pending" class="font-headline text-headline-md text-on-surface tabular-nums">0</span>
           </div>
         </div>
 
@@ -1150,7 +1157,7 @@
     <span id="toast-message" class="font-label text-label-md truncate">Acción registrada</span>
   </div>
 
-  <script src="./qrcode.min.js?v=20261124h"></script>
-  <script src="./app.js?v=20261124h"></script>
+  <script src="./qrcode.min.js?v=20261125a"></script>
+  <script src="./app.js?v=20261125a"></script>
 </body>
 </html>
