@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gco-app-v25';
+const CACHE_NAME = 'gco-app-v24';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const SHELL_ASSETS = [
   './qrcode.min.js',
   './app.js',
   './manifest.json',
+  '../img/logo.png',
 ];
 
 self.addEventListener('install', function (event) {

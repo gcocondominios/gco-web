@@ -344,11 +344,6 @@
       pillIcon.className = 'material-symbols-outlined text-[16px] text-warning';
       pillIcon.textContent = 'schedule';
       eqIconBox.className = 'w-10 h-10 rounded-md bg-warning-container text-on-warning-container flex items-center justify-center shrink-0';
-    } else if (sem.color === 'gris') {
-      pill.className = 'inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-subtle text-on-surface-variant border border-outline';
-      pillIcon.className = 'material-symbols-outlined text-[16px] text-on-surface-variant';
-      pillIcon.textContent = 'event_upcoming';
-      eqIconBox.className = 'w-10 h-10 rounded-md bg-surface-subtle text-on-surface-variant flex items-center justify-center shrink-0';
     } else {
       pill.className = 'inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-error-container text-on-error-container';
       pillIcon.className = 'material-symbols-outlined text-[16px] text-error';
@@ -628,53 +623,19 @@
     document.getElementById('dir-count-ok').textContent = String(data.resumen.operativos);
     document.getElementById('dir-count-warn').textContent = String(data.resumen.observacion);
     document.getElementById('dir-count-err').textContent = String(data.resumen.fueraServicio);
-    const pendingEl = document.getElementById('dir-count-pending');
-    if (pendingEl) pendingEl.textContent = String(data.resumen.porProgramar || 0);
-
-    const isOpsOrAdmin = Boolean(
-      state.session &&
-      state.session.user &&
-      (state.session.user.rol === 'operaciones' || state.session.user.rol === 'admin')
-    );
-    const todayRonda = isOpsOrAdmin ? getTodayRondaStatusMap(data.edificio.id) : null;
 
     const list = document.getElementById('directory-list');
     list.innerHTML = data.equipos.map(function (eq) {
       const sem = eq.semaforo;
       const isOk = sem.color === 'verde';
-      const dataState = isOk ? 'ok' : (sem.color === 'gris' ? 'pending' : 'alert');
-      const borderLeft = sem.color === 'rojo'
-        ? 'border-l-4 border-l-error'
-        : (sem.color === 'amarillo' ? 'border-l-4 border-l-warning' : '');
+      const dataState = isOk ? 'ok' : 'alert';
+      const borderLeft = sem.color === 'rojo' ? 'border-l-4 border-l-error' : (sem.color === 'amarillo' ? 'border-l-4 border-l-warning' : '');
       const iconBg = sem.color === 'rojo'
         ? 'bg-error-container text-on-error-container'
-        : (sem.color === 'amarillo'
-          ? 'bg-warning-container text-on-warning-container'
-          : (sem.color === 'gris' ? 'bg-surface-subtle text-on-surface-variant' : 'bg-primary-container text-on-primary-container'));
+        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-primary-container text-on-primary-container');
       const badgeClass = sem.color === 'rojo'
         ? 'bg-error-container text-on-error-container'
-        : (sem.color === 'amarillo'
-          ? 'bg-warning-container text-on-warning-container'
-          : (sem.color === 'gris' ? 'bg-surface-subtle text-on-surface-variant border border-outline' : 'bg-success-container text-on-success-container'));
-
-      let rondaBadgeHtml = '';
-      if (isOpsOrAdmin && todayRonda) {
-        const eqKey = String(eq.id || '').toLowerCase();
-        const areaKey = (String(eq.nombre || '') + ' (#' + String(eq.id || '') + ')').toLowerCase();
-        const hit = todayRonda.byEqIdLower[eqKey] || todayRonda.byAreaLower[areaKey] || null;
-        if (hit && hit.item) {
-          const est = String(hit.item.estado || 'Conforme').toLowerCase();
-          if (est.indexOf('urg') !== -1) {
-            rondaBadgeHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label text-[10px] shrink-0">! Urgente hoy</span>';
-          } else if (est.indexOf('obs') !== -1) {
-            rondaBadgeHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-warning-container text-on-warning-container font-label text-[10px] shrink-0">! Obs. hoy</span>';
-          } else {
-            rondaBadgeHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-success-container text-on-success-container font-label text-[10px] shrink-0">✓ Revisado hoy</span>';
-          }
-        } else if (todayRonda.items.length > 0) {
-          rondaBadgeHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-subtle text-on-surface-variant border border-outline font-label text-[10px] shrink-0">○ Pendiente hoy</span>';
-        }
-      }
+        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
 
       return (
         '<button type="button" data-equipo-id="' + escapeHtml(eq.id) + '" data-state="' + dataState + '" class="dir-asset-item text-left w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle ' + borderLeft + ' p-gutter-md lg:p-gutter-lg shadow-gco flex items-center justify-between gap-gutter-sm hover:bg-surface-subtle transition-colors duration-state-change">' +
@@ -683,10 +644,7 @@
               '<span class="material-symbols-outlined text-[20px]">' + guessEquipmentIcon(eq.nombre, eq.id) + '</span>' +
             '</div>' +
             '<div class="flex flex-col gap-0.5 min-w-0 flex-1">' +
-              '<div class="flex items-center gap-gutter-xs flex-wrap">' +
-                '<span class="font-title text-title-sm text-on-surface leading-snug">' + escapeHtml(eq.nombre) + '</span>' +
-                rondaBadgeHtml +
-              '</div>' +
+              '<span class="font-title text-title-sm text-on-surface leading-snug">' + escapeHtml(eq.nombre) + '</span>' +
               '<span class="font-label text-[11px] lg:text-label-sm text-on-surface-variant tabular-nums whitespace-nowrap truncate">#' + escapeHtml(eq.id) + ' · ' + escapeHtml(formatShortDate(sem.ultimaVisita)) + '</span>' +
             '</div>' +
           '</div>' +
@@ -697,8 +655,6 @@
         '</button>'
       );
     }).join('');
-
-    renderDirectoryRondaBanner(data, isOpsOrAdmin, todayRonda);
 
     list.querySelectorAll('.dir-asset-item').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -2560,17 +2516,13 @@
     const vencidas = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'rojo'; }).length;
     const porVencer = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'amarillo'; }).length;
     const alDia = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'verde'; }).length;
-    const porProgramar = equipos.filter(function (e) { return e.semaforo && e.semaforo.color === 'gris'; }).length;
 
     const agendaStrip = equipos.length > 0
       ? '<div class="grid grid-cols-3 gap-gutter-xs">' +
           '<div class="bg-error-container text-on-error-container rounded-md p-gutter-sm text-center"><div class="font-headline text-title-md">' + vencidas + '</div><div class="font-label text-[11px]">Vencidas/Alerta</div></div>' +
           '<div class="bg-warning-container text-on-warning-container rounded-md p-gutter-sm text-center"><div class="font-headline text-title-md">' + porVencer + '</div><div class="font-label text-[11px]">Por vencer</div></div>' +
           '<div class="bg-success-container text-on-success-container rounded-md p-gutter-sm text-center"><div class="font-headline text-title-md">' + alDia + '</div><div class="font-label text-[11px]">Al día</div></div>' +
-        '</div>' +
-        (porProgramar > 0
-          ? '<p class="font-label text-[11px] text-on-surface-variant text-center">Pendientes de primera mantención (por programar): <strong>' + porProgramar + '</strong></p>'
-          : '')
+        '</div>'
       : '';
 
     const printTopBtn = equipos.length > 0
@@ -2588,9 +2540,7 @@
       const sem = eq.semaforo || { color: 'verde', etiquetaCorta: 'Al día', proximaVisita: '--' };
       const semCls = sem.color === 'rojo'
         ? 'bg-error-container text-on-error-container'
-        : (sem.color === 'amarillo'
-          ? 'bg-warning-container text-on-warning-container'
-          : (sem.color === 'gris' ? 'bg-surface-subtle text-on-surface-variant border border-outline' : 'bg-success-container text-on-success-container'));
+        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
       return (
         '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
           '<div class="flex items-start justify-between gap-gutter-sm">' +
@@ -2690,7 +2640,108 @@
     });
   }
 
-  function openQrModal(eq, qrUrl) {
+  let gcoLogoPromise = null;
+  function loadGcoLogoImage() {
+    if (gcoLogoPromise) return gcoLogoPromise;
+    gcoLogoPromise = new Promise(function (resolve) {
+      const existing = document.querySelector('#brand-logo-box img');
+      if (existing && existing.complete && existing.naturalWidth > 0) {
+        resolve(existing);
+        return;
+      }
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function () {
+        resolve(img.naturalWidth > 0 ? img : null);
+      };
+      img.onerror = function () {
+        gcoLogoPromise = null;
+        resolve(null);
+      };
+      img.src = '../img/logo.png';
+    });
+    return gcoLogoPromise;
+  }
+
+  async function createBrandedQrCanvas(text, displaySize) {
+    const size = displaySize || 220;
+    const scale = 2;
+    const px = size * scale;
+    const canvas = document.createElement('canvas');
+    canvas.width = px;
+    canvas.height = px;
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+    canvas.style.display = 'block';
+    canvas.style.borderRadius = '8px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, px, px);
+
+    const logoImg = await loadGcoLogoImage();
+    const quiet = Math.round(px * 0.045);
+    const inner = px - quiet * 2;
+
+    if (logoImg && logoImg.naturalWidth > 0 && logoImg.naturalHeight > 0) {
+      const maxW = inner * 0.88;
+      const maxH = inner * 0.88;
+      const ratio = Math.min(maxW / logoImg.naturalWidth, maxH / logoImg.naturalHeight);
+      const drawW = logoImg.naturalWidth * ratio;
+      const drawH = logoImg.naturalHeight * ratio;
+      const drawX = (px - drawW) / 2;
+      const drawY = (px - drawH) / 2;
+      ctx.save();
+      ctx.globalAlpha = 0.22;
+      ctx.drawImage(logoImg, drawX, drawY, drawW, drawH);
+      ctx.restore();
+    }
+
+    const temp = document.createElement('div');
+    temp.style.cssText = 'position:fixed;left:-9999px;top:-9999px;visibility:hidden;';
+    document.body.appendChild(temp);
+    try {
+      const qr = new QRCode(temp, {
+        text: text,
+        width: inner,
+        height: inner,
+        colorDark: '#0F2942',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.H,
+      });
+
+      if (qr && qr._oQRCode && typeof qr._oQRCode.getModuleCount === 'function') {
+        const count = qr._oQRCode.getModuleCount();
+        const cell = inner / count;
+        ctx.fillStyle = '#0F2942';
+        for (let r = 0; r < count; r++) {
+          for (let c = 0; c < count; c++) {
+            if (qr._oQRCode.isDark(r, c)) {
+              const x = quiet + Math.floor(c * cell);
+              const y = quiet + Math.floor(r * cell);
+              const w = Math.ceil((c + 1) * cell) - Math.floor(c * cell);
+              const h = Math.ceil((r + 1) * cell) - Math.floor(r * cell);
+              ctx.fillRect(x, y, w, h);
+            }
+          }
+        }
+      } else {
+        const srcCanvas = temp.querySelector('canvas');
+        if (srcCanvas) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'multiply';
+          ctx.drawImage(srcCanvas, quiet, quiet, inner, inner);
+          ctx.restore();
+        }
+      }
+    } finally {
+      document.body.removeChild(temp);
+    }
+
+    return canvas;
+  }
+
+  async function openQrModal(eq, qrUrl) {
     document.getElementById('sheet-qr-title').textContent = eq.nombre;
     document.getElementById('qr-modal-subtitle').textContent = eq.edificioId + ' · Equipo #' + eq.equipoId;
     document.getElementById('qr-url-preview').textContent = qrUrl;
@@ -2703,14 +2754,10 @@
       return;
     }
 
-    new QRCode(box, {
-      text: qrUrl,
-      width: 220,
-      height: 220,
-      colorDark: '#0F2942',
-      colorLight: '#FFFFFF',
-      correctLevel: QRCode.CorrectLevel.M,
-    });
+    openModal('modal-qr');
+    const qrCanvas = await createBrandedQrCanvas(qrUrl, 232);
+    box.innerHTML = '';
+    box.appendChild(qrCanvas);
 
     document.getElementById('btn-download-qr').onclick = function () {
       const canvas = box.querySelector('canvas');
@@ -2732,11 +2779,9 @@
     document.getElementById('btn-print-single-qr').onclick = function () {
       printQrCards([eq]);
     };
-
-    openModal('modal-qr');
   }
 
-  function printQrCards(equipos) {
+  async function printQrCards(equipos) {
     if (typeof QRCode === 'undefined') {
       showToast('Librería QR no disponible', true);
       return;
@@ -2758,7 +2803,8 @@
       '</div>';
 
     const grid = document.getElementById('print-qr-grid');
-    equipos.forEach(function (eq, idx) {
+    for (let idx = 0; idx < equipos.length; idx++) {
+      const eq = equipos[idx];
       const qrUrl = base + '?edificio=' + encodeURIComponent(eq.edificioId) + '&equipo=' + encodeURIComponent(eq.equipoId);
       const card = document.createElement('div');
       card.style.cssText = 'border: 1px solid #DEE3ED; border-radius: 12px; padding: 16px; text-align: center; page-break-inside: avoid; background: #FFFFFF;';
@@ -2769,15 +2815,14 @@
         '<div style="font-size: 11px; color: #49607C; margin-top: 10px;">Escanea para ver estado, PDF o reportar fallas</div>';
       grid.appendChild(card);
 
-      new QRCode(document.getElementById('print-qr-box-' + idx), {
-        text: qrUrl,
-        width: 150,
-        height: 150,
-        colorDark: '#0F2942',
-        colorLight: '#FFFFFF',
-        correctLevel: QRCode.CorrectLevel.M,
-      });
-    });
+      const qrCanvas = await createBrandedQrCanvas(qrUrl, 164);
+      const qrImg = document.createElement('img');
+      qrImg.src = qrCanvas.toDataURL('image/png');
+      qrImg.width = 164;
+      qrImg.height = 164;
+      qrImg.style.display = 'block';
+      document.getElementById('print-qr-box-' + idx).appendChild(qrImg);
+    }
 
     const committeeSheet = document.getElementById('print-committee-sheet');
     if (committeeSheet) committeeSheet.classList.remove('print-active');
@@ -2820,12 +2865,9 @@
   }
 
   function renderCommitteeModal(data) {
-    const r = data.resumen;
-    document.getElementById('committee-building-subtitle').textContent =
-      data.edificio.nombre +
-      ' · Actualizado ' + formatShortDate(data.generadoEn) +
-      ((r.porProgramar || 0) > 0 ? ' · ' + r.porProgramar + ' por programar' : '');
+    document.getElementById('committee-building-subtitle').textContent = data.edificio.nombre + ' · Actualizado ' + formatShortDate(data.generadoEn);
 
+    const r = data.resumen;
     document.getElementById('committee-summary-cards').innerHTML =
       '<div class="bg-success-container text-on-success-container rounded-md p-gutter-md flex flex-col gap-gutter-xs">' +
         '<span class="font-label text-label-sm">Operativos</span>' +
@@ -2844,9 +2886,7 @@
       const sem = eq.semaforo;
       const badgeClass = sem.color === 'rojo'
         ? 'bg-error-container text-on-error-container'
-        : (sem.color === 'amarillo'
-          ? 'bg-warning-container text-on-warning-container'
-          : (sem.color === 'gris' ? 'bg-surface-subtle text-on-surface-variant border border-outline' : 'bg-success-container text-on-success-container'));
+        : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
       const pdfLink = splitLinks(eq.ultimoPdf)[0] || '';
       const pdfHtml = pdfLink
         ? '<a href="' + escapeHtml(pdfLink) + '" target="_blank" rel="noopener noreferrer" class="font-label text-label-sm text-primary hover:underline">Ver PDF</a>'
@@ -3537,29 +3577,13 @@
     return false;
   }
 
-  function buildQrDataUrl(text) {
+  async function buildQrDataUrl(text) {
     if (typeof QRCode === 'undefined') return '';
-    const temp = document.createElement('div');
-    temp.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:168px;height:168px;';
-    document.body.appendChild(temp);
     try {
-      new QRCode(temp, {
-        text: text,
-        width: 168,
-        height: 168,
-        colorDark: '#0F2942',
-        colorLight: '#FFFFFF',
-        correctLevel: QRCode.CorrectLevel.M,
-      });
-      const canvas = temp.querySelector('canvas');
-      if (canvas) return canvas.toDataURL('image/png');
-      const img = temp.querySelector('img');
-      if (img && img.src && img.src.indexOf('data:image/') === 0) return img.src;
-      return '';
+      const canvas = await createBrandedQrCanvas(text, 168);
+      return canvas ? canvas.toDataURL('image/png') : '';
     } catch (e) {
       return '';
-    } finally {
-      document.body.removeChild(temp);
     }
   }
 
@@ -3568,12 +3592,12 @@
     const eq = state.data.equipo;
     const edif = state.data.edificio;
     const qrUrl = 'https://gcoadmin.cl/app/?edificio=' + encodeURIComponent(edif.id) + '&equipo=' + encodeURIComponent(eq.id);
-    const qrDataUrl = buildQrDataUrl(qrUrl);
     const prevHtml = triggerBtn ? triggerBtn.innerHTML : '';
     if (triggerBtn) {
       triggerBtn.disabled = true;
       triggerBtn.innerHTML = '<span class="material-symbols-outlined text-[15px]">hourglass_top</span>Generando PDF...';
     }
+    const qrDataUrl = await buildQrDataUrl(qrUrl);
     try {
       const res = await postApi({
         action: 'saveReceiptPdf',
@@ -4133,75 +4157,6 @@
     }
   }
 
-  function getTodayRondaStatusMap(edificioId) {
-    const edif = edificioId || state.edificioId || 'DEMO';
-    const today = getTodayIsoLocal();
-    let rawItems = [];
-    if (String(edif) === String(state.edificioId) && Array.isArray(state.rondaItems) && state.rondaItems.length > 0) {
-      rawItems = state.rondaItems;
-    } else {
-      try {
-        const raw = localStorage.getItem('gco_ronda_draft_v1_' + edif);
-        rawItems = raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        rawItems = [];
-      }
-    }
-    const items = (Array.isArray(rawItems) ? rawItems : []).filter(function (it) {
-      return it && it.espacio && (!it.fechaCarpeta || it.fechaCarpeta === today);
-    });
-    const byAreaLower = {};
-    const byEqIdLower = {};
-    items.forEach(function (it, idx) {
-      const esp = String(it.espacio || '').trim();
-      byAreaLower[esp.toLowerCase()] = { item: it, idx: idx };
-      const m = esp.match(/\(#([^)]+)\)/);
-      if (m && m[1]) {
-        byEqIdLower[String(m[1]).trim().toLowerCase()] = { item: it, idx: idx };
-      }
-    });
-    return { items: items, byAreaLower: byAreaLower, byEqIdLower: byEqIdLower };
-  }
-
-  function renderDirectoryRondaBanner(data, isOpsOrAdmin, todayRonda) {
-    const banner = document.getElementById('dir-ronda-banner');
-    if (!banner) return;
-    if (!isOpsOrAdmin || !data || !data.edificio) {
-      banner.classList.add('hidden');
-      banner.classList.remove('flex');
-      return;
-    }
-    const opts = getRondaAreaOptions();
-    const total = opts.length || 0;
-    const statusMap = todayRonda || getTodayRondaStatusMap(data.edificio.id);
-    let reviewed = 0;
-    opts.forEach(function (o) {
-      if (statusMap.byAreaLower[o.toLowerCase()]) reviewed++;
-    });
-    const pct = total > 0 ? Math.min(100, Math.round((reviewed / total) * 100)) : 0;
-
-    const titleEl = document.getElementById('dir-ronda-title');
-    const subEl = document.getElementById('dir-ronda-sub');
-    const barEl = document.getElementById('dir-ronda-bar');
-    const btnLbl = document.getElementById('btn-dir-open-ronda-label');
-
-    if (titleEl) titleEl.textContent = 'Ronda de hoy: ' + reviewed + ' de ' + total + ' espacios (' + pct + '%)';
-    if (subEl) {
-      if (total > 0 && reviewed >= total) {
-        subEl.textContent = '✓ ¡Recorrido completo! Ya puedes generar y guardar el PDF para el Comité';
-      } else if (reviewed > 0) {
-        subEl.textContent = 'Faltan ' + (total - reviewed) + ' espacio(s) por revisar · Los revisados muestran ✓ verde';
-      } else {
-        subEl.textContent = 'Toca "Iniciar ronda" para ver el recorrido completo y marcar cada espacio con ✓';
-      }
-    }
-    if (barEl) barEl.style.width = pct + '%';
-    if (btnLbl) btnLbl.textContent = reviewed > 0 ? 'Continuar ronda' : 'Iniciar ronda';
-
-    banner.classList.remove('hidden');
-    banner.classList.add('flex');
-  }
-
   function saveRondaDraft() {
     // Para ítems ya respaldados en Drive, no guardamos el base64 pesado en localStorage
     // (ya tenemos fotoFileIds y fotoUrls), evitando llenar el límite de 5 MB en rondas largas.
@@ -4232,12 +4187,6 @@
         });
         localStorage.setItem(getRondaDraftKey(), JSON.stringify(light));
       } catch (e2) {}
-    }
-    if (state.data && state.data.mode === 'edificio') {
-      const dirView = document.getElementById('view-directory');
-      if (dirView && !dirView.classList.contains('hidden')) {
-        renderDirectoryView(state.data);
-      }
     }
   }
 
@@ -4367,72 +4316,6 @@
     }
 
     updateRondaProgress(opts, doneSet);
-    renderRondaVisualMap(opts);
-  }
-
-  function renderRondaVisualMap(optsInput) {
-    const container = document.getElementById('ronda-visual-map');
-    if (!container) return;
-    const opts = optsInput || getRondaAreaOptions();
-    const sel = document.getElementById('ronda-area-select');
-    const currentVal = sel ? sel.value : '';
-
-    const itemByArea = {};
-    (state.rondaItems || []).forEach(function (it, idx) {
-      if (it && it.espacio) {
-        itemByArea[String(it.espacio).toLowerCase()] = { item: it, idx: idx };
-      }
-    });
-
-    container.innerHTML = opts.map(function (o, i) {
-      const hit = itemByArea[o.toLowerCase()];
-      const isSelected = o === currentVal;
-      const ringCls = isSelected ? ' ring-2 ring-primary' : '';
-      let chipCls = 'bg-surface-card text-on-surface border border-outline';
-      let iconName = 'radio_button_unchecked';
-      let iconCls = 'text-on-surface-variant';
-
-      if (hit && hit.item) {
-        const est = String(hit.item.estado || 'Conforme').toLowerCase();
-        if (est.indexOf('urg') !== -1) {
-          chipCls = 'bg-error-container text-on-error-container border border-error';
-          iconName = 'error';
-          iconCls = 'text-error';
-        } else if (est.indexOf('obs') !== -1) {
-          chipCls = 'bg-warning-container text-on-warning-container border border-warning';
-          iconName = 'warning';
-          iconCls = 'text-warning';
-        } else {
-          chipCls = 'bg-success-container text-on-success-container border border-success';
-          iconName = 'check_circle';
-          iconCls = 'text-success';
-        }
-      }
-
-      const shortLabel = o.replace(/\s*\(#[^)]+\)\s*$/, '');
-      return (
-        '<button type="button" data-ronda-map-idx="' + i + '" class="inline-flex items-center gap-1 px-2 py-1 rounded-full font-label text-[11px] transition-colors duration-state-change ' + chipCls + ringCls + '">' +
-          '<span class="material-symbols-outlined text-[14px] ' + iconCls + '" style="font-variation-settings: \'FILL\' 1;" aria-hidden="true">' + iconName + '</span>' +
-          '<span>' + escapeHtml(shortLabel) + '</span>' +
-        '</button>'
-      );
-    }).join('');
-
-    container.querySelectorAll('[data-ronda-map-idx]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const idx = Number(btn.getAttribute('data-ronda-map-idx'));
-        const targetArea = opts[idx];
-        if (!targetArea) return;
-        const hit = itemByArea[targetArea.toLowerCase()];
-        if (hit) {
-          startEditRondaItem(hit.idx);
-        } else {
-          state.rondaEditingIdx = -1;
-          if (sel) sel.value = targetArea;
-          renderRondaVisualMap(opts);
-        }
-      });
-    });
   }
 
   function updateRondaProgress(optsInput, doneSetInput) {
@@ -4562,39 +4445,25 @@
     showToast('Editando: ' + it.espacio);
   }
 
-  function openRondaModalFlow() {
-    const sub = document.getElementById('ronda-building-subtitle');
-    if (sub && state.data && state.data.edificio) {
-      sub.textContent = state.data.edificio.nombre + ' · Fotos e informe se respaldan en Drive';
-    }
-    const banner = document.getElementById('ronda-backup-banner');
-    if (banner) {
-      banner.classList.add('hidden');
-      banner.classList.remove('flex');
-    }
-    state.rondaSavedToDrive = false;
-    loadRondaDraft();
-    resetRondaForm(false);
-    renderRondaItemsList();
-    openModal('modal-ronda');
-    syncPendingRondaPhotos();
-  }
-
   function bindRondaEvents() {
     const btnOpen = document.getElementById('btn-open-ronda');
     if (btnOpen) {
-      btnOpen.addEventListener('click', openRondaModalFlow);
-    }
-
-    const btnDirOpen = document.getElementById('btn-dir-open-ronda');
-    if (btnDirOpen) {
-      btnDirOpen.addEventListener('click', openRondaModalFlow);
-    }
-
-    const areaSel = document.getElementById('ronda-area-select');
-    if (areaSel) {
-      areaSel.addEventListener('change', function () {
-        renderRondaVisualMap();
+      btnOpen.addEventListener('click', function () {
+        const sub = document.getElementById('ronda-building-subtitle');
+        if (sub && state.data && state.data.edificio) {
+          sub.textContent = state.data.edificio.nombre + ' · Fotos e informe se respaldan en Drive';
+        }
+        const banner = document.getElementById('ronda-backup-banner');
+        if (banner) {
+          banner.classList.add('hidden');
+          banner.classList.remove('flex');
+        }
+        state.rondaSavedToDrive = false;
+        loadRondaDraft();
+        resetRondaForm(false);
+        renderRondaItemsList();
+        openModal('modal-ronda');
+        syncPendingRondaPhotos();
       });
     }
 
