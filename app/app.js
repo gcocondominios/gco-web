@@ -631,6 +631,13 @@
     const pendingEl = document.getElementById('dir-count-pending');
     if (pendingEl) pendingEl.textContent = String(data.resumen.porProgramar || 0);
 
+    const isOpsOrAdmin = Boolean(
+      state.session &&
+      state.session.user &&
+      (state.session.user.rol === 'operaciones' || state.session.user.rol === 'admin')
+    );
+    const todayRonda = isOpsOrAdmin ? getTodayRondaStatusMap(data.edificio.id) : null;
+
     const list = document.getElementById('directory-list');
     list.innerHTML = data.equipos.map(function (eq) {
       const sem = eq.semaforo;
@@ -650,6 +657,25 @@
           ? 'bg-warning-container text-on-warning-container'
           : (sem.color === 'gris' ? 'bg-surface-subtle text-on-surface-variant border border-outline' : 'bg-success-container text-on-success-container'));
 
+      let rondaBadgeHtml = '';
+      if (isOpsOrAdmin && todayRonda) {
+        const eqKey = String(eq.id || '').toLowerCase();
+        const areaKey = (String(eq.nombre || '') + ' (#' + String(eq.id || '') + ')').toLowerCase();
+        const hit = todayRonda.byEqIdLower[eqKey] || todayRonda.byAreaLower[areaKey] || null;
+        if (hit && hit.item) {
+          const est = String(hit.item.estado || 'Conforme').toLowerCase();
+          if (est.indexOf('urg') !== -1) {
+            rondaBadgeHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label text-[10px] shrink-0">! Urgente hoy</span>';
+          } else if (est.indexOf('obs') !== -1) {
+            rondaBadgeHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-warning-container text-on-warning-container font-label text-[10px] shrink-0">! Obs. hoy</span>';
+          } else {
+            rondaBadgeHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-success-container text-on-success-container font-label text-[10px] shrink-0">✓ Revisado hoy</span>';
+          }
+        } else if (todayRonda.items.length > 0) {
+          rondaBadgeHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-subtle text-on-surface-variant border border-outline font-label text-[10px] shrink-0">○ Pendiente hoy</span>';
+        }
+      }
+
       return (
         '<button type="button" data-equipo-id="' + escapeHtml(eq.id) + '" data-state="' + dataState + '" class="dir-asset-item text-left w-full bg-surface-card text-on-surface-card rounded-lg border border-outline-subtle ' + borderLeft + ' p-gutter-md lg:p-gutter-lg shadow-gco flex items-center justify-between gap-gutter-sm hover:bg-surface-subtle transition-colors duration-state-change">' +
           '<div class="flex items-center gap-gutter-sm lg:gap-gutter-md min-w-0 flex-1">' +
@@ -657,7 +683,10 @@
               '<span class="material-symbols-outlined text-[20px]">' + guessEquipmentIcon(eq.nombre, eq.id) + '</span>' +
             '</div>' +
             '<div class="flex flex-col gap-0.5 min-w-0 flex-1">' +
-              '<span class="font-title text-title-sm text-on-surface leading-snug">' + escapeHtml(eq.nombre) + '</span>' +
+              '<div class="flex items-center gap-gutter-xs flex-wrap">' +
+                '<span class="font-title text-title-sm text-on-surface leading-snug">' + escapeHtml(eq.nombre) + '</span>' +
+                rondaBadgeHtml +
+              '</div>' +
               '<span class="font-label text-[11px] lg:text-label-sm text-on-surface-variant tabular-nums whitespace-nowrap truncate">#' + escapeHtml(eq.id) + ' · ' + escapeHtml(formatShortDate(sem.ultimaVisita)) + '</span>' +
             '</div>' +
           '</div>' +
@@ -668,6 +697,8 @@
         '</button>'
       );
     }).join('');
+
+    renderDirectoryRondaBanner(data, isOpsOrAdmin, todayRonda);
 
     list.querySelectorAll('.dir-asset-item').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -4102,6 +4133,75 @@
     }
   }
 
+  function getTodayRondaStatusMap(edificioId) {
+    const edif = edificioId || state.edificioId || 'DEMO';
+    const today = getTodayIsoLocal();
+    let rawItems = [];
+    if (String(edif) === String(state.edificioId) && Array.isArray(state.rondaItems) && state.rondaItems.length > 0) {
+      rawItems = state.rondaItems;
+    } else {
+      try {
+        const raw = localStorage.getItem('gco_ronda_draft_v1_' + edif);
+        rawItems = raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        rawItems = [];
+      }
+    }
+    const items = (Array.isArray(rawItems) ? rawItems : []).filter(function (it) {
+      return it && it.espacio && (!it.fechaCarpeta || it.fechaCarpeta === today);
+    });
+    const byAreaLower = {};
+    const byEqIdLower = {};
+    items.forEach(function (it, idx) {
+      const esp = String(it.espacio || '').trim();
+      byAreaLower[esp.toLowerCase()] = { item: it, idx: idx };
+      const m = esp.match(/\(#([^)]+)\)/);
+      if (m && m[1]) {
+        byEqIdLower[String(m[1]).trim().toLowerCase()] = { item: it, idx: idx };
+      }
+    });
+    return { items: items, byAreaLower: byAreaLower, byEqIdLower: byEqIdLower };
+  }
+
+  function renderDirectoryRondaBanner(data, isOpsOrAdmin, todayRonda) {
+    const banner = document.getElementById('dir-ronda-banner');
+    if (!banner) return;
+    if (!isOpsOrAdmin || !data || !data.edificio) {
+      banner.classList.add('hidden');
+      banner.classList.remove('flex');
+      return;
+    }
+    const opts = getRondaAreaOptions();
+    const total = opts.length || 0;
+    const statusMap = todayRonda || getTodayRondaStatusMap(data.edificio.id);
+    let reviewed = 0;
+    opts.forEach(function (o) {
+      if (statusMap.byAreaLower[o.toLowerCase()]) reviewed++;
+    });
+    const pct = total > 0 ? Math.min(100, Math.round((reviewed / total) * 100)) : 0;
+
+    const titleEl = document.getElementById('dir-ronda-title');
+    const subEl = document.getElementById('dir-ronda-sub');
+    const barEl = document.getElementById('dir-ronda-bar');
+    const btnLbl = document.getElementById('btn-dir-open-ronda-label');
+
+    if (titleEl) titleEl.textContent = 'Ronda de hoy: ' + reviewed + ' de ' + total + ' espacios (' + pct + '%)';
+    if (subEl) {
+      if (total > 0 && reviewed >= total) {
+        subEl.textContent = '✓ ¡Recorrido completo! Ya puedes generar y guardar el PDF para el Comité';
+      } else if (reviewed > 0) {
+        subEl.textContent = 'Faltan ' + (total - reviewed) + ' espacio(s) por revisar · Los revisados muestran ✓ verde';
+      } else {
+        subEl.textContent = 'Toca "Iniciar ronda" para ver el recorrido completo y marcar cada espacio con ✓';
+      }
+    }
+    if (barEl) barEl.style.width = pct + '%';
+    if (btnLbl) btnLbl.textContent = reviewed > 0 ? 'Continuar ronda' : 'Iniciar ronda';
+
+    banner.classList.remove('hidden');
+    banner.classList.add('flex');
+  }
+
   function saveRondaDraft() {
     // Para ítems ya respaldados en Drive, no guardamos el base64 pesado en localStorage
     // (ya tenemos fotoFileIds y fotoUrls), evitando llenar el límite de 5 MB en rondas largas.
@@ -4132,6 +4232,12 @@
         });
         localStorage.setItem(getRondaDraftKey(), JSON.stringify(light));
       } catch (e2) {}
+    }
+    if (state.data && state.data.mode === 'edificio') {
+      const dirView = document.getElementById('view-directory');
+      if (dirView && !dirView.classList.contains('hidden')) {
+        renderDirectoryView(state.data);
+      }
     }
   }
 
@@ -4261,6 +4367,72 @@
     }
 
     updateRondaProgress(opts, doneSet);
+    renderRondaVisualMap(opts);
+  }
+
+  function renderRondaVisualMap(optsInput) {
+    const container = document.getElementById('ronda-visual-map');
+    if (!container) return;
+    const opts = optsInput || getRondaAreaOptions();
+    const sel = document.getElementById('ronda-area-select');
+    const currentVal = sel ? sel.value : '';
+
+    const itemByArea = {};
+    (state.rondaItems || []).forEach(function (it, idx) {
+      if (it && it.espacio) {
+        itemByArea[String(it.espacio).toLowerCase()] = { item: it, idx: idx };
+      }
+    });
+
+    container.innerHTML = opts.map(function (o, i) {
+      const hit = itemByArea[o.toLowerCase()];
+      const isSelected = o === currentVal;
+      const ringCls = isSelected ? ' ring-2 ring-primary' : '';
+      let chipCls = 'bg-surface-card text-on-surface border border-outline';
+      let iconName = 'radio_button_unchecked';
+      let iconCls = 'text-on-surface-variant';
+
+      if (hit && hit.item) {
+        const est = String(hit.item.estado || 'Conforme').toLowerCase();
+        if (est.indexOf('urg') !== -1) {
+          chipCls = 'bg-error-container text-on-error-container border border-error';
+          iconName = 'error';
+          iconCls = 'text-error';
+        } else if (est.indexOf('obs') !== -1) {
+          chipCls = 'bg-warning-container text-on-warning-container border border-warning';
+          iconName = 'warning';
+          iconCls = 'text-warning';
+        } else {
+          chipCls = 'bg-success-container text-on-success-container border border-success';
+          iconName = 'check_circle';
+          iconCls = 'text-success';
+        }
+      }
+
+      const shortLabel = o.replace(/\s*\(#[^)]+\)\s*$/, '');
+      return (
+        '<button type="button" data-ronda-map-idx="' + i + '" class="inline-flex items-center gap-1 px-2 py-1 rounded-full font-label text-[11px] transition-colors duration-state-change ' + chipCls + ringCls + '">' +
+          '<span class="material-symbols-outlined text-[14px] ' + iconCls + '" style="font-variation-settings: \'FILL\' 1;" aria-hidden="true">' + iconName + '</span>' +
+          '<span>' + escapeHtml(shortLabel) + '</span>' +
+        '</button>'
+      );
+    }).join('');
+
+    container.querySelectorAll('[data-ronda-map-idx]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const idx = Number(btn.getAttribute('data-ronda-map-idx'));
+        const targetArea = opts[idx];
+        if (!targetArea) return;
+        const hit = itemByArea[targetArea.toLowerCase()];
+        if (hit) {
+          startEditRondaItem(hit.idx);
+        } else {
+          state.rondaEditingIdx = -1;
+          if (sel) sel.value = targetArea;
+          renderRondaVisualMap(opts);
+        }
+      });
+    });
   }
 
   function updateRondaProgress(optsInput, doneSetInput) {
@@ -4390,25 +4562,39 @@
     showToast('Editando: ' + it.espacio);
   }
 
+  function openRondaModalFlow() {
+    const sub = document.getElementById('ronda-building-subtitle');
+    if (sub && state.data && state.data.edificio) {
+      sub.textContent = state.data.edificio.nombre + ' · Fotos e informe se respaldan en Drive';
+    }
+    const banner = document.getElementById('ronda-backup-banner');
+    if (banner) {
+      banner.classList.add('hidden');
+      banner.classList.remove('flex');
+    }
+    state.rondaSavedToDrive = false;
+    loadRondaDraft();
+    resetRondaForm(false);
+    renderRondaItemsList();
+    openModal('modal-ronda');
+    syncPendingRondaPhotos();
+  }
+
   function bindRondaEvents() {
     const btnOpen = document.getElementById('btn-open-ronda');
     if (btnOpen) {
-      btnOpen.addEventListener('click', function () {
-        const sub = document.getElementById('ronda-building-subtitle');
-        if (sub && state.data && state.data.edificio) {
-          sub.textContent = state.data.edificio.nombre + ' · Fotos e informe se respaldan en Drive';
-        }
-        const banner = document.getElementById('ronda-backup-banner');
-        if (banner) {
-          banner.classList.add('hidden');
-          banner.classList.remove('flex');
-        }
-        state.rondaSavedToDrive = false;
-        loadRondaDraft();
-        resetRondaForm(false);
-        renderRondaItemsList();
-        openModal('modal-ronda');
-        syncPendingRondaPhotos();
+      btnOpen.addEventListener('click', openRondaModalFlow);
+    }
+
+    const btnDirOpen = document.getElementById('btn-dir-open-ronda');
+    if (btnDirOpen) {
+      btnDirOpen.addEventListener('click', openRondaModalFlow);
+    }
+
+    const areaSel = document.getElementById('ronda-area-select');
+    if (areaSel) {
+      areaSel.addEventListener('change', function () {
+        renderRondaVisualMap();
       });
     }
 

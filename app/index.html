@@ -13,7 +13,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Red+Hat+Mono:wght@500&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=20261125a">
+  <link rel="stylesheet" href="./style.css?v=20261125b">
 </head>
 <body class="bg-surface text-on-surface font-body antialiased">
 
@@ -251,6 +251,25 @@
         </div>
 
         <section id="directory-notices-box" class="hidden flex-col gap-gutter-sm" aria-label="Avisos de administración"></section>
+
+        <section id="dir-ronda-banner" class="hidden flex-col gap-gutter-sm bg-surface-card rounded-lg border border-outline p-gutter-md shadow-sm" aria-label="Avance de ronda de hoy">
+          <div class="flex items-center justify-between gap-gutter-sm flex-wrap">
+            <div class="flex items-center gap-gutter-xs min-w-0">
+              <span class="material-symbols-outlined text-[20px] text-primary shrink-0" aria-hidden="true">fact_check</span>
+              <div class="flex flex-col min-w-0">
+                <span id="dir-ronda-title" class="font-title text-title-sm text-on-surface truncate">Ronda de hoy: 0 de 0 espacios</span>
+                <span id="dir-ronda-sub" class="font-label text-[11px] text-on-surface-variant">Marca cada espacio con ✓ durante tu recorrido</span>
+              </div>
+            </div>
+            <button type="button" id="btn-dir-open-ronda" class="inline-flex items-center gap-1 px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-sm hover:bg-secondary transition-colors duration-state-change shrink-0">
+              <span class="material-symbols-outlined text-[16px]" aria-hidden="true">checklist</span>
+              <span id="btn-dir-open-ronda-label">Iniciar ronda</span>
+            </button>
+          </div>
+          <div class="w-full h-2 rounded-full bg-surface-variant overflow-hidden">
+            <div id="dir-ronda-bar" class="h-full bg-success rounded-full transition-all duration-300" style="width:0%"></div>
+          </div>
+        </section>
 
         <div class="grid grid-cols-2 gap-gutter-sm">
           <div class="bg-surface-card rounded-md border border-outline-subtle p-gutter-md shadow-sm flex flex-col gap-gutter-xs">
@@ -882,6 +901,14 @@
         </div>
       </div>
 
+      <div id="ronda-visual-map-wrap" class="flex flex-col gap-gutter-xs">
+        <div class="flex items-center justify-between gap-gutter-xs flex-wrap font-label text-[11px] text-on-surface-variant">
+          <span>Recorrido visual (toca un espacio para ir directo)</span>
+          <span>○ Pendiente · ✓ OK · ! Hallazgo</span>
+        </div>
+        <div id="ronda-visual-map" class="flex flex-wrap gap-gutter-xs overflow-y-auto p-gutter-xs rounded-md bg-surface-subtle border border-outline" style="max-height:136px"></div>
+      </div>
+
       <form id="ronda-item-form" class="bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-md">
         <div class="flex flex-col gap-gutter-xs">
           <div class="flex items-center justify-between gap-gutter-xs flex-wrap">
@@ -1157,7 +1184,7 @@
     <span id="toast-message" class="font-label text-label-md truncate">Acción registrada</span>
   </div>
 
-  <script src="./qrcode.min.js?v=20261125a"></script>
-  <script src="./app.js?v=20261125a"></script>
+  <script src="./qrcode.min.js?v=20261125b"></script>
+  <script src="./app.js?v=20261125b"></script>
 </body>
 </html>
