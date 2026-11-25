@@ -1,6 +1,6 @@
 // GCO Control — Service Worker PWA (scope: /panel-gco/)
 // Seguridad Ley N° 19.628: NUNCA cachea respuestas de Supabase ni de Google Apps Script.
-const CACHE_NAME = "gco-panel-shell-v1";
+const CACHE_NAME = "gco-panel-shell-20261125090435";
 const SHELL_ASSETS = [
   "/panel-gco/",
   "/panel-gco/manifest.json",

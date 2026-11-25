@@ -417,18 +417,27 @@
 
     list.querySelectorAll('[data-complete-order]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        const orderId = btn.getAttribute('data-complete-order');
-        const res = await postApi({
-          action: 'completeOrder',
-          token: state.session.token,
-          orderId: orderId,
-        });
-        if (!res.ok) {
-          showToast(res.error || 'No se pudo completar la orden', true);
-          return;
+        if (btn.disabled) return;
+        const prevText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '...';
+        try {
+          const orderId = btn.getAttribute('data-complete-order');
+          const res = await postApi({
+            action: 'completeOrder',
+            token: state.session.token,
+            orderId: orderId,
+          });
+          if (!res.ok) {
+            showToast(res.error || 'No se pudo completar la orden', true);
+            return;
+          }
+          showToast(res.message);
+          loadData();
+        } finally {
+          btn.disabled = false;
+          btn.textContent = prevText;
         }
-        showToast(res.message);
-        loadData();
       });
     });
   }
@@ -1121,9 +1130,26 @@
       const hideForOps = isOpsOnly && adminTabsAllowedOps.indexOf(tName) === -1;
       tabBtn.classList.toggle('hidden', hideForOps);
     });
+    if (isOpsOnly) {
+      const activeAdminTab = document.querySelector('.admin-panel-tab.bg-primary');
+      if (activeAdminTab && adminTabsAllowedOps.indexOf(activeAdminTab.getAttribute('data-admin-tab')) === -1) {
+        const fallbackTab = document.querySelector('.admin-panel-tab[data-admin-tab="tickets"]');
+        if (fallbackTab) fallbackTab.click();
+      }
+      const docPanel = document.getElementById('dir-panel-documentos');
+      if (docPanel && !docPanel.classList.contains('hidden')) {
+        switchDirectoryTab('equipos');
+      }
+    }
     const adminTitle = document.getElementById('sheet-admin-title');
     if (adminTitle) {
       adminTitle.textContent = isOpsOnly ? 'Panel de Operaciones' : 'Panel de Administración';
+    }
+    const adminSub = document.getElementById('sheet-admin-subtitle');
+    if (adminSub) {
+      adminSub.textContent = isOpsOnly
+        ? 'Gestión en terreno de tickets, órdenes, equipos y bodega'
+        : 'Gestión de comunidades, tickets, equipos y cuentas';
     }
     if (btnCommittee) {
       btnCommittee.classList.toggle('hidden', !isCommittee);
@@ -1465,15 +1491,25 @@
       document.getElementById('btn-back-login').click();
     });
 
-    document.getElementById('btn-open-maintenance').addEventListener('click', function () {
+    function resetMaintenanceModalControls() {
+      state.maintType = 'Preventiva';
+      state.maintState = 'Operativo';
+      document.querySelectorAll('.maint-type-btn').forEach(function (b) {
+        b.className = b.getAttribute('data-maint-type') === 'Preventiva'
+          ? 'maint-type-btn py-gutter-sm rounded-sm bg-primary text-on-primary font-label text-label-sm transition-colors duration-state-change'
+          : 'maint-type-btn py-gutter-sm rounded-sm text-on-surface-variant hover:bg-surface-variant font-label text-label-sm transition-colors duration-state-change';
+      });
+      document.querySelectorAll('.maint-state-pill').forEach(function (p) {
+        p.className = p.getAttribute('data-maint-state') === 'Operativo'
+          ? 'maint-state-pill py-gutter-sm px-gutter-xs rounded-md border-2 border-success bg-success-container text-on-success-container font-label text-label-sm transition-colors duration-state-change'
+          : 'maint-state-pill py-gutter-sm px-gutter-xs rounded-md border border-outline bg-surface-subtle text-on-surface-variant font-label text-label-sm transition-colors duration-state-change';
+      });
       const dateInput = document.getElementById('maint-date');
-      if (dateInput && !dateInput.value) {
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        dateInput.value = yyyy + '-' + mm + '-' + dd;
-      }
+      if (dateInput) dateInput.value = getTodayIsoLocal();
+    }
+
+    document.getElementById('btn-open-maintenance').addEventListener('click', function () {
+      resetMaintenanceModalControls();
 
       const areaWrap = document.getElementById('maint-area-select-wrap');
       const areaSel = document.getElementById('maint-area-select');
@@ -1571,23 +1607,31 @@
     document.getElementById('maint-file-input').addEventListener('change', async function (e) {
       const files = Array.from(e.target.files || []);
       if (files.length === 0) return;
+      let failed = 0;
       for (let i = 0; i < files.length; i++) {
         if (state.maintFiles.length >= 6) {
           showToast('Máximo 6 archivos por mantención', true);
           break;
         }
         const file = files[i];
-        if (file.type.startsWith('image/')) {
-          const compressed = await compressImage(file, 1280, 0.8);
-          state.maintFiles.push({ name: file.name, base64: compressed.dataUrl, mimeType: 'image/jpeg', isImage: true });
-        } else {
-          if (file.size > 6 * 1024 * 1024) {
-            showToast(file.name + ' supera los 6 MB permitidos', true);
-            continue;
+        try {
+          if (file.type && file.type.startsWith('image/')) {
+            const compressed = await compressImage(file, 1280, 0.8);
+            state.maintFiles.push({ name: file.name, base64: compressed.dataUrl, mimeType: 'image/jpeg', isImage: true });
+          } else {
+            if (file.size > 6 * 1024 * 1024) {
+              showToast(file.name + ' supera los 6 MB permitidos', true);
+              continue;
+            }
+            const dataUrl = await readFileAsDataUrl(file);
+            state.maintFiles.push({ name: file.name, base64: dataUrl, mimeType: file.type || 'application/pdf', isImage: false });
           }
-          const dataUrl = await readFileAsDataUrl(file);
-          state.maintFiles.push({ name: file.name, base64: dataUrl, mimeType: file.type || 'application/pdf', isImage: false });
+        } catch (fErr) {
+          failed++;
         }
+      }
+      if (failed > 0) {
+        showToast('No se pudieron leer ' + failed + ' archivo(s). Usa JPG, PNG o PDF.', true);
       }
       renderMaintFilesPreview();
       e.target.value = '';
@@ -1661,6 +1705,7 @@
       }
 
       document.getElementById('sheet-maint-form').reset();
+      resetMaintenanceModalControls();
       clearSignaturePad();
       state.maintFiles = [];
       renderMaintFilesPreview();
@@ -1676,14 +1721,25 @@
 
     document.getElementById('admin-building-select').addEventListener('change', function (e) {
       const nuevoEdif = e.target.value;
-      if (!nuevoEdif || nuevoEdif === state.edificioId) return;
+      if (nuevoEdif === state.edificioId) return;
       state.edificioId = nuevoEdif;
       state.equipoId = '';
       const url = new URL(window.location.href);
-      url.searchParams.set('edificio', nuevoEdif);
+      if (nuevoEdif) {
+        url.searchParams.set('edificio', nuevoEdif);
+        if (nuevoEdif.toUpperCase() !== 'DEMO') {
+          try { localStorage.setItem(LAST_EDIF_KEY, nuevoEdif); } catch (err) {}
+        }
+      } else {
+        url.searchParams.delete('edificio');
+      }
       url.searchParams.delete('equipo');
       window.history.pushState({}, '', url.toString());
-      loadData();
+      if (nuevoEdif) {
+        loadData();
+      } else if (state.session && state.session.user && state.session.user.rol === 'operaciones') {
+        loadOpsHomeView();
+      }
       loadAdminPanelData();
     });
 
@@ -1825,8 +1881,10 @@
     if (json.isGlobalAdmin && json.edificios && json.edificios.length > 0) {
       selWrap.classList.remove('hidden');
       selWrap.classList.add('flex');
-      sel.innerHTML = json.edificios.map(function (ed) {
-        const selected = ed.id === state.edificioId ? ' selected' : '';
+      const curEdif = state.edificioId || '';
+      const allOpt = '<option value=""' + (!curEdif || curEdif.toUpperCase() === 'ALL' ? ' selected' : '') + '>Todas las comunidades (vista general)</option>';
+      sel.innerHTML = allOpt + json.edificios.map(function (ed) {
+        const selected = ed.id === curEdif ? ' selected' : '';
         return '<option value="' + escapeHtml(ed.id) + '"' + selected + '>' + escapeHtml(ed.nombre) + ' (' + escapeHtml(ed.id) + ')</option>';
       }).join('');
     } else {
@@ -2129,6 +2187,7 @@
 
     document.getElementById('admin-add-doc-form').addEventListener('submit', async function (e) {
       e.preventDefault();
+      if (!requireSelectedAdminBuilding()) return;
       const btn = document.getElementById('btn-add-doc-submit');
       setLoadingBtn(btn, true, 'Subiendo...');
 
@@ -2137,13 +2196,25 @@
       const fileInp = document.getElementById('doc-file');
       if (fileInp && fileInp.files && fileInp.files[0]) {
         const f = fileInp.files[0];
-        if (f.size > 6 * 1024 * 1024) {
+        try {
+          if (f.type && f.type.startsWith('image/')) {
+            const comp = await compressImage(f, 1280, 0.8);
+            archivoBase64 = comp.dataUrl;
+            archivoMime = 'image/jpeg';
+          } else {
+            if (f.size > 6 * 1024 * 1024) {
+              setLoadingBtn(btn, false, 'Guardar en Repositorio');
+              showToast('El archivo supera los 6 MB permitidos', true);
+              return;
+            }
+            archivoBase64 = await readFileAsDataUrl(f);
+            archivoMime = f.type || 'application/pdf';
+          }
+        } catch (fErr) {
           setLoadingBtn(btn, false, 'Guardar en Repositorio');
-          showToast('El archivo supera los 6 MB permitidos', true);
+          showToast('No se pudo leer el archivo adjunto. Usa PDF, JPG o PNG.', true);
           return;
         }
-        archivoBase64 = await readFileAsDataUrl(f);
-        archivoMime = f.type || 'application/pdf';
       }
 
       const res = await postApi({
@@ -2171,18 +2242,24 @@
 
     container.querySelectorAll('[data-del-doc]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        const res = await postApi({
-          action: 'deleteDocument',
-          token: state.session.token,
-          docId: btn.getAttribute('data-del-doc'),
-        });
-        if (!res.ok) {
-          showToast(res.error || 'No se pudo eliminar', true);
-          return;
+        if (btn.disabled) return;
+        btn.disabled = true;
+        try {
+          const res = await postApi({
+            action: 'deleteDocument',
+            token: state.session.token,
+            docId: btn.getAttribute('data-del-doc'),
+          });
+          if (!res.ok) {
+            showToast(res.error || 'No se pudo eliminar', true);
+            return;
+          }
+          showToast('Documento eliminado');
+          loadData();
+          loadAdminPanelData();
+        } finally {
+          btn.disabled = false;
         }
-        showToast('Documento eliminado');
-        loadData();
-        loadAdminPanelData();
       });
     });
   }
@@ -2348,10 +2425,18 @@
 
       fileInput.addEventListener('change', async function (e) {
         const files = Array.from(e.target.files || []);
+        let failed = 0;
         for (let i = 0; i < files.length; i++) {
           if (fotosDespues.length >= 5) break;
-          const compressed = await compressImage(files[i], 1024, 0.75);
-          fotosDespues.push(compressed.dataUrl);
+          try {
+            const compressed = await compressImage(files[i], 1024, 0.75);
+            fotosDespues.push(compressed.dataUrl);
+          } catch (imgErr) {
+            failed++;
+          }
+        }
+        if (failed > 0) {
+          showToast('No se pudieron leer ' + failed + ' foto(s). Intenta en JPG o PNG.', true);
         }
         renderTicketThumbs();
         e.target.value = '';
@@ -2359,27 +2444,37 @@
 
       card.querySelectorAll('.btn-admin-ticket-save').forEach(function (btn) {
         btn.addEventListener('click', async function () {
-          const ticketId = card.getAttribute('data-ticket-id');
-          const estado = btn.getAttribute('data-next-state');
-          const solucion = card.querySelector('.admin-ticket-note').value.trim();
+          if (btn.disabled) return;
+          const saveBtns = card.querySelectorAll('.btn-admin-ticket-save');
+          const prevText = btn.textContent;
+          saveBtns.forEach(function (b) { b.disabled = true; });
+          btn.textContent = 'Guardando...';
+          try {
+            const ticketId = card.getAttribute('data-ticket-id');
+            const estado = btn.getAttribute('data-next-state');
+            const solucion = card.querySelector('.admin-ticket-note').value.trim();
 
-          const res = await postApi({
-            action: 'updateTicket',
-            token: state.session.token,
-            ticketId: ticketId,
-            estado: estado,
-            solucion: solucion,
-            fotosDespues: fotosDespues,
-          });
+            const res = await postApi({
+              action: 'updateTicket',
+              token: state.session.token,
+              ticketId: ticketId,
+              estado: estado,
+              solucion: solucion,
+              fotosDespues: fotosDespues,
+            });
 
-          if (!res.ok) {
-            showToast(res.error || 'No se pudo actualizar', true);
-            return;
+            if (!res.ok) {
+              showToast(res.error || 'No se pudo actualizar', true);
+              return;
+            }
+
+            showToast(res.message);
+            loadAdminPanelData();
+            loadData();
+          } finally {
+            saveBtns.forEach(function (b) { b.disabled = false; });
+            btn.textContent = prevText;
           }
-
-          showToast(res.message);
-          loadAdminPanelData();
-          loadData();
         });
       });
     });
@@ -2475,6 +2570,7 @@
     if (addForm) {
       addForm.addEventListener('submit', async function (e) {
         e.preventDefault();
+        if (!requireSelectedAdminBuilding()) return;
         const btn = document.getElementById('btn-add-eq-submit');
         setLoadingBtn(btn, true, 'Guardando...');
         const res = await postApi({
@@ -2887,42 +2983,73 @@
     }).join('');
   }
 
+  function requireSelectedAdminBuilding() {
+    if (!state.edificioId || state.edificioId.toUpperCase() === 'ALL') {
+      showToast('Selecciona primero una comunidad específica en "Comunidad activa" arriba.', true);
+      const sel = document.getElementById('admin-building-select');
+      if (sel) sel.focus();
+      return false;
+    }
+    return true;
+  }
+
   function bindQuoteStatusButtons(container, onSuccess) {
     if (!container) return;
     container.querySelectorAll('.btn-quote-status').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        const res = await postApi({
-          action: 'updateQuoteStatus',
-          token: state.session.token,
-          quoteId: btn.getAttribute('data-quote-id'),
-          estado: btn.getAttribute('data-quote-state'),
-        });
-        if (!res.ok) {
-          showToast(res.error || 'No se pudo actualizar cotización', true);
-          return;
+        if (btn.disabled) return;
+        const card = btn.closest('article');
+        const siblings = card ? card.querySelectorAll('.btn-quote-status') : [btn];
+        const prevText = btn.textContent;
+        siblings.forEach(function (b) { b.disabled = true; });
+        btn.textContent = 'Guardando...';
+        try {
+          const res = await postApi({
+            action: 'updateQuoteStatus',
+            token: state.session.token,
+            quoteId: btn.getAttribute('data-quote-id'),
+            estado: btn.getAttribute('data-quote-state'),
+          });
+          if (!res.ok) {
+            showToast(res.error || 'No se pudo actualizar cotización', true);
+            return;
+          }
+          showToast(res.message);
+          if (onSuccess) onSuccess();
+        } finally {
+          siblings.forEach(function (b) { b.disabled = false; });
+          btn.textContent = prevText;
         }
-        showToast(res.message);
-        if (onSuccess) onSuccess();
       });
     });
 
     container.querySelectorAll('.btn-quote-to-order').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        const res = await postApi({
-          action: 'addOrder',
-          token: state.session.token,
-          edificioId: state.edificioId,
-          equipoId: btn.getAttribute('data-q2o-eq') || 'GENERAL',
-          titulo: btn.getAttribute('data-q2o-title'),
-          detalle: btn.getAttribute('data-q2o-desc'),
-          prioridad: 'Normal',
-        });
-        if (!res.ok) {
-          showToast(res.error || 'No se pudo generar la orden', true);
-          return;
+        if (btn.disabled) return;
+        if (!requireSelectedAdminBuilding()) return;
+        const prevText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Generando orden...';
+        try {
+          const res = await postApi({
+            action: 'addOrder',
+            token: state.session.token,
+            edificioId: state.edificioId,
+            equipoId: btn.getAttribute('data-q2o-eq') || 'GENERAL',
+            titulo: btn.getAttribute('data-q2o-title'),
+            detalle: btn.getAttribute('data-q2o-desc'),
+            prioridad: 'Normal',
+          });
+          if (!res.ok) {
+            showToast(res.error || 'No se pudo generar la orden', true);
+            return;
+          }
+          showToast(res.message);
+          if (onSuccess) onSuccess();
+        } finally {
+          btn.disabled = false;
+          btn.textContent = prevText;
         }
-        showToast(res.message);
-        if (onSuccess) onSuccess();
       });
     });
 
@@ -2999,9 +3126,9 @@
                 '<span class="font-label text-[11px] text-on-surface-variant">Mínimo: ' + item.stockMinimo + ' ' + escapeHtml(item.unidad) + '</span>' +
               '</div>' +
               '<div class="flex items-center gap-gutter-xs shrink-0">' +
-                '<button type="button" data-inv-id="' + escapeHtml(item.id) + '" data-inv-delta="-1" class="btn-inv-adj w-9 h-9 rounded-md bg-surface-card border border-outline font-title text-title-md text-on-surface">-</button>' +
+                '<button type="button" data-inv-edif="' + escapeHtml(item.edificioId) + '" data-inv-id="' + escapeHtml(item.id) + '" data-inv-delta="-1" class="btn-inv-adj w-9 h-9 rounded-md bg-surface-card border border-outline font-title text-title-md text-on-surface">-</button>' +
                 '<span class="px-gutter-sm py-1 rounded-md ' + badgeCls + ' font-mono text-mono-sm min-w-[56px] text-center">' + item.stockActual + ' ' + escapeHtml(item.unidad) + '</span>' +
-                '<button type="button" data-inv-id="' + escapeHtml(item.id) + '" data-inv-delta="1" class="btn-inv-adj w-9 h-9 rounded-md bg-surface-card border border-outline font-title text-title-md text-on-surface">+</button>' +
+                '<button type="button" data-inv-edif="' + escapeHtml(item.edificioId) + '" data-inv-id="' + escapeHtml(item.id) + '" data-inv-delta="1" class="btn-inv-adj w-9 h-9 rounded-md bg-surface-card border border-outline font-title text-title-md text-on-surface">+</button>' +
               '</div>' +
             '</article>'
           );
@@ -3013,6 +3140,7 @@
     if (form) {
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
+        if (!requireSelectedAdminBuilding()) return;
         const btn = document.getElementById('btn-add-inv-submit');
         setLoadingBtn(btn, true, 'Guardando...');
         const res = await postApi({
@@ -3036,19 +3164,27 @@
 
     container.querySelectorAll('.btn-inv-adj').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        const res = await postApi({
-          action: 'saveInventoryItem',
-          token: state.session.token,
-          edificioId: state.edificioId,
-          itemId: btn.getAttribute('data-inv-id'),
-          delta: Number(btn.getAttribute('data-inv-delta')),
-        });
-        if (!res.ok) {
-          showToast(res.error || 'Error al ajustar stock', true);
-          return;
+        if (btn.disabled) return;
+        const row = btn.closest('article');
+        const adjBtns = row ? row.querySelectorAll('.btn-inv-adj') : [btn];
+        adjBtns.forEach(function (b) { b.disabled = true; });
+        try {
+          const res = await postApi({
+            action: 'saveInventoryItem',
+            token: state.session.token,
+            edificioId: btn.getAttribute('data-inv-edif') || state.edificioId,
+            itemId: btn.getAttribute('data-inv-id'),
+            delta: Number(btn.getAttribute('data-inv-delta')),
+          });
+          if (!res.ok) {
+            showToast(res.error || 'Error al ajustar stock', true);
+            return;
+          }
+          showToast(res.message);
+          loadAdminPanelData();
+        } finally {
+          adjBtns.forEach(function (b) { b.disabled = false; });
         }
-        showToast(res.message);
-        loadAdminPanelData();
       });
     });
   }
@@ -3102,6 +3238,7 @@
     if (form) {
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
+        if (!requireSelectedAdminBuilding()) return;
         const btn = document.getElementById('btn-add-order-submit');
         setLoadingBtn(btn, true, 'Enviando...');
         const res = await postApi({
@@ -3126,18 +3263,27 @@
 
     container.querySelectorAll('[data-admin-complete-order]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        const res = await postApi({
-          action: 'completeOrder',
-          token: state.session.token,
-          orderId: btn.getAttribute('data-admin-complete-order'),
-        });
-        if (!res.ok) {
-          showToast(res.error || 'Error', true);
-          return;
+        if (btn.disabled) return;
+        const prevText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '...';
+        try {
+          const res = await postApi({
+            action: 'completeOrder',
+            token: state.session.token,
+            orderId: btn.getAttribute('data-admin-complete-order'),
+          });
+          if (!res.ok) {
+            showToast(res.error || 'Error', true);
+            return;
+          }
+          showToast(res.message);
+          loadAdminPanelData();
+          loadData();
+        } finally {
+          btn.disabled = false;
+          btn.textContent = prevText;
         }
-        showToast(res.message);
-        loadAdminPanelData();
-        loadData();
       });
     });
   }
@@ -3181,15 +3327,25 @@
       fileInput.addEventListener('change', async function (e) {
         const f = e.target.files[0];
         if (!f) return;
-        if (f.type.startsWith('image/')) {
-          const comp = await compressImage(f, 1280, 0.8);
-          quoteFileBase64 = comp.dataUrl;
-          quoteFileMime = 'image/jpeg';
-        } else {
-          quoteFileBase64 = await readFileAsDataUrl(f);
-          quoteFileMime = f.type || 'application/pdf';
+        try {
+          if (f.type && f.type.startsWith('image/')) {
+            const comp = await compressImage(f, 1280, 0.8);
+            quoteFileBase64 = comp.dataUrl;
+            quoteFileMime = 'image/jpeg';
+          } else {
+            if (f.size > 6 * 1024 * 1024) {
+              showToast('El archivo supera los 6 MB permitidos', true);
+              e.target.value = '';
+              return;
+            }
+            quoteFileBase64 = await readFileAsDataUrl(f);
+            quoteFileMime = f.type || 'application/pdf';
+          }
+          fileBtn.textContent = f.name;
+        } catch (err) {
+          showToast('No se pudo procesar "' + f.name + '". Usa formato PDF, JPG o PNG.', true);
+          e.target.value = '';
         }
-        fileBtn.textContent = f.name;
       });
     }
 
@@ -3197,6 +3353,7 @@
     if (form) {
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
+        if (!requireSelectedAdminBuilding()) return;
         const btn = document.getElementById('btn-add-quote-submit');
         setLoadingBtn(btn, true, 'Subiendo...');
         const res = await postApi({
@@ -3325,10 +3482,38 @@
     return false;
   }
 
+  function buildQrDataUrl(text) {
+    if (typeof QRCode === 'undefined') return '';
+    const temp = document.createElement('div');
+    temp.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:168px;height:168px;';
+    document.body.appendChild(temp);
+    try {
+      new QRCode(temp, {
+        text: text,
+        width: 168,
+        height: 168,
+        colorDark: '#0F2942',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+      const canvas = temp.querySelector('canvas');
+      if (canvas) return canvas.toDataURL('image/png');
+      const img = temp.querySelector('img');
+      if (img && img.src && img.src.indexOf('data:image/') === 0) return img.src;
+      return '';
+    } catch (e) {
+      return '';
+    } finally {
+      document.body.removeChild(temp);
+    }
+  }
+
   async function printMaintenanceReceipt(m, triggerBtn) {
     if (!state.data || !m) return;
     const eq = state.data.equipo;
     const edif = state.data.edificio;
+    const qrUrl = 'https://gcoadmin.cl/app/?edificio=' + encodeURIComponent(edif.id) + '&equipo=' + encodeURIComponent(eq.id);
+    const qrDataUrl = buildQrDataUrl(qrUrl);
     const prevHtml = triggerBtn ? triggerBtn.innerHTML : '';
     if (triggerBtn) {
       triggerBtn.disabled = true;
@@ -3347,10 +3532,11 @@
         estadoResultante: m.estadoResultante,
         tecnico: m.tecnico || eq.empresa,
         observaciones: m.observaciones,
+        qrDataUrl: qrDataUrl,
       });
       if (!res.ok) throw new Error(res.error || 'No se pudo generar el comprobante PDF.');
       await deliverGeneratedPdf(res, 'Comprobante_' + eq.id + '.pdf', 'Comprobante de Mantención · ' + eq.nombre);
-      showToast('Comprobante PDF descargado.', false);
+      showToast('Comprobante PDF con QR descargado.', false);
     } catch (err) {
       showToast(err.message || 'Error al generar comprobante PDF.', true);
     } finally {
@@ -3598,32 +3784,63 @@
     }
   }
 
+  let isSyncingQueue = false;
   async function syncOfflineQueue() {
+    if (isSyncingQueue) return;
     const queue = loadOfflineQueue();
     if (queue.length === 0 || !navigator.onLine) return;
 
+    isSyncingQueue = true;
     const remaining = [];
     let syncedCount = 0;
+    let droppedError = '';
+    let authNeeded = false;
 
-    for (let i = 0; i < queue.length; i++) {
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(queue[i]),
-        });
-        const json = await res.json();
-        if (json && json.ok) syncedCount++;
-        else remaining.push(queue[i]);
-      } catch (err) {
-        remaining.push(queue[i]);
+    try {
+      for (let i = 0; i < queue.length; i++) {
+        const item = Object.assign({}, queue[i]);
+        if (item.token && state.session && state.session.token) {
+          item.token = state.session.token;
+        }
+        try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(item),
+          });
+          const json = await res.json();
+          if (json && json.ok) {
+            syncedCount++;
+          } else {
+            const errMsg = (json && json.error) ? String(json.error) : '';
+            if (/sesi[oó]n|token|expir/i.test(errMsg)) {
+              authNeeded = true;
+              remaining.push(item);
+            } else {
+              item._retries = (item._retries || 0) + 1;
+              if (item._retries < 3) {
+                remaining.push(item);
+              } else {
+                droppedError = errMsg || 'Datos rechazados por el servidor';
+              }
+            }
+          }
+        } catch (err) {
+          remaining.push(item);
+        }
       }
+    } finally {
+      isSyncingQueue = false;
     }
 
     saveOfflineQueue(remaining);
     if (syncedCount > 0) {
       showToast('Se sincronizaron ' + syncedCount + ' registro(s) pendientes');
       loadData();
+    } else if (authNeeded) {
+      showToast('Inicia sesión nuevamente para enviar ' + remaining.length + ' registro(s) en cola.', true);
+    } else if (droppedError) {
+      showToast('Envío descartado tras 3 intentos: ' + droppedError, true);
     }
   }
 
