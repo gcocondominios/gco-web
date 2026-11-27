@@ -16,7 +16,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261127b">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 
     <!-- Google tag (gtag.js) con Consent Mode v2 (Ley 21.719) -->
@@ -51,6 +51,7 @@
                 <ul class="nav-links">
                     <li><a href="index.html#inicio">Inicio Web</a></li>
                     <li><a href="#que-es">Para qué sirve</a></li>
+                    <li><a href="#ronda-pdf">Informe Ronda</a></li>
                     <li><a href="#modulos">Módulos</a></li>
                     <li><a href="#recorrido">Recorrido</a></li>
                     <li><a href="#faq-app">Preguntas</a></li>
@@ -116,8 +117,8 @@
     <section class="app-metrics-strip" aria-label="Indicadores clave de GCO App">
         <div class="container app-metrics-grid">
             <div class="app-metric-item">
-                <strong>4 Roles</strong>
-                <span>Residente, Técnico, Comité y Admin</span>
+                <strong>5 Perfiles</strong>
+                <span>Residente, Técnico, Operaciones, Comité y Admin</span>
             </div>
             <div class="app-metric-item">
                 <strong>100% Web</strong>
@@ -128,8 +129,8 @@
                 <span>Cola automática en subterráneos sin señal</span>
             </div>
             <div class="app-metric-item">
-                <strong>PDF + QR</strong>
-                <span>Informes, comprobantes y Actas de Comité</span>
+                <strong>PDF + QR + IA</strong>
+                <span>Rondas con fotos, comprobantes y Actas</span>
             </div>
         </div>
     </section>
@@ -168,19 +169,19 @@
             <div class="app-compare-box" style="max-width: 860px; margin: 0 auto;" data-app-compare>
                 <div class="app-compare-header">
                     <strong>¿Cómo cambia el día a día de la comunidad?</strong>
-                    <div class="app-toggle-group" role="group" aria-label="Comparar gestión sin o con GCO App">
-                        <button type="button" class="app-toggle-btn is-active" data-mode="sin" aria-pressed="true">Sin GCO App</button>
-                        <button type="button" class="app-toggle-btn" data-mode="con" aria-pressed="false">Con GCO App</button>
+                    <div class="app-toggle-group" role="group" aria-label="Comparar gestión tradicional o con GCO App">
+                        <button type="button" class="app-toggle-btn" data-mode="sin" aria-pressed="false">Administración Tradicional</button>
+                        <button type="button" class="app-toggle-btn is-active" data-mode="con" aria-pressed="true">Con GCO App</button>
                     </div>
                 </div>
-                <ul class="app-compare-list" data-active-mode="sin">
+                <ul class="app-compare-list" data-active-mode="sin" hidden>
                     <li>El comité no sabe cuándo fue la última mantención de bombas o ascensores sin pedir correos.</li>
                     <li>Los residentes envían fotos de fallas por WhatsApp y el seguimiento se pierde entre mensajes.</li>
                     <li>Los técnicos en salas subterráneas sin señal anotan en papel y el informe llega días después.</li>
                     <li>Las cotizaciones e historial de cada equipo viven en carpetas distintas sin hoja de vida única.</li>
                     <li>Riesgo de no poder acreditar mantenciones preventivas ante fiscalizaciones o Ley 21.442.</li>
                 </ul>
-                <ul class="app-compare-list" data-active-mode="con" hidden>
+                <ul class="app-compare-list" data-active-mode="con">
                     <li>Cada equipo tiene un código QR con semáforo en tiempo real, historial y último informe PDF.</li>
                     <li>Los tickets de residentes ingresan ordenados por equipo, síntoma, departamento y evidencia fotográfica.</li>
                     <li>El técnico registra la visita en su celular (con firma digital y modo offline) y genera comprobante con QR.</li>
@@ -190,7 +191,7 @@
             </div>
 
             <!-- Ejemplo Real: Informe de Ronda Operativa PDF -->
-            <div class="ronda-spotlight-card ronda-spotlight-card--light" style="margin-top: 56px;">
+            <div id="ronda-pdf" class="ronda-spotlight-card ronda-spotlight-card--light" style="margin-top: 56px;">
                 <div class="ronda-spotlight-info">
                     <span class="ronda-spotlight-badge">Documento Real Generado en Terreno</span>
                     <h3>Informe de Ronda Operativa PDF: evidencia visual en cada visita</h3>
@@ -507,6 +508,11 @@
                 <details class="faq-item">
                     <summary>¿Cómo se instalan los códigos QR en el condominio?</summary>
                     <p>Desde el Panel de Administración generamos las láminas QR individuales de cada equipo en formato listo para imprimir y plastificar, con el código y enlace directo del edificio para ubicarlo en tableros, puertas técnicas o cabinas.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>¿Qué incluye el Informe de Ronda Operativa PDF que recibe el Comité?</summary>
+                    <p>Cada vez que nuestro equipo de operaciones visita el edificio, genera desde GCO App un documento PDF con resumen KPI (sectores revisados, conformes, con observación y urgentes), hora exacta por espacio, checklist técnico y hasta 10 fotografías por sector respaldadas automáticamente en la nube. Puedes ver capturas reales en <a href="blog/informe-ronda-operativa-gco-app.html" style="color: var(--primary-green); font-weight: 600;">este artículo</a>.</p>
                 </details>
 
                 <details class="faq-item">

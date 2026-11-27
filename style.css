@@ -1493,28 +1493,6 @@ body.cookie-banner-visible .whatsapp-float { opacity: 0; pointer-events: none; }
     align-items: center;
     box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
 }
-.ronda-spotlight-card--light {
-    background: #F4FAF0;
-    border: 1px solid rgba(74, 140, 42, 0.28);
-    box-shadow: 0 12px 32px rgba(26, 46, 20, 0.08);
-}
-.ronda-spotlight-card--light h3 { color: var(--primary-dark); }
-.ronda-spotlight-card--light p { color: var(--gray-text); }
-.ronda-spotlight-card--light .ronda-kpi-pill {
-    background: var(--white);
-    color: var(--primary-dark);
-    border-color: rgba(74, 140, 42, 0.25);
-}
-.ronda-spotlight-card--light .ronda-page-btn {
-    background: var(--white);
-    color: var(--black-text);
-    border-color: #D2DCE0;
-}
-.ronda-spotlight-card--light .ronda-page-btn.is-active {
-    background: var(--primary-green);
-    color: var(--white);
-    border-color: var(--primary-green);
-}
 .ronda-spotlight-badge {
     display: inline-block;
     background: rgba(126, 217, 87, 0.18);
@@ -1528,11 +1506,6 @@ body.cookie-banner-visible .whatsapp-float { opacity: 0; pointer-events: none; }
     padding: 5px 13px;
     border-radius: 50px;
     margin-bottom: 14px;
-}
-.ronda-spotlight-card--light .ronda-spotlight-badge {
-    background: rgba(74, 140, 42, 0.12);
-    color: var(--primary-dark);
-    border-color: rgba(74, 140, 42, 0.3);
 }
 .ronda-spotlight-info h3 {
     font-family: var(--font-heading);
@@ -1611,8 +1584,57 @@ body.cookie-banner-visible .whatsapp-float { opacity: 0; pointer-events: none; }
     text-align: center;
     margin: 0;
 }
+
+/* Variante clara (gco-app.html) — declarada DESPUÉS para máxima especificidad y contraste WCAG AAA */
+.ronda-spotlight-card.ronda-spotlight-card--light {
+    background: #FFFFFF;
+    border: 1.5px solid rgba(74, 140, 42, 0.32);
+    box-shadow: 0 14px 36px rgba(26, 46, 20, 0.08);
+}
+.ronda-spotlight-card--light .ronda-spotlight-badge {
+    background: #EBF5E6;
+    color: var(--primary-dark);
+    border-color: rgba(74, 140, 42, 0.35);
+}
+.ronda-spotlight-card--light .ronda-spotlight-info h3 {
+    color: #162A10;
+}
+.ronda-spotlight-card--light .ronda-spotlight-info p {
+    color: #3A4639;
+}
+.ronda-spotlight-card--light .ronda-spotlight-info strong {
+    color: #1A1A1A;
+}
+.ronda-spotlight-card--light .ronda-kpi-pill {
+    background: #F1F7EE;
+    color: #1E3B16;
+    border-color: rgba(74, 140, 42, 0.28);
+}
+.ronda-spotlight-card--light .ronda-page-btn {
+    background: #F4F6F4;
+    color: #1A1A1A;
+    border-color: #CBD6C9;
+}
+.ronda-spotlight-card--light .ronda-page-btn:hover,
+.ronda-spotlight-card--light .ronda-page-btn.is-active {
+    background: var(--primary-green);
+    color: var(--white);
+    border-color: var(--primary-green);
+}
+.ronda-spotlight-card--light .ronda-doc-frame {
+    border: 1px solid #D8E2D5;
+    box-shadow: 0 12px 28px rgba(26, 46, 20, 0.14);
+}
 .ronda-spotlight-card--light .ronda-doc-caption {
-    color: var(--gray-text);
+    color: #4A554A;
+}
+
+/* Hover de botones secundarios sobre fondos oscuros (footer y blog CTA) */
+.footer .btn-secondary:hover,
+.blog-cta-box .btn-secondary:hover {
+    background-color: var(--white);
+    color: var(--black-text) !important;
+    border-color: var(--white);
 }
 
 /* Badges y tarjetas destacadas en Actualidad / Blog */
