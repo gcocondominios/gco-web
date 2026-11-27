@@ -4271,17 +4271,26 @@
       opts.push(lbl);
     }
 
+    const normTxt = function (s) {
+      return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    };
+    const existingNorm = opts.map(normTxt);
+
     [
-      'Hall de Acceso y Conserjería',
-      'Pasillos y Escaleras',
-      'Sala de Bombas / Estanques',
-      'Ascensores',
-      'Estacionamientos y Portón',
-      'Sala de Basura',
-      'Quincho / Áreas Comunes',
-      'Jardines y Perímetro',
+      { label: 'Hall de Acceso y Conserjería', keys: ['conserjer', 'hall'] },
+      { label: 'Pasillos y Escaleras', keys: ['pasillo', 'escala', 'escalera'] },
+      { label: 'Sala de Bombas / Estanques', keys: ['bomba', 'hidropack', 'estanque'] },
+      { label: 'Ascensores', keys: ['ascensor', 'elevador'] },
+      { label: 'Estacionamientos y Portón', keys: ['estacionamiento', 'porton'] },
+      { label: 'Sala de Basura', keys: ['basura', 'shaft'] },
+      { label: 'Quincho / Áreas Comunes', keys: ['quincho'] },
+      { label: 'Jardines y Perímetro', keys: ['jardin', 'perimetro'] },
     ].forEach(function (gen) {
-      if (!seen[gen.toLowerCase()]) opts.push(gen);
+      if (seen[gen.label.toLowerCase()]) return;
+      const alreadyCovered = existingNorm.some(function (ex) {
+        return gen.keys.some(function (k) { return ex.indexOf(k) !== -1; });
+      });
+      if (!alreadyCovered) opts.push(gen.label);
     });
 
     return opts;
@@ -5007,9 +5016,10 @@
         const pdfLink = document.getElementById('ronda-backup-pdf-link');
         const folderLink = document.getElementById('ronda-backup-folder-link');
         if (bannerTitle) {
-          bannerTitle.textContent = backupRes.ordenesCreadas > 0
-            ? 'Ronda guardada en Drive · ' + backupRes.ordenesCreadas + ' orden(es) creada(s)'
-            : 'Ronda registrada y PDF guardado en Drive';
+          const parts = ['Ronda guardada en Drive'];
+          if (backupRes.sectoresActualizados > 0) parts.push(backupRes.sectoresActualizados + ' sector(es) actualizado(s)');
+          if (backupRes.ordenesCreadas > 0) parts.push(backupRes.ordenesCreadas + ' orden(es) creada(s)');
+          bannerTitle.textContent = parts.join(' · ');
         }
         if (pdfLink) pdfLink.href = backupRes.linkPdf;
         if (folderLink && backupRes.folderUrl) folderLink.href = backupRes.folderUrl;
@@ -5019,6 +5029,7 @@
           banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
         showToast(backupRes.message || 'Ronda registrada y PDF guardado en Drive');
+        try { loadData(); } catch (_) {}
       } else if (backupRes && backupRes.queued) {
         showToast('Sin señal: la ronda quedó en cola y se respaldará al reconectar.');
       } else {
