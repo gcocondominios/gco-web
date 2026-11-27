@@ -1334,3 +1334,396 @@ body.cookie-banner-visible .whatsapp-float { opacity: 0; pointer-events: none; }
         animation-duration: 0.01ms !important;
     }
 }
+
+/* =========================================
+   Énfasis GCO App, Destacado de Ronda PDF y Blog Badges
+   ========================================= */
+.nav-links a.nav-app-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #EBF5E6;
+    color: var(--primary-dark);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 700;
+    border: 1px solid rgba(74, 140, 42, 0.3);
+}
+.nav-links a.nav-app-pill::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primary-green);
+    display: inline-block;
+}
+.nav-links a.nav-app-pill:hover {
+    background-color: var(--primary-green);
+    color: var(--white);
+}
+.nav-links a.nav-app-pill:hover::before {
+    background-color: var(--white);
+}
+
+.hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(74, 140, 42, 0.22);
+    border: 1px solid rgba(126, 217, 87, 0.55);
+    color: #DDF6D0;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 8px 18px;
+    border-radius: 50px;
+    margin-bottom: 22px;
+    text-decoration: none;
+    transition: var(--transition-standard);
+}
+.hero-eyebrow:hover {
+    background: rgba(74, 140, 42, 0.4);
+    color: #FFFFFF;
+    transform: translateY(-2px);
+}
+
+/* Sección destacada GCO App en portada (fondo oscuro verde bosque) */
+.gco-app-featured {
+    background: radial-gradient(circle at 85% 15%, rgba(74, 140, 42, 0.28) 0%, transparent 45%),
+                linear-gradient(155deg, #132011 0%, #1B2D17 52%, #141B14 100%);
+    color: var(--white);
+    position: relative;
+}
+.gco-app-featured .section-title h2 {
+    color: var(--white);
+}
+.gco-app-featured .section-title p {
+    color: #D6E2D4;
+}
+.gco-app-featured .app-badge {
+    background-color: rgba(126, 217, 87, 0.14);
+    color: #CFF2BE;
+    border-color: rgba(126, 217, 87, 0.35);
+}
+.gco-app-featured .app-badge-highlight {
+    background-color: var(--primary-green);
+    color: var(--white);
+    border-color: #7ED957;
+}
+.gco-app-featured .app-tab-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: var(--white);
+}
+.gco-app-featured .app-tab-btn strong {
+    color: var(--white);
+}
+.gco-app-featured .app-tab-btn span {
+    color: #C2D0C0;
+}
+.gco-app-featured .app-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.11);
+    border-color: #7ED957;
+}
+.gco-app-featured .app-tab-btn.is-active {
+    background: rgba(74, 140, 42, 0.25);
+    border-color: #7ED957;
+    border-left: 4px solid #7ED957;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+}
+.gco-app-featured .app-tab-btn-full {
+    grid-column: 1 / -1;
+}
+.gco-app-featured .app-detail-box,
+.gco-app-featured .app-compare-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+}
+.gco-app-featured .app-detail-box h3,
+.gco-app-featured .app-compare-header strong {
+    color: var(--white);
+}
+.gco-app-featured .app-detail-box p,
+.gco-app-featured .app-compare-list li {
+    color: #D4E0D2;
+}
+.gco-app-featured .app-bullets li {
+    color: #EFF6EE;
+}
+.gco-app-featured .app-bullets li::before,
+.gco-app-featured .app-compare-list[data-active-mode="con"] li::before {
+    color: #7ED957;
+}
+.gco-app-featured .app-toggle-group {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+.gco-app-featured .app-toggle-btn {
+    color: #C2D0C0;
+}
+.gco-app-featured .app-toggle-btn[data-mode="sin"].is-active {
+    background: #C0392B;
+    color: var(--white);
+}
+.gco-app-featured .app-phone-caption {
+    color: #C6D6C4;
+}
+.gco-app-featured .btn-secondary {
+    color: var(--white);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+.gco-app-featured .btn-secondary:hover {
+    background-color: var(--white);
+    color: var(--black-text) !important;
+    border-color: var(--white);
+}
+
+/* Bloque destacado de Ejemplo Real: Informe de Ronda Operativa PDF */
+.ronda-spotlight-card {
+    margin-top: 52px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(126, 217, 87, 0.32);
+    border-radius: 18px;
+    padding: 36px;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 36px;
+    align-items: center;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+}
+.ronda-spotlight-card--light {
+    background: #F4FAF0;
+    border: 1px solid rgba(74, 140, 42, 0.28);
+    box-shadow: 0 12px 32px rgba(26, 46, 20, 0.08);
+}
+.ronda-spotlight-card--light h3 { color: var(--primary-dark); }
+.ronda-spotlight-card--light p { color: var(--gray-text); }
+.ronda-spotlight-card--light .ronda-kpi-pill {
+    background: var(--white);
+    color: var(--primary-dark);
+    border-color: rgba(74, 140, 42, 0.25);
+}
+.ronda-spotlight-card--light .ronda-page-btn {
+    background: var(--white);
+    color: var(--black-text);
+    border-color: #D2DCE0;
+}
+.ronda-spotlight-card--light .ronda-page-btn.is-active {
+    background: var(--primary-green);
+    color: var(--white);
+    border-color: var(--primary-green);
+}
+.ronda-spotlight-badge {
+    display: inline-block;
+    background: rgba(126, 217, 87, 0.18);
+    color: #8BE466;
+    border: 1px solid rgba(126, 217, 87, 0.4);
+    font-family: var(--font-heading);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 5px 13px;
+    border-radius: 50px;
+    margin-bottom: 14px;
+}
+.ronda-spotlight-card--light .ronda-spotlight-badge {
+    background: rgba(74, 140, 42, 0.12);
+    color: var(--primary-dark);
+    border-color: rgba(74, 140, 42, 0.3);
+}
+.ronda-spotlight-info h3 {
+    font-family: var(--font-heading);
+    font-size: 1.65rem;
+    line-height: 1.25;
+    color: var(--white);
+    margin-bottom: 12px;
+}
+.ronda-spotlight-info p {
+    color: #D4E0D2;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    margin-bottom: 18px;
+}
+.ronda-kpi-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+.ronda-kpi-pill {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #E8F2E6;
+    font-size: 0.84rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+.ronda-doc-viewer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.ronda-page-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.ronda-page-btn {
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+    color: #DCE8DA;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 13px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: var(--transition-standard);
+}
+.ronda-page-btn.is-active,
+.ronda-page-btn:hover {
+    background: var(--primary-green);
+    border-color: #7ED957;
+    color: var(--white);
+}
+.ronda-doc-frame {
+    background: #FFFFFF;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
+    border: 3px solid rgba(255, 255, 255, 0.92);
+}
+.ronda-doc-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 410px;
+    object-fit: contain;
+    background: #FFFFFF;
+}
+.ronda-doc-caption {
+    font-size: 0.84rem;
+    color: #B8CBB6;
+    text-align: center;
+    margin: 0;
+}
+.ronda-spotlight-card--light .ronda-doc-caption {
+    color: var(--gray-text);
+}
+
+/* Badges y tarjetas destacadas en Actualidad / Blog */
+.blog-update-card.is-featured {
+    border: 2px solid var(--primary-green);
+    box-shadow: 0 10px 30px rgba(74, 140, 42, 0.12);
+}
+.blog-card-image {
+    position: relative;
+}
+.blog-card-image img.cover-center {
+    object-position: center center;
+}
+.blog-category-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(21, 34, 18, 0.88);
+    color: #A8F088;
+    border: 1px solid rgba(126, 217, 87, 0.45);
+    font-family: var(--font-heading);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    border-radius: 50px;
+    z-index: 2;
+}
+.blog-category-badge--green {
+    background: var(--primary-green);
+    color: var(--white);
+    border-color: var(--primary-green);
+}
+
+/* Galería de documentos dentro de artículos de blog */
+.blog-doc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+    margin: 30px 0;
+}
+.blog-doc-figure {
+    background: #F8FAF7;
+    border: 1px solid #DDE7DA;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+.blog-doc-figure img {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #FFFFFF;
+}
+.blog-doc-figure figcaption {
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    color: var(--gray-text);
+    line-height: 1.5;
+    border-top: 1px solid #EAEAEA;
+}
+.blog-doc-figure--full {
+    grid-column: 1 / -1;
+}
+
+.blog-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 28px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    font-size: 0.96rem;
+}
+.blog-comparison-table th {
+    background: #1B2D17;
+    color: var(--white);
+    font-family: var(--font-heading);
+    text-align: left;
+    padding: 14px 18px;
+}
+.blog-comparison-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #EAEAEA;
+    color: var(--gray-text);
+    vertical-align: top;
+}
+.blog-comparison-table tr:nth-child(even) td {
+    background: #F9FBF8;
+}
+.blog-comparison-table td.col-gco {
+    color: var(--primary-dark);
+    font-weight: 500;
+}
+
+@media (max-width: 991px) {
+    .ronda-spotlight-card {
+        grid-template-columns: 1fr;
+        padding: 26px;
+    }
+    .blog-doc-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .ronda-spotlight-card {
+        padding: 22px 18px;
+    }
+    .ronda-spotlight-info h3 {
+        font-size: 1.35rem;
+    }
+}

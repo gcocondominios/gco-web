@@ -184,9 +184,51 @@
                     <li>Cada equipo tiene un código QR con semáforo en tiempo real, historial y último informe PDF.</li>
                     <li>Los tickets de residentes ingresan ordenados por equipo, síntoma, departamento y evidencia fotográfica.</li>
                     <li>El técnico registra la visita en su celular (con firma digital y modo offline) y genera comprobante con QR.</li>
-                    <li>El Portal Comité reúne estado de equipos, cotizaciones de trabajos y Acta Ejecutiva PDF lista para imprimir.</li>
-                    <li>Respaldo histórico auditable de preventivas, correctivas, emergencias, certificaciones y rondas.</li>
+                    <li>El Portal Comité reúne estado de equipos, cotizaciones con comparador IA y Acta Ejecutiva PDF lista para imprimir.</li>
+                    <li>Informes de Ronda Operativa en PDF con fotos por sector, dictado por voz y respaldo auditable bajo Ley 21.442.</li>
                 </ul>
+            </div>
+
+            <!-- Ejemplo Real: Informe de Ronda Operativa PDF -->
+            <div class="ronda-spotlight-card ronda-spotlight-card--light" style="margin-top: 56px;">
+                <div class="ronda-spotlight-info">
+                    <span class="ronda-spotlight-badge">Documento Real Generado en Terreno</span>
+                    <h3>Informe de Ronda Operativa PDF: evidencia visual en cada visita</h3>
+                    <p>Durante la supervisión semanal presencial, nuestro equipo registra el estado de ascensores, sala de bombas, tableros eléctricos, portones y espacios comunes. Al finalizar, GCO App genera un <strong>PDF con KPIs automáticos, fotografías por sector y respaldo directo en Drive</strong> para el Comité.</p>
+                    <div class="ronda-kpi-strip">
+                        <span class="ronda-kpi-pill">✓ Semáforo KPI automático</span>
+                        <span class="ronda-kpi-pill">📷 Hasta 10 fotos por sector</span>
+                        <span class="ronda-kpi-pill">🎙️ Dictado + Redacción IA</span>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                        <a href="blog/informe-ronda-operativa-gco-app.html" class="btn-primary">Ver Artículo con Capturas →</a>
+                        <a href="https://gcoadmin.cl/app/?edificio=DEMO" target="_blank" rel="noopener noreferrer" class="btn-secondary">Probar Demo en Vivo</a>
+                    </div>
+                </div>
+
+                <div class="ronda-doc-viewer" data-app-tabs>
+                    <div class="ronda-page-tabs" role="tablist" aria-label="Páginas reales de Informe de Ronda Operativa">
+                        <button type="button" class="ronda-page-btn is-active" role="tab" aria-selected="true"
+                            data-tab-target="gco-ronda-p1"
+                            data-img="img/app/ronda-portada-kpi.jpg"
+                            data-alt="Portada real de Informe de Ronda Operativa GCO con KPIs y Sala de Bombas"
+                            data-caption="Captura real: Portada con KPIs (Revisados, Conformes, Observación, Urgente) y Sala de Bombas.">1. Portada + Bombas</button>
+                        <button type="button" class="ronda-page-btn" role="tab" aria-selected="false"
+                            data-tab-target="gco-ronda-p2"
+                            data-img="img/app/ronda-sala-electrica.jpg"
+                            data-alt="Inspección conforme de Sala Eléctrica en Informe de Ronda GCO"
+                            data-caption="Captura real: Verificación de Sala Eléctrica con checklist aprobado y fotos de tableros.">2. Sala Eléctrica</button>
+                        <button type="button" class="ronda-page-btn" role="tab" aria-selected="false"
+                            data-tab-target="gco-ronda-p3"
+                            data-img="img/app/ronda-porton-vehicular.jpg"
+                            data-alt="Inspección de portones vehiculares y peatonales en Informe de Ronda GCO"
+                            data-caption="Captura real: Revisión de portones de ingreso vehicular y peatonal en grilla de 3 fotos.">3. Portones</button>
+                    </div>
+                    <div class="ronda-doc-frame">
+                        <img src="img/app/ronda-portada-kpi.jpg" alt="Portada real de Informe de Ronda Operativa GCO con KPIs y Sala de Bombas" data-tab-img loading="lazy">
+                    </div>
+                    <p class="ronda-doc-caption" data-tab-caption>Captura real: Portada con KPIs (Revisados, Conformes, Observación, Urgente) y Sala de Bombas.</p>
+                </div>
             </div>
         </div>
     </section>
