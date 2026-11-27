@@ -808,8 +808,21 @@
         <button type="submit" class="min-h-[40px] px-gutter-md rounded-md bg-secondary text-on-secondary font-label text-label-sm hover:bg-primary transition-colors duration-state-change shrink-0">Consultar</button>
       </form>
 
-      <div id="committee-equipment-list" class="flex flex-col gap-gutter-sm">
-        <p class="font-body text-body-sm text-on-surface-variant">Cargando estado de la comunidad...</p>
+      <div class="flex flex-col gap-gutter-sm">
+        <div class="flex items-center justify-between gap-gutter-sm">
+          <h3 class="font-headline text-title-sm text-on-surface">Últimas Rondas en Terreno</h3>
+          <span class="font-label text-[11px] text-on-surface-variant">Informes PDF y fotos</span>
+        </div>
+        <div id="committee-rondas-list" class="flex flex-col gap-gutter-sm">
+          <p class="font-body text-body-sm text-on-surface-variant">Cargando rondas...</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-gutter-sm">
+        <h3 class="font-headline text-title-sm text-on-surface">Estado de Equipos y Sectores</h3>
+        <div id="committee-equipment-list" class="flex flex-col gap-gutter-sm">
+          <p class="font-body text-body-sm text-on-surface-variant">Cargando estado de la comunidad...</p>
+        </div>
       </div>
 
       <div class="flex flex-col gap-gutter-sm">

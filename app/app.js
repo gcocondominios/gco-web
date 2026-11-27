@@ -2882,14 +2882,56 @@
         '<span class="font-headline text-headline-md tabular-nums">' + r.fueraServicio + '</span>' +
       '</div>';
 
+    const rondasEl = document.getElementById('committee-rondas-list');
+    if (rondasEl) {
+      const rondas = Array.isArray(data.rondas) ? data.rondas : [];
+      if (rondas.length === 0) {
+        rondasEl.innerHTML = '<p class="font-body text-body-sm text-on-surface-variant bg-surface-subtle rounded-lg border border-outline p-gutter-md">Aún no hay informes de ronda registrados para esta comunidad.</p>';
+      } else {
+        rondasEl.innerHTML = rondas.map(function (rd) {
+          const pdfBtn = rd.linkPdf
+            ? '<a href="' + escapeHtml(rd.linkPdf) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-md bg-primary text-on-primary font-label text-label-sm hover:bg-secondary transition-colors duration-state-change"><span class="material-symbols-outlined text-[16px]" aria-hidden="true">picture_as_pdf</span><span>Ver Informe PDF</span></a>'
+            : '';
+          const fotosBtn = rd.carpetaDrive
+            ? '<a href="' + escapeHtml(rd.carpetaDrive) + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-md bg-primary-container text-on-primary-container border border-primary/20 font-label text-label-sm hover:bg-outline transition-colors duration-state-change"><span class="material-symbols-outlined text-[16px]" aria-hidden="true">photo_library</span><span>Ver Fotos</span></a>'
+            : '';
+          const chips = [];
+          chips.push('<span class="px-2 py-0.5 rounded-full bg-success-container text-on-success-container font-label text-[11px] tabular-nums">' + (rd.conformes || 0) + ' conforme(s)</span>');
+          if (rd.observaciones > 0) {
+            chips.push('<span class="px-2 py-0.5 rounded-full bg-warning-container text-on-warning-container font-label text-[11px] tabular-nums">' + rd.observaciones + ' obs.</span>');
+          }
+          if (rd.urgentes > 0) {
+            chips.push('<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label text-[11px] tabular-nums">' + rd.urgentes + ' urgente(s)</span>');
+          }
+          return (
+            '<article class="w-full bg-surface-subtle rounded-lg border border-outline p-gutter-md flex flex-col gap-gutter-sm">' +
+              '<div class="flex flex-wrap items-center justify-between gap-gutter-xs">' +
+                '<div class="flex flex-col min-w-0">' +
+                  '<span class="font-title text-title-sm text-on-surface">' + escapeHtml(formatShortDate(rd.fecha)) + '</span>' +
+                  '<span class="font-label text-[11px] text-on-surface-variant">' + escapeHtml(rd.operador || 'Operaciones GCO') + ' · ' + (rd.totalEspacios || 0) + ' espacio(s) revisado(s)</span>' +
+                '</div>' +
+                '<div class="flex flex-wrap items-center gap-gutter-xs">' + chips.join('') + '</div>' +
+              '</div>' +
+              ((pdfBtn || fotosBtn)
+                ? '<div class="flex flex-wrap items-center gap-gutter-sm pt-gutter-xs border-t border-outline-subtle">' + pdfBtn + fotosBtn + '</div>'
+                : '') +
+            '</article>'
+          );
+        }).join('');
+      }
+    }
+
     document.getElementById('committee-equipment-list').innerHTML = data.equipos.map(function (eq) {
       const sem = eq.semaforo;
       const badgeClass = sem.color === 'rojo'
         ? 'bg-error-container text-on-error-container'
         : (sem.color === 'amarillo' ? 'bg-warning-container text-on-warning-container' : 'bg-success-container text-on-success-container');
-      const pdfLink = splitLinks(eq.ultimoPdf)[0] || '';
-      const pdfHtml = pdfLink
-        ? '<a href="' + escapeHtml(pdfLink) + '" target="_blank" rel="noopener noreferrer" class="font-label text-label-sm text-primary hover:underline">Ver PDF</a>'
+      const pdfLinks = splitLinks(eq.ultimoPdf);
+      const pdfHtml = pdfLinks.length > 0
+        ? pdfLinks.map(function (lnk, idxL) {
+            const lbl = pdfLinks.length === 1 ? 'Ver respaldo' : 'Archivo ' + (idxL + 1);
+            return '<a href="' + escapeHtml(lnk) + '" target="_blank" rel="noopener noreferrer" class="font-label text-label-sm text-primary hover:underline">' + lbl + '</a>';
+          }).join('<span class="text-outline">·</span>')
         : '<span class="font-label text-label-sm text-on-surface-variant">Sin PDF</span>';
 
       return (
@@ -2898,9 +2940,9 @@
             '<span class="font-title text-title-sm text-on-surface truncate">' + escapeHtml(eq.nombre) + '</span>' +
             '<span class="px-gutter-sm py-gutter-xs rounded-full ' + badgeClass + ' font-label text-label-sm shrink-0">' + escapeHtml(sem.etiquetaCorta) + '</span>' +
           '</div>' +
-          '<div class="flex items-center justify-between text-on-surface-variant font-label text-label-sm">' +
-            '<span>#' + escapeHtml(eq.id) + ' · ' + escapeHtml(eq.empresa) + '</span>' +
-            pdfHtml +
+          '<div class="flex flex-wrap items-center justify-between gap-gutter-xs text-on-surface-variant font-label text-label-sm">' +
+            '<span>#' + escapeHtml(eq.id) + ' · ' + escapeHtml(eq.empresa) + ' · ' + escapeHtml(formatShortDate(sem.ultimaVisita)) + '</span>' +
+            '<div class="flex flex-wrap items-center gap-gutter-xs">' + pdfHtml + '</div>' +
           '</div>' +
           '<p class="font-body text-body-sm text-on-surface-variant">' + escapeHtml(eq.ultimaObservacion) + '</p>' +
         '</article>'
@@ -4078,9 +4120,22 @@
 
   function formatShortDate(str) {
     if (!str || str === 'Sin registros' || str === 'Por programar') return str || '--';
-    const d = new Date(String(str).replace(' ', 'T'));
-    if (isNaN(d.getTime())) return String(str);
+    const raw = String(str).trim();
+    if (raw.indexOf('Ronda ') === 0) {
+      return 'Ronda ' + formatShortDate(raw.slice(6));
+    }
+    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
     const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    if (isoMatch) {
+      const y = Number(isoMatch[1]);
+      const m = Number(isoMatch[2]) - 1;
+      const day = Number(isoMatch[3]);
+      if (m >= 0 && m < 12 && day >= 1 && day <= 31) {
+        return String(day).padStart(2, '0') + ' ' + meses[m] + ' ' + y;
+      }
+    }
+    const d = new Date(raw.replace(' ', 'T'));
+    if (isNaN(d.getTime())) return raw;
     return String(d.getDate()).padStart(2, '0') + ' ' + meses[d.getMonth()] + ' ' + d.getFullYear();
   }
 
