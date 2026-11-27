@@ -7,13 +7,17 @@
     <link rel="canonical" href="https://gcoadmin.cl/blog/mantenimiento-hidropack-estanques.html">
     <title>Limpieza de estanques e hidropack: Protegiendo la salud de tu edificio | GCO</title>
     <link rel="icon" type="image/png" href="../favicon.png">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../style.css?v=20261127d">
     
-    <!-- Google tag (gtag.js) -->
+    <!-- Google tag (gtag.js) con Consent Mode v2 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-K1NB1CMMWD"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        'analytics_storage': localStorage.getItem('gcoCookiesAccepted') ? 'granted' : 'denied',
+        'ad_storage': 'denied'
+      });
       gtag('js', new Date());
       gtag('config', 'G-K1NB1CMMWD');
     </script>
@@ -42,18 +46,19 @@
             <a href="../index.html" class="logo-link">
                 <img src="../Logo con las letras mas pequeñas - copia.png" alt="GCO Logo" class="brand-logo">
             </a>
-            <div class="menu-toggle" id="mobile-menu">
+            <button type="button" class="menu-toggle" id="mobile-menu" aria-label="Abrir menú de navegación" aria-expanded="false">
                 <span class="bar"></span>
                 <span class="bar"></span>
                 <span class="bar"></span>
-            </div>
+            </button>
             <nav>
                 <ul class="nav-links">
                     <li><a href="../index.html#inicio">Inicio</a></li>
                     <li><a href="../index.html#metodologia">Metodología</a></li>
                     <li><a href="../index.html#servicios">Servicios</a></li>
+                    <li><a href="../gco-app.html" class="nav-app-pill">GCO App</a></li>
                     <li><a href="../index.html#actualidad">Actualidad</a></li>
-                    <li><a href="https://comunidadfeliz.cl/" target="_blank" class="btn-secondary">Portal</a></li>
+                    <li><a href="https://comunidadfeliz.cl/" target="_blank" rel="noopener noreferrer" class="btn-secondary">Portal</a></li>
                     <li><a href="../index.html#cotizar" class="btn-primary">Cotizar</a></li>
                 </ul>
             </nav>
@@ -110,13 +115,6 @@
         </div>
     </footer>
 
-    <script>
-        const mobileMenu = document.getElementById('mobile-menu');
-        const navLinks = document.querySelector('.nav-links');
-        mobileMenu.addEventListener('click', () => {
-            mobileMenu.classList.toggle('is-active');
-            navLinks.classList.toggle('active');
-        });
-    </script>
+    <script defer src="../script.js"></script>
 </body>
 </html>

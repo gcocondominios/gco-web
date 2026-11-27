@@ -55,21 +55,26 @@ body {
 
 .nav-container {
     display: flex; justify-content: space-between; align-items: center;
-    gap: 20px;
-    min-height: 96px; 
-    padding: 12px 30px;
+    gap: 18px;
+    min-height: 84px; 
+    padding: 10px 30px;
 }
 
-.brand-logo { height: 92px; width: auto; object-fit: contain; flex-shrink: 0; }
+.brand-logo { height: 76px; width: auto; object-fit: contain; flex-shrink: 0; }
 
-.nav-links { list-style: none; display: flex; align-items: center; gap: 1.15rem; }
+.nav-links { list-style: none; display: flex; align-items: center; gap: 1.05rem; }
 .nav-links a {
     text-decoration: none; color: var(--black-text);
-    font-weight: 500; font-size: 0.95rem;
+    font-weight: 500; font-size: 0.94rem;
     white-space: nowrap;
     transition: var(--transition-standard);
 }
 .nav-links a:hover { color: var(--primary-green); }
+.navbar .btn-primary,
+.navbar .btn-secondary {
+    padding: 9px 18px;
+    font-size: 0.92rem;
+}
 
 /* Botones */
 .btn-primary {
@@ -91,6 +96,32 @@ body {
     transition: var(--transition-standard); display: inline-block;
 }
 .btn-secondary:hover { background-color: var(--black-text); color: var(--white) !important; transform: translateY(-2px); }
+
+.btn-white {
+    background-color: var(--white); color: var(--black-text) !important;
+    padding: 10px 21px; border: 2px solid var(--white);
+    border-radius: 50px; font-weight: 600; text-decoration: none;
+    text-align: center;
+    white-space: nowrap;
+    transition: var(--transition-standard); display: inline-block;
+}
+.btn-white:hover {
+    background-color: var(--primary-dark); color: var(--white) !important;
+    border-color: var(--primary-dark); transform: translateY(-2px);
+}
+
+.btn-outline-light {
+    background-color: transparent; color: var(--white) !important;
+    padding: 10px 21px; border: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50px; font-weight: 600; text-decoration: none;
+    text-align: center;
+    white-space: nowrap;
+    transition: var(--transition-standard); display: inline-block;
+}
+.btn-outline-light:hover {
+    background-color: var(--white); color: var(--black-text) !important;
+    border-color: var(--white); transform: translateY(-2px);
+}
 
 /* =========================================
    Hero Section (Fondo de Concepción)
@@ -778,12 +809,30 @@ body.cookie-banner-visible .whatsapp-float { opacity: 0; pointer-events: none; }
 /* =========================================
    Responsive Media Queries
    ========================================= */
-@media (max-width: 1180px) {
-    .nav-container { min-height: 86px; gap: 14px; }
-    .brand-logo { height: 78px; }
-    .nav-links { gap: 0.75rem; }
+@media (max-width: 1200px) {
+    .nav-container { min-height: 80px; gap: 12px; }
+    .brand-logo { height: 68px; }
+    .nav-links { gap: 0.72rem; }
     .nav-links a { font-size: 0.88rem; }
-    .btn-primary, .btn-secondary { padding: 9px 16px; font-size: 0.88rem; }
+    .navbar .btn-primary,
+    .navbar .btn-secondary { padding: 8px 14px; font-size: 0.86rem; }
+}
+
+@media (max-width: 1024px) {
+    .menu-toggle { display: flex; margin-left: auto; margin-right: 6px; }
+    .nav-links {
+        position: absolute; top: 100%;
+        left: 0; width: 100%;
+        background-color: var(--white); flex-direction: column;
+        padding: 24px 20px; box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        display: none; text-align: center; gap: 0.95rem;
+        border-top: 1px solid #EEE;
+    }
+    .nav-links.active { display: flex; }
+
+    .menu-toggle.is-active .bar:nth-child(2) { opacity: 0; }
+    .menu-toggle.is-active .bar:nth-child(1) { transform: translateY(10px) rotate(45deg); }
+    .menu-toggle.is-active .bar:nth-child(3) { transform: translateY(-10px) rotate(-45deg); }
 }
 
 @media (max-width: 991px) {
@@ -810,20 +859,6 @@ body.cookie-banner-visible .whatsapp-float { opacity: 0; pointer-events: none; }
 }
 
 @media (max-width: 767px) {
-    .menu-toggle { display: flex; margin-left: auto; margin-right: 10px; }
-    .nav-links {
-        position: absolute; top: 90px;
-        left: 0; width: 100%;
-        background-color: var(--white); flex-direction: column;
-        padding: 30px 0; box-shadow: 0 10px 15px rgba(0,0,0,0.05);
-        display: none; text-align: center; gap: 1rem;
-    }
-    .nav-links.active { display: flex; }
-    
-    .menu-toggle.is-active .bar:nth-child(2) { opacity: 0; }
-    .menu-toggle.is-active .bar:nth-child(1) { transform: translateY(10px) rotate(45deg); }
-    .menu-toggle.is-active .bar:nth-child(3) { transform: translateY(-10px) rotate(-45deg); }
-
     .hero h1 { font-size: 2.3rem; }
     .section-title h2 { font-size: 2.2rem; }
     .section-padding { padding: 80px 0; }
@@ -834,7 +869,7 @@ body.cookie-banner-visible .whatsapp-float { opacity: 0; pointer-events: none; }
     .footer { padding: 80px 0 40px; }
 
     .hero-buttons { flex-direction: column; gap: 15px; max-width: 400px; margin: 0 auto; }
-    .btn-primary, .btn-secondary { white-space: normal; }
+    .btn-primary, .btn-secondary, .btn-white, .btn-outline-light { white-space: normal; }
     .grid-three-columns, .team-grid, .transition-grid { grid-template-columns: 1fr; gap: 25px; }
     .methodology-card .service-img-wrapper { height: 210px; }
     .grid-alliances { grid-template-columns: 1fr; gap: 15px; }
